@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<extension key="biz.jmaconsulting.grantprofiles" type="module">
+  <file>grantprofiles</file>
+  <name>GrantProfile</name>
+  <description>GrantProfile</description>
+  <license>This extension enhances profile creation for Grants.</license>
+  <maintainer>
+    <author>Jma Consulting</author>
+    <email>info@jmaconsulting.biz</email>
+  </maintainer>
+  <releaseDate>2013-03-13</releaseDate>
+  <version>1.0.beta1</version>
+  <develStage>beta</develStage>
+  <compatibility>
+    <ver>4.2</ver>
+  </compatibility>
+  <comments>This is a new, undeveloped module</comments>
+  <civix>
+    <namespace>CRM/Grantprofiles</namespace>
+  </civix>
+</extension>
