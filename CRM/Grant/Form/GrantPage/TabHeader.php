@@ -98,7 +98,7 @@ class CRM_Grant_Form_GrantPage_TabHeader {
      
       foreach ($tabs as $key => $value) {
         $tabs[$key]['link'] = CRM_Utils_System::url("civicrm/admin/grant/{$key}",
-          "{$reset}action=update&snippet=4&id={$grantPageId}&qfKey={$qfKey}"
+          "{$reset}action=update&snippet=4&id={$grantPageId}"
         );
         $tabs[$key]['active'] = $tabs[$key]['valid'] = TRUE;
       
