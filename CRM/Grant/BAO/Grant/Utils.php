@@ -111,7 +111,7 @@ class CRM_Grant_BAO_Grant_Utils {
       );
       
       if ($grant) {
-      $form->_params['contributionID'] = $grant->id;
+        $form->_params['contributionID'] = $grant->id;
       }
       
       $form->_params['contributionTypeID'] = $grantTypeId;

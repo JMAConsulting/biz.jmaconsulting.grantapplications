@@ -40,4 +40,4 @@ LEFT JOIN civicrm_uf_join uj ON uj.uf_group_id = g.id
 LEFT JOIN civicrm_uf_field uf ON uf.uf_group_id = g.id
 WHERE g.group_type LIKE '%Grant%';
 
-DELETE FROM civicrm_uf_group WHERE g.group_type LIKE '%Grant%';
+DELETE FROM civicrm_uf_group WHERE group_type LIKE '%Grant%';

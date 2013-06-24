@@ -251,7 +251,6 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
       // address required during receipt processing (pdf and email receipt)
       if ($displayAddress = CRM_Utils_Array::value('address', $values)) {
         $tplParams['address'] = $displayAddress;
-        $tplParams['contributeMode'] = NULL;
       }
 
       // CRM-6976
@@ -272,7 +271,6 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
         $tplParams['onBehalfName'] = $displayName;
         $tplParams['onBehalfEmail'] = $email;
 
-        require_once 'CRM/Core/BAO/UFJoin.php';
         $ufJoinParams = array(
           'module' => 'onBehalf',
           'entity_table' => 'civicrm_grant_app_page',
@@ -337,8 +335,8 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
      */
   function composeMessage($tplParams, $contactID, $isTest) {
     $sendTemplateParams = array(
-      'groupName' => $tplParams['membershipID'] ? 'msg_tpl_workflow_membership' : 'msg_tpl_workflow_contribution',
-      'valueName' => $tplParams['membershipID'] ? 'membership_online_receipt' : 'contribution_online_receipt',
+      'groupName' => $tplParams['membershipID'] ? 'msg_tpl_workflow_membership' : 'msg_tpl_workflow_grant',
+      'valueName' => $tplParams['membershipID'] ? 'membership_online_receipt' : 'grant_online_receipt',
       'contactId' => $contactID,
       'tplParams' => $tplParams,
       'isTest' => $isTest,
@@ -446,8 +444,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
    * @static
    */
   function buildCustomDisplay($gid, $name, $cid, &$template, &$params, $fieldTypes = NULL) {
-      if ($gid) {
-
+    if ($gid) {
       if (CRM_Core_BAO_UFGroup::filterUFGroups($gid, $cid)) {
         $values     = array();
         $groupTitle = NULL;
