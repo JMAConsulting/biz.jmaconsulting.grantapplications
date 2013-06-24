@@ -83,8 +83,31 @@ function grantprofiles_civicrm_managed(&$entities) {
   return _grantprofiles_civix_civicrm_managed($entities);
 }
 
+function grantprofiles_civicrm_validate($formName, &$fields, &$files, &$form) {
+  $errors = array();
+  if ($formName == "CRM_UF_Form_Field" && CRM_Core_Permission::access('CiviGrant')) {
+    $fieldType = $fields['field_name'][0];
+    $errorField = FALSE;
+    //get the group type.
+    $groupType = CRM_Core_BAO_UFGroup::calculateGroupType($form->getVar('_gid'), FALSE, CRM_Utils_Array::value('field_id', $fields));
+    if ($fieldType == "Activity" || $fieldType == "Participant" || $fieldType == "Contribution" || $fieldType =="Membership") {
+      if (in_array('Grant', $groupType)) {
+        $errors['field_name'] = ts('The profile has a grant field already, and this field is not a contact or grant field.');
+      }
+    }
+    elseif ($fieldType == "Grant") {
+      if ( in_array('Membership', $groupType) || 
+        in_array('Activity', $groupType) || 
+        in_array('Participant', $groupType) || 
+        in_array('Contribution', $groupType) ) {
+        $errors['field_name'] = ts('A grant field can only be added to a profile that has only contact and grant fields. This profile has fields that are not contact or grant fields');
+      }
+    }
+  }
+  return $errors;
+}
 
-function grantprofiles_civicrm_buildForm( $formName, &$form  ) { 
+function grantprofiles_civicrm_buildForm($formName, &$form) { 
   
   if ($formName == "CRM_Grant_Form_GrantPage_Settings" || $formName == "CRM_Grant_Form_GrantPage_Custom" || $formName == "CRM_Grant_Form_GrantPage_ThankYou") {
     CRM_Core_Region::instance('page-body')->add(array(
@@ -94,7 +117,11 @@ function grantprofiles_civicrm_buildForm( $formName, &$form  ) {
   if ($formName == "CRM_UF_Form_Field" && CRM_Core_Permission::access('CiviGrant')) { // Code to be done to avoid core editing
     $grantFields = getProfileFields();
     $fields['Grant'] = $grantFields;
-       
+    // Add the grant fields to the form
+    $originalFields = $form->getVar('_fields');
+    $form->setVar('_fields', array_merge(exportableFields('Grant'), $originalFields));
+    $originalSelect = $form->getVar('_selectFields');
+
     foreach ($fields as $key => $value) {
       foreach ($value as $key1 => $value1) {
         //CRM-2676, replacing the conflict for same custom field name from different custom group.
@@ -102,12 +129,17 @@ function grantprofiles_civicrm_buildForm( $formName, &$form  ) {
           $customGroupId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', $customFieldId, 'custom_group_id');
           $customGroupName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomGroup', $customGroupId, 'title');
           $mapperFields[$key][$key1] = $value1['title'] . ' :: ' . $customGroupName;
+          $selectFields[$key][$key1] = $value1['title'];
         }
         else {
           $mapperFields[$key][$key1] = $value1['title'];
+          $selectFields[$key][$key1] = $value1['title'];
         }
         $hasLocationTypes[$key][$key1] = CRM_Utils_Array::value('hasLocationType', $value1);
       }
+    }
+    if (!empty($selectFields['Grant'])) {
+      $form->setVar('_selectFields', array_merge($selectFields['Grant'], $originalSelect));
     }
     if(!empty($noSearchable)) {
       $form->assign('noSearchable', $noSearchable);
