@@ -230,24 +230,20 @@ function getProfileFields() {
 }
 
 /**
- * Function to get list of contribution fields for profile
- * For now we only allow custom contribution fields to be in
+ * Function to get list of grant fields for profile
+ * For now we only allow custom grant fields to be in
  * profile
  *
  * @param boolean $addExtraFields true if special fields needs to be added
  *
- * @return return the list of contribution fields
+ * @return return the list of grant fields
  * @static
  * @access public
  */
-function getGrantFields($addExtraFields = TRUE) {
+function getGrantFields() {
   $grantFields = CRM_Grant_DAO_Grant::export();
   $grantFields = array_merge($grantFields, CRM_Core_OptionValue::getFields($mode = 'grant'));
        
-  if ($addExtraFields) {
-    $contributionFields = array_merge($contributionFields, self::getSpecialContributionFields());
-  }
-
   $grantFields = array_merge($grantFields, CRM_Financial_DAO_FinancialType::export());
     
   foreach ($grantFields as $key => $var) {
@@ -271,24 +267,14 @@ function browse($action = NULL) {
          SELECT  id
          FROM  civicrm_grant_app_page
          WHERE  1";
-  $contribPage = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Grant_DAO_GrantApplicationPage');
-  $contribPageIds = array();
-  while ($contribPage->fetch()) {
-    $contribPageIds[$contribPage->id] = $contribPage->id;
+  $grantAppPage = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Grant_DAO_GrantApplicationPage');
+  $grantAppPageIds = array();
+  while ($grantAppPage->fetch()) {
+    $grantAppIds[$grantAppPage->id] = $grantAppPage->id;
   }
   //get all section info.
-  $contriPageSectionInfo = CRM_Grant_BAO_GrantApplicationPage::getSectionInfo($contribPageIds);
-  $query = "
-          SELECT *
-          FROM civicrm_contribution_page 
-          WHERE 1
-          ORDER BY title asc";
+  $grantAppPageSectionInfo = CRM_Grant_BAO_GrantApplicationPage::getSectionInfo($grantAppPageIds);
 
-  $dao = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Grant_DAO_GrantApplicationPage');
-  /* while ($dao->fetch()) { */
-
-  /*     $sectionsInfo = CRM_Utils_Array::value($dao->id, $contriPageSectionInfo, array()); */
-  /* } */
   while ( $grantPage->fetch() ) {
     $rows[$grantPage->id] = array();
     CRM_Core_DAO::storeValues($grantPage, $rows[$grantPage->id]);
@@ -313,7 +299,7 @@ function browse($action = NULL) {
     if (!$allowToDelete) {
       $action -= CRM_Core_Action::DELETE;
     }
-    $sectionsInfo = CRM_Utils_Array::value($grantPage->id, $contriPageSectionInfo, array());
+    $sectionsInfo = CRM_Utils_Array::value($grantPage->id, $grantAppPageSectionInfo, array());
 
     $rows[$grantPage->id]['configureActionLinks'] = CRM_Core_Action::formLink(formatConfigureLinks($sectionsInfo),
                                                                               $action,
@@ -344,9 +330,6 @@ function browse($action = NULL) {
       
   }
   $smarty =  CRM_Core_Smarty::singleton( );
-  if (isset($grant)) {
-    $smarty->assign('', $grant);
-  }
   $smarty->assign('fields', $rows);
 }
 
