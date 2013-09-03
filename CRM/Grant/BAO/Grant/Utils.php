@@ -43,7 +43,7 @@ class CRM_Grant_BAO_Grant_Utils {
    * @param array   $premiumParams   array with premium related key
    * value pairs
    * @param int     $contactID       contact id
-     * @param int     $contributionTypeId   financial type id
+   * @param int     $contributionTypeId   financial type id
    * @param int     $component   component id
    *
    * @return array associated array

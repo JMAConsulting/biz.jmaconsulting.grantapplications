@@ -109,12 +109,15 @@ function grantprofiles_civicrm_validate($formName, &$fields, &$files, &$form) {
 
 function grantprofiles_civicrm_buildForm($formName, &$form) { 
   
-  if ($formName == "CRM_Grant_Form_GrantPage_Settings" || $formName == "CRM_Grant_Form_GrantPage_Custom" || $formName == "CRM_Grant_Form_GrantPage_ThankYou") {
+  if ($formName == "CRM_Grant_Form_GrantPage_Settings" || 
+    $formName == "CRM_Grant_Form_GrantPage_Custom" || 
+    $formName == "CRM_Grant_Form_GrantPage_ThankYou") {
     CRM_Core_Region::instance('page-body')->add(array(
-        'template' => 'CRM/css/grantprofiles.tpl',
-      ));
-  }
-  if ($formName == "CRM_UF_Form_Field" && CRM_Core_Permission::access('CiviGrant')) { // Code to be done to avoid core editing
+       'template' => 'CRM/css/grantprofiles.tpl',
+    ));
+  } 
+  // Code to be done to avoid core editing
+  if ($formName == "CRM_UF_Form_Field" && CRM_Core_Permission::access('CiviGrant')) {
     $grantFields = getProfileFields();
     $fields['Grant'] = $grantFields;
     // Add the grant fields to the form

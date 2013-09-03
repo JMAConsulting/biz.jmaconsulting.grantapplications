@@ -560,11 +560,10 @@ WHERE entity_table = 'civicrm_contribution_page'
     $premiumDao = CRM_Core_DAO::executeQuery($premiumQuery, CRM_Core_DAO::$_nullArray);
     while ($premiumDao->fetch()) {
       if ($premiumDao->id) {
-        $copyPremiumProduct = &CRM_Core_DAO::copyGeneric('CRM_Contribute_DAO_PremiumsProduct', array(
-            'premiums_id' => $premiumDao->id,
-          ), array(
-            'premiums_id' => $copyPremium->id,
-          ));
+        $copyPremiumProduct = &CRM_Core_DAO::copyGeneric('CRM_Contribute_DAO_PremiumsProduct', 
+          array('premiums_id' => $premiumDao->id), 
+          array('premiums_id' => $copyPremium->id),
+        );
       }
     }
 

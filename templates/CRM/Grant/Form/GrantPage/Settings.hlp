@@ -28,7 +28,7 @@
   {ts}Financial Type{/ts}
 {/htxt}
 {htxt id="id-financial_type"}
-<p>{ts}Select the corresponding financial type for contributions made using this page (e.g. donation, capital campaign, etc.). Financial types (and associated accounting codes) are included when contributions are exported, so it can helpful to set up specific types for accounting purposes. You can add or modify contribution available types from Administer &gt; CiviContribute &gt; Financial Types.{/ts}</p>
+<p>{ts}Select the corresponding financial type for grant applications made using this page (e.g. donation, capital campaign, etc.). Financial types (and associated accounting codes) are included when contributions are exported, so it can helpful to set up specific types for accounting purposes. You can add or modify contribution available types from Administer &gt; CiviContribute &gt; Financial Types.{/ts}</p>
 <p>{ts}NOTE: If you are using this contribution page for membership signup and renewals, the financial type configured in the membership type settings will be used when recording the membership payment. The financial type selected here will only be used if you are also collecting additional contributions (as configured on the Membership Settings page).{/ts}</p>
 {/htxt}
 

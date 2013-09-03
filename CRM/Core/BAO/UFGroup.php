@@ -898,8 +898,7 @@ class CRM_Core_BAO_UFGroup extends CRM_Core_DAO_UFGroup {
     $query = new CRM_Contact_BAO_Query($params, $returnProperties, $fields, NULL, NULL, 128);
     $options = &$query->_options;
 
-    $details = $query->searchQuery( 0, 0, NULL, FALSE, FALSE,
-      FALSE, FALSE, FALSE, $additionalWhereClause);
+    $details = $query->searchQuery( 0, 0, NULL, FALSE, FALSE, FALSE, FALSE, FALSE, $additionalWhereClause);
     if (!$details->fetch()) {
       return;
     }
@@ -1578,7 +1577,11 @@ AND    ( entity_id IS NULL OR entity_id <= 0 )
    * @access public
    * @static
    */
-  public static function getModuleUFGroup($moduleName = NULL, $count = 0, $skipPermission = TRUE, $op = CRM_Core_Permission::VIEW) {
+  public static function getModuleUFGroup($moduleName = NULL, 
+    $count = 0, 
+    $skipPermission = TRUE, 
+    $op = CRM_Core_Permission::VIEW
+  ) {
     $queryString = 'SELECT civicrm_uf_group.id, title, civicrm_uf_group.is_active, is_reserved, group_type
                         FROM civicrm_uf_group
                         LEFT JOIN civicrm_uf_join ON (civicrm_uf_group.id = uf_group_id)';
