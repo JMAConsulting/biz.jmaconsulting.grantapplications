@@ -22,7 +22,15 @@ function grantprofiles_civicrm_xmlMenu(&$files) {
  * Implementation of hook_civicrm_install
  */
 function grantprofiles_civicrm_install() {
-  return _grantprofiles_civix_civicrm_install();
+  _grantprofiles_civix_civicrm_install();
+
+  $smarty = CRM_Core_Smarty::singleton();
+  $config = CRM_Core_Config::singleton();
+  $data = $smarty->fetch($config->extensionsDir . 'biz.jmaconsulting.grantprofiles/sql/civicrm_msg_template.tpl');
+  file_put_contents($config->uploadDir . "civicrm_data.sql", $data);
+  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->uploadDir . "civicrm_data.sql");
+  grantprofiles_addRemoveMenu(TRUE);
+  return TRUE;
 }
 
 /**
@@ -36,6 +44,9 @@ function grantprofiles_civicrm_uninstall() {
  * Implementation of hook_civicrm_enable
  */
 function grantprofiles_civicrm_enable() {
+  $config = CRM_Core_Config::singleton();
+  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->extensionsDir.'biz.jmaconsulting.grantprofiles/sql/grantprofiles_enable.sql');
+  grantprofiles_addRemoveMenu(TRUE);
   return _grantprofiles_civix_civicrm_enable();
 }
 
@@ -43,6 +54,9 @@ function grantprofiles_civicrm_enable() {
  * Implementation of hook_civicrm_disable
  */
 function grantprofiles_civicrm_disable() {
+  $config = CRM_Core_Config::singleton();
+  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->extensionsDir.'biz.jmaconsulting.grantprofiles/sql/grantprofiles_disable.sql');
+  grantprofiles_addRemoveMenu(FALSE);
   return _grantprofiles_civix_civicrm_disable();
 }
 
@@ -69,48 +83,98 @@ function grantprofiles_civicrm_managed(&$entities) {
   return _grantprofiles_civix_civicrm_managed($entities);
 }
 
-
-function grantprofiles_civicrm_buildForm( $formName, &$form  ) { 
-  
-  $grantFields = getProfileFields();
-  $fields['Grant'] = $grantFields;
-       
-  foreach ($fields as $key => $value) {
-    foreach ($value as $key1 => $value1) {
-      //CRM-2676, replacing the conflict for same custom field name from different custom group.
-      if ($customFieldId = CRM_Core_BAO_CustomField::getKeyID($key1)) {
-        $customGroupId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', $customFieldId, 'custom_group_id');
-        $customGroupName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomGroup', $customGroupId, 'title');
-        $mapperFields[$key][$key1] = $value1['title'] . ' :: ' . $customGroupName;
-      }
-      else {
-        $mapperFields[$key][$key1] = $value1['title'];
-      }
-      $hasLocationTypes[$key][$key1] = CRM_Utils_Array::value('hasLocationType', $value1);
-    }
-  }
-  if(!empty($noSearchable)) {
-    $form->assign('noSearchable', $noSearchable);
-  }
-  $grantArray = array('text' => 'Grant',
-                      'attr' => array('value' => 'Grant'));
-  foreach ( $form->_elements as $eleKey => $eleVal ) {
-    foreach ( $eleVal as $optionKey => $optionVal ) {
-      if ($optionKey == '_options') {
-        $form->_elements[$eleKey]->_options[0]['Grant'] = 'Grant';
-        $form->_elements[$eleKey]->_options[1]['Grant'] = $mapperFields['Grant'];
-      }
-      if ($optionKey == '_elements') {
-        $form->_elements[$eleKey]->_elements[0]->_options[] = $grantArray;
-      } 
-      if ($optionKey == '_js') {
+function grantprofiles_civicrm_validate($formName, &$fields, &$files, &$form) {
+  $errors = array();
+  if ($formName == "CRM_UF_Form_Field" && CRM_Core_Permission::access('CiviGrant')) {
+    $fieldType = $fields['field_name'][0];
+    $errorField = FALSE;
+    //get the group type.
+    $groupType = CRM_Core_BAO_UFGroup::calculateGroupType($form->getVar('_gid'), FALSE, CRM_Utils_Array::value('field_id', $fields));
+    if ($fieldType == "Activity" || $fieldType == "Participant" || $fieldType == "Contribution" || $fieldType =="Membership") {
+      if (in_array('Grant', $groupType)) {
+        $errors['field_name'] = ts('The profile has a grant field already, and this field is not a contact or grant field.');
       }
     }
-  } 
+    elseif ($fieldType == "Grant") {
+      if ( in_array('Membership', $groupType) || 
+        in_array('Activity', $groupType) || 
+        in_array('Participant', $groupType) || 
+        in_array('Contribution', $groupType) ) {
+        $errors['field_name'] = ts('A grant field can only be added to a profile that has only contact and grant fields. This profile has fields that are not contact or grant fields');
+      }
+    }
+  }
+  return $errors;
 }
+
+function grantprofiles_civicrm_buildForm($formName, &$form) { 
+  
+  if ($formName == "CRM_Grant_Form_GrantPage_Settings" || 
+    $formName == "CRM_Grant_Form_GrantPage_Custom" || 
+    $formName == "CRM_Grant_Form_GrantPage_ThankYou") {
+    CRM_Core_Region::instance('page-body')->add(array(
+       'template' => 'CRM/css/grantprofiles.tpl',
+    ));
+  } 
+  // Code to be done to avoid core editing
+  if ($formName == "CRM_UF_Form_Field" && CRM_Core_Permission::access('CiviGrant')) {
+    $grantFields = getProfileFields();
+    $fields['Grant'] = $grantFields;
+    // Add the grant fields to the form
+    $originalFields = $form->getVar('_fields');
+    $form->setVar('_fields', array_merge(exportableFields('Grant'), $originalFields));
+    $originalSelect = $form->getVar('_selectFields');
+
+    foreach ($fields as $key => $value) {
+      foreach ($value as $key1 => $value1) {
+        //CRM-2676, replacing the conflict for same custom field name from different custom group.
+        if ($customFieldId = CRM_Core_BAO_CustomField::getKeyID($key1)) {
+          $customGroupId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', $customFieldId, 'custom_group_id');
+          $customGroupName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomGroup', $customGroupId, 'title');
+          $mapperFields[$key][$key1] = $value1['title'] . ' :: ' . $customGroupName;
+          $selectFields[$key][$key1] = $value1['title'];
+        }
+        else {
+          $mapperFields[$key][$key1] = $value1['title'];
+          $selectFields[$key][$key1] = $value1['title'];
+        }
+        $hasLocationTypes[$key][$key1] = CRM_Utils_Array::value('hasLocationType', $value1);
+      }
+    }
+    if (!empty($selectFields['Grant'])) {
+      $form->setVar('_selectFields', array_merge($selectFields['Grant'], $originalSelect));
+    }
+    if(!empty($noSearchable)) {
+      $form->assign('noSearchable', $noSearchable);
+    }
+    $grantArray = array(
+      'text' => 'Grant',
+      'attr' => array('value' => 'Grant')
+    );
+
+    foreach ($form->_elements as $eleKey => $eleVal) {
+      foreach ($eleVal as $optionKey => $optionVal) {
+        if ($optionKey == '_options') {
+          $form->_elements[$eleKey]->_options[0]['Grant'] = 'Grant';
+          $form->_elements[$eleKey]->_options[1]['Grant'] = $mapperFields['Grant'];
+        }
+        if ($optionKey == '_elements') {
+          $form->_elements[$eleKey]->_elements[0]->_options[] = $grantArray;
+        } 
+        if ($optionKey == '_js') {
+          $form->_elements[$eleKey]->_js .= 'hs_field_name_Grant = '. json_encode($mapperFields['Grant']) . ';';
+        }
+      }
+    } 
+  }
+}
+
 function grantprofiles_civicrm_pageRun( &$page ) {
   if( $page->getVar('_name') == 'CRM_Grant_Page_DashBoard') {
     browse();
+    CRM_Core_Region::instance('page-body')->add(array(
+        'template' => 'CRM/Grant/Page/GrantApplicationDashboard.tpl',
+      ));
   }
 }
 
@@ -169,25 +233,21 @@ function getProfileFields() {
 }
 
 /**
- * Function to get list of contribution fields for profile
- * For now we only allow custom contribution fields to be in
+ * Function to get list of grant fields for profile
+ * For now we only allow custom grant fields to be in
  * profile
  *
  * @param boolean $addExtraFields true if special fields needs to be added
  *
- * @return return the list of contribution fields
+ * @return return the list of grant fields
  * @static
  * @access public
  */
-function getGrantFields($addExtraFields = TRUE) {
+function getGrantFields() {
   $grantFields = CRM_Grant_DAO_Grant::export();
   $grantFields = array_merge($grantFields, CRM_Core_OptionValue::getFields($mode = 'grant'));
        
-  if ($addExtraFields) {
-    $contributionFields = array_merge($contributionFields, self::getSpecialContributionFields());
-  }
-
-  $grantFields = array_merge($grantFields, CRM_Contribute_DAO_ContributionType::export());
+  $grantFields = array_merge($grantFields, CRM_Financial_DAO_FinancialType::export());
     
   foreach ($grantFields as $key => $var) {
     $fields[$key] = $var;
@@ -210,24 +270,14 @@ function browse($action = NULL) {
          SELECT  id
          FROM  civicrm_grant_app_page
          WHERE  1";
-  $contribPage = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Grant_DAO_GrantApplicationPage');
-  $contribPageIds = array();
-  while ($contribPage->fetch()) {
-    $contribPageIds[$contribPage->id] = $contribPage->id;
+  $grantAppPage = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Grant_DAO_GrantApplicationPage');
+  $grantAppPageIds = array();
+  while ($grantAppPage->fetch()) {
+    $grantAppIds[$grantAppPage->id] = $grantAppPage->id;
   }
   //get all section info.
-  $contriPageSectionInfo = CRM_Grant_BAO_GrantApplicationPage::getSectionInfo($contribPageIds);
-  $query = "
-          SELECT *
-          FROM civicrm_contribution_page 
-          WHERE 1
-          ORDER BY title asc";
+  $grantAppPageSectionInfo = CRM_Grant_BAO_GrantApplicationPage::getSectionInfo($grantAppPageIds);
 
-  $dao = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Grant_DAO_GrantApplicationPage');
-  /* while ($dao->fetch()) { */
-
-  /*     $sectionsInfo = CRM_Utils_Array::value($dao->id, $contriPageSectionInfo, array()); */
-  /* } */
   while ( $grantPage->fetch() ) {
     $rows[$grantPage->id] = array();
     CRM_Core_DAO::storeValues($grantPage, $rows[$grantPage->id]);
@@ -252,7 +302,7 @@ function browse($action = NULL) {
     if (!$allowToDelete) {
       $action -= CRM_Core_Action::DELETE;
     }
-    $sectionsInfo = CRM_Utils_Array::value($grantPage->id, $contriPageSectionInfo, array());
+    $sectionsInfo = CRM_Utils_Array::value($grantPage->id, $grantAppPageSectionInfo, array());
 
     $rows[$grantPage->id]['configureActionLinks'] = CRM_Core_Action::formLink(formatConfigureLinks($sectionsInfo),
                                                                               $action,
@@ -268,7 +318,7 @@ function browse($action = NULL) {
                                                                           ts('Grant Application (Live)'),
                                                                           FALSE
                                                                           );
-         
+
     //build the normal action links.
     $rows[$grantPage->id]['action'] = CRM_Core_Action::formLink(actionLinks(),
                                                                 $action,
@@ -283,9 +333,6 @@ function browse($action = NULL) {
       
   }
   $smarty =  CRM_Core_Smarty::singleton( );
-  if (isset($grant)) {
-    $smarty->assign('', $grant);
-  }
   $smarty->assign('fields', $rows);
 }
 
@@ -391,4 +438,24 @@ function formatConfigureLinks($sectionsInfo) {
   }
 
   return $formattedConfLinks;
+}
+
+function grantprofiles_addRemoveMenu($enable) {
+  $config_backend = unserialize(CRM_Core_DAO::singleValueQuery('SELECT config_backend FROM civicrm_domain WHERE id = 1'));
+  $params['enableComponents'] = $config_backend['enableComponents'];
+  $params['enableComponentIDs'] = $config_backend['enableComponentIDs'];
+  if ($enable) {
+    $params['enableComponents'][] = 'CiviGrant';
+    $params['enableComponentIDs'][] = CRM_Core_DAO::singleValueQuery("SELECT id FROM civicrm_component WHERE name = 'CiviGrant'");
+  }
+  else {
+    foreach (array_keys($params['enableComponents'], 'CiviGrant', TRUE) as $key) {
+      unset($params['enableComponents'][$key]);
+    }
+    foreach (array_keys($params['enableComponentIDs'], (int)CRM_Core_DAO::singleValueQuery("SELECT id FROM civicrm_component WHERE name = 'CiviGrant'"), TRUE) as $key) {
+      unset($params['enableComponentIDs'][$key]);
+    }
+  }
+  CRM_Core_BAO_ConfigSetting::create($params);
+  return;
 }

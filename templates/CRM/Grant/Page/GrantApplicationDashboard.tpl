@@ -1,4 +1,5 @@
-<div id='crm-container'>
+
+<div class='crm-container manage-grant-apps' id='crm-container'>
 <h3>{ts}Manage Grant Application Pages{/ts}</h3>
 {include file="CRM/common/enableDisable.tpl"}
 	     {include file="CRM/common/jsortable.tpl"}

@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.1                                                |
+ | CiviCRM version 4.3                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2011                                |
+ | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -28,12 +28,10 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2011
+ * @copyright CiviCRM LLC (c) 2004-2013
  * $Id$
  *
  */
-
-require_once 'CRM/Grant/DAO/GrantApplicationPage.php';
 
 /**
  * This class contains Contribution Page related functions.
@@ -70,21 +68,14 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
     return CRM_Core_DAO::setFieldValue('CRM_Grant_DAO_GrantApplicationPage', $id, 'is_active', $is_active);
   }
 
-  static
-  function setValues($id, &$values) {
-    $params = array('id' => $id);
-
-    CRM_Core_DAO::commonRetrieve('CRM_Grant_DAO_GrantApplicationPage', $params, $values);
-
-    // get the amounts and the label
-    require_once 'CRM/Core/OptionGroup.php';
-    $values['amount'] = array();
-    CRM_Core_OptionGroup::getAssoc("civicrm_contribution_page.amount.{$id}",
-      $values['amount'], TRUE
+  static function setValues($id, &$values) {
+    $params = array(
+      'id' => $id,
     );
 
+    CRM_Core_DAO::commonRetrieve('CRM_Grant_DAO_GrantApplicationPage', $params, $values);
+    
     // get the profile ids
-    require_once 'CRM/Core/BAO/UFJoin.php';
     $ufJoinParams = array(
       'module' => 'CiviGrant',
       'entity_table' => 'civicrm_grant_app_page',
@@ -114,10 +105,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
    * @access public
    * @static
    */
-  static
-  function sendMail($contactID, &$values, $isTest = FALSE, $returnMessageText = FALSE, $fieldTypes = NULL) {
-    require_once 'CRM/Core/BAO/UFField.php';
-  
+  static function sendMail($contactID, &$values, $isTest = FALSE, $returnMessageText = FALSE, $fieldTypes = NULL) {
     $gIds = $params = array();
     $email = NULL;
     if (isset($values['custom_pre_id'])) {
@@ -139,21 +127,32 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
     }
     //check whether it is a test drive
     if ($isTest && !empty($params['custom_pre_id'])) {
-      $params['custom_pre_id'][] = array('contribution_test', '=', 1, 0, 0);
+      $params['custom_pre_id'][] = array(
+        'contribution_test',
+        '=',
+        1,
+        0,
+        0,
+      );
     }
 
     if ($isTest && !empty($params['custom_post_id'])) {
-      $params['custom_post_id'][] = array('contribution_test', '=', 1, 0, 0);
+      $params['custom_post_id'][] = array(
+        'contribution_test',
+        '=',
+        1,
+        0,
+        0,
+      );
     }
+    
     if (!$returnMessageText && !empty($gIds)) {
       //send notification email if field values are set (CRM-1941)
-      require_once 'CRM/Core/BAO/UFGroup.php';
       foreach ($gIds as $key => $gId) {
         if ($gId) {
           $email = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_UFGroup', $gId, 'notify');
-          
           if ($email) {
-            $val = CRM_Core_BAO_UFGroup::checkFieldsEmptyValues($gId, $contactID, $params[$key]);
+            $val = CRM_Core_BAO_UFGroup::checkFieldsEmptyValues($gId, $contactID, CRM_Utils_Array::value($key, $params), true );
             CRM_Core_BAO_UFGroup::commonSendMail($contactID, $val);
           }
         }
@@ -174,12 +173,10 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
       else {
         // presence of related contact implies onbehalf of org case,
         // where location type is set to default.
-        require_once 'CRM/Core/BAO/LocationType.php';
         $locType = CRM_Core_BAO_LocationType::getDefault();
         $billingLocationTypeId = $locType->id;
       }
 
-      require_once 'CRM/Contact/BAO/Contact/Location.php';
       if (!array_key_exists('related_contact', $values)) {
         list($displayName, $email) = CRM_Contact_BAO_Contact_Location::getEmailDetails($contactID, FALSE, $billingLocationTypeId);
       }
@@ -187,10 +184,8 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
       if (!$email) {
         list($displayName, $email) = CRM_Contact_BAO_Contact_Location::getEmailDetails($contactID);
       }
-
       if (empty($displayName)) {
-        require_once 'CRM/Contact/BAO/Contact.php';
-        $displayName = CRM_Contact_BAO_Contact::displayName($contactID);
+        list($displayName, $email) = CRM_Contact_BAO_Contact_Location::getEmailDetails($contactID);
       }
 
       //for display profile need to get individual contact id,
@@ -200,7 +195,6 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
       //If profile GROUP contain the Individual type then consider the
       //profile is of Individual ( including the custom data of membership/contribution )
       //IF Individual type not present in profile then it is consider as Organization data.
-      require_once 'CRM/Core/BAO/UFGroup.php';
       $userID = $contactID;
       if ($preID = CRM_Utils_Array::value('custom_pre_id', $values)) {
         if (CRM_Utils_Array::value('related_contact', $values)) {
@@ -210,26 +204,20 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
             $userID = CRM_Utils_Array::value('related_contact', $values);
           }
         }
-
-           self::buildCustomDisplay($preID, 'customPre', $userID, $template, $params['custom_pre_id']);
+        self::buildCustomDisplay($preID, 'customPre', $userID, $template, $params['custom_pre_id']);
       }
       $userID = $contactID;
       if ($postID = CRM_Utils_Array::value('custom_post_id', $values)) {
         if (CRM_Utils_Array::value('related_contact', $values)) {
           $postProfileTypes = CRM_Core_BAO_UFGroup::profileGroups($postID);
-          CRM_Core_Error::debug( '$postProfileTypes', $postProfileTypes );
           if (in_array('Individual', $postProfileTypes) || in_array('Contact', $postProfileTypes)) {
             //Take Individual contact ID
             $userID = CRM_Utils_Array::value('related_contact', $values);
           }
         }
-
         self::buildCustomDisplay($postID, 'customPost', $userID, $template, $params['custom_post_id']);
-
-        exit;
       }
 
-      require_once 'CRM/Contribute/PseudoConstant.php';
       $title = isset($values['title']) ? $values['title'] : CRM_Contribute_PseudoConstant::contributionPage($values['contribution_page_id']);
 
       // set email in the template here
@@ -238,7 +226,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
         'receiptFromEmail' => CRM_Utils_Array::value('receipt_from_email', $values),
         'contactID' => $contactID,
         'displayName' => $displayName,
-        'contributionID' => $values['contribution_id'],
+        'contributionID' => CRM_Utils_Array::value('contribution_id', $values),
         'contributionOtherID' => CRM_Utils_Array::value('contribution_other_id', $values),
         'membershipID' => CRM_Utils_Array::value('membership_id', $values),
         // CRM-5095
@@ -251,7 +239,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
     
       if ($contributionTypeId = CRM_Utils_Array::value('grant_type_id', $values)) {
         $tplParams['contributionTypeId'] = $contributionTypeId;
-        $tplParams['contributionTypeName'] = CRM_Core_DAO::getFieldValue('CRM_Contribute_DAO_ContributionType',
+        $tplParams['contributionTypeName'] = CRM_Core_DAO::getFieldValue('CRM_Financial_DAO_FinancialType',
           $contributionTypeId
         );
       }
@@ -263,7 +251,6 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
       // address required during receipt processing (pdf and email receipt)
       if ($displayAddress = CRM_Utils_Array::value('address', $values)) {
         $tplParams['address'] = $displayAddress;
-        $tplParams['contributeMode'] = NULL;
       }
 
       // CRM-6976
@@ -284,7 +271,6 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
         $tplParams['onBehalfName'] = $displayName;
         $tplParams['onBehalfEmail'] = $email;
 
-        require_once 'CRM/Core/BAO/UFJoin.php';
         $ufJoinParams = array(
           'module' => 'onBehalf',
           'entity_table' => 'civicrm_grant_app_page',
@@ -293,9 +279,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
         $OnBehalfProfile = CRM_Core_BAO_UFJoin::getUFGroupIds($ufJoinParams);
         $profileId       = $OnBehalfProfile[0];
         $userID          = $contactID;
-        self::buildCustomDisplay($profileId, 'onBehalfProfile', $userID, $template,
-            $params['onbehalf_profile'], $fieldTypes
-         );
+        self::buildCustomDisplay($profileId, 'onBehalfProfile', $userID, $template, $params['onbehalf_profile'], $fieldTypes);
       }
 
       // use either the contribution or membership receipt, based on whether it’s a membership-related contrib or not
@@ -308,11 +292,8 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
         'PDFFilename' => 'receipt.pdf',
       );
 
-      require_once 'CRM/Core/BAO/MessageTemplates.php';
-
       if ($returnMessageText) {
         list($sent, $subject, $message, $html) = CRM_Core_BAO_MessageTemplates::sendTemplate($sendTemplateParams);
-      
         return array(
           'subject' => $subject,
           'body' => $message,
@@ -327,7 +308,6 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
         $sendTemplateParams['toEmail'] = $email;
         $sendTemplateParams['cc'] = CRM_Utils_Array::value('cc_receipt', $values);
         $sendTemplateParams['bcc'] = CRM_Utils_Array::value('bcc_receipt', $values);
-      
         list($sent, $subject, $message, $html) = CRM_Core_BAO_MessageTemplates::sendTemplate($sendTemplateParams);
       }
 
@@ -337,14 +317,39 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
         $sendTemplateParams['valueName'] = 'contribution_dupalert';
         $sendTemplateParams['from'] = ts('Automatically Generated') . " <{$values['receipt_from_email']}>";
         $sendTemplateParams['toName'] = CRM_Utils_Array::value('receipt_from_name', $values);
-        $sendTemplateParams['toEmail'] = $values['receipt_from_email'];
+        $sendTemplateParams['toEmail'] = CRM_Utils_Array::value('receipt_from_email', $values);
         $sendTemplateParams['tplParams']['onBehalfID'] = $contactID;
         $sendTemplateParams['tplParams']['receiptMessage'] = $message;
 
         // fix cc and reset back to original, CRM-6976
         $sendTemplateParams['cc'] = $originalCCReceipt;
+
         CRM_Core_BAO_MessageTemplates::sendTemplate($sendTemplateParams);
       }
+    }
+  }
+  
+  /*
+     * Construct the message to be sent by the send function
+     *
+     */
+  function composeMessage($tplParams, $contactID, $isTest) {
+    $sendTemplateParams = array(
+      'groupName' => $tplParams['membershipID'] ? 'msg_tpl_workflow_membership' : 'msg_tpl_workflow_grant',
+      'valueName' => $tplParams['membershipID'] ? 'membership_online_receipt' : 'grant_online_receipt',
+      'contactId' => $contactID,
+      'tplParams' => $tplParams,
+      'isTest' => $isTest,
+      'PDFFilename' => 'receipt.pdf',
+    );
+    if ($returnMessageText) {
+      list($sent, $subject, $message, $html) = CRM_Core_BAO_MessageTemplates::sendTemplate($sendTemplateParams);
+      return array(
+        'subject' => $subject,
+        'body' => $message,
+        'to' => $displayName,
+        'html' => $html,
+      );
     }
   }
 
@@ -361,17 +366,17 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
    * @access public
    * @static
    */
-  static
-  function recurringNofify($type, $contactID, $pageID, $recur, $autoRenewMembership = FALSE) {
+  static function recurringNotify($type, $contactID, $pageID, $recur, $autoRenewMembership = FALSE) {
     $value = array();
     if ($pageID) {
-      CRM_Core_DAO::commonRetrieveAll('CRM_Contribute_DAO_ContributionPage', 'id',
-        $pageID, $value,
-        array(
-          'title', 'is_email_receipt', 'receipt_from_name',
-          'receipt_from_email', 'cc_receipt', 'bcc_receipt',
-        )
-      );
+      CRM_Core_DAO::commonRetrieveAll('CRM_Contribute_DAO_ContributionPage', 'id', $pageID, $value, array(
+          'title',
+          'is_email_receipt',
+          'receipt_from_name',
+          'receipt_from_email',
+          'cc_receipt',
+          'bcc_receipt',
+        ));
     }
 
     $isEmailReceipt = CRM_Utils_Array::value('is_email_receipt', $value[$pageID]);
@@ -387,14 +392,12 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
         $receiptFromEmail = $value[$pageID]['receipt_from_email'];
       }
       else {
-        require_once 'CRM/Core/BAO/Domain.php';
         $domainValues     = CRM_Core_BAO_Domain::getNameAndEmail();
         $receiptFrom      = "$domainValues[0] <$domainValues[1]>";
         $receiptFromName  = $domainValues[0];
         $receiptFromEmail = $domainValues[1];
       }
 
-      require_once 'CRM/Contact/BAO/Contact/Location.php';
       list($displayName, $email) = CRM_Contact_BAO_Contact_Location::getEmailDetails($contactID, FALSE);
       $templatesParams = array(
         'groupName' => 'msg_tpl_workflow_grant',
@@ -417,8 +420,6 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
         'toName' => $displayName,
         'toEmail' => $email,
       );
-
-      require_once 'CRM/Core/BAO/MessageTemplates.php';
       list($sent, $subject, $message, $html) = CRM_Core_BAO_MessageTemplates::sendTemplate($templatesParams);
 
       if ($sent) {
@@ -443,29 +444,25 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
    * @static
    */
   function buildCustomDisplay($gid, $name, $cid, &$template, &$params, $fieldTypes = NULL) {
-      if ($gid) {
-      require_once 'CRM/Core/BAO/UFGroup.php';
-
+    if ($gid) {
       if (CRM_Core_BAO_UFGroup::filterUFGroups($gid, $cid)) {
         $values     = array();
         $groupTitle = NULL;
-
-        $fields     = CRM_Core_BAO_UFGroup::getFields($gid, FALSE, CRM_Core_Action::VIEW, NULL, NULL, FALSE,
-          NULL, FALSE, NULL, CRM_Core_Permission::CREATE, NULL
-        );
-
+        $fields     = CRM_Core_BAO_UFGroup::getFields($gid, FALSE, CRM_Core_Action::VIEW, NULL, NULL, FALSE, NULL, FALSE, NULL, CRM_Core_Permission::CREATE, NULL);
         foreach ($fields as $k => $v) {
           if (!$groupTitle) {
             $groupTitle = $v["groupTitle"];
           }
-          // suppress all file fields from display
-          if (CRM_Utils_Array::value('data_type', $v, '') == 'File' || CRM_Utils_Array::value('name', $v, '') == 'image_URL') {
+          // suppress all file fields from display and formatting fields
+          if (
+            CRM_Utils_Array::value('data_type', $v, '') == 'File' ||
+            CRM_Utils_Array::value('name', $v, '') == 'image_URL' ||
+            CRM_Utils_Array::value('field_type', $v) == 'Formatting'
+          ) {
             unset($fields[$k]);
           }
 
-          if (!empty($fieldTypes) &&
-            (!in_array($v['field_type'], $fieldTypes))
-          ) {
+          if (!empty($fieldTypes) && (!in_array($v['field_type'], $fieldTypes))) {
             unset($fields[$k]);
           }
         }
@@ -475,10 +472,9 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
         }
 
         CRM_Core_BAO_UFGroup::getValues($cid, $fields, $values, FALSE, $params);
-                                      CRM_Core_Error::debug( '$name', $name );
 
         if (count($values)) {
-            $template->assign($name, $values);
+          $template->assign($name, $values);
         }
       }
     }
@@ -494,80 +490,68 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
    * @access public
    * @static
    */
-  static
-  function copy($id) {
-    $fieldsFix = array('prefix' => array('title' => ts('Copy of') . ' '));
-    $copy = &CRM_Core_DAO::copyGeneric('CRM_Contribute_DAO_ContributionPage',
-      array('id' => $id),
-      NULL,
-      $fieldsFix
+  static function copy($id) {
+    $fieldsFix = array(
+      'prefix' => array(
+        'title' => ts('Copy of') . ' ',
+      ),
     );
+    $copy = &CRM_Core_DAO::copyGeneric('CRM_Contribute_DAO_ContributionPage', array(
+        'id' => $id,
+      ), NULL, $fieldsFix);
 
     //copying all the blocks pertaining to the contribution page
-    $copyPledgeBlock = &CRM_Core_DAO::copyGeneric('CRM_Pledge_DAO_PledgeBlock',
-      array(
+    $copyPledgeBlock = &CRM_Core_DAO::copyGeneric('CRM_Pledge_DAO_PledgeBlock', array(
         'entity_id' => $id,
         'entity_table' => 'civicrm_contribution_page',
-      ),
-      array('entity_id' => $copy->id)
-    );
+      ), array(
+        'entity_id' => $copy->id,
+      ));
 
-    $copyMembershipBlock = &CRM_Core_DAO::copyGeneric('CRM_Member_DAO_MembershipBlock',
-      array(
+    $copyMembershipBlock = &CRM_Core_DAO::copyGeneric('CRM_Member_DAO_MembershipBlock', array(
         'entity_id' => $id,
         'entity_table' => 'civicrm_contribution_page',
-      ),
-      array('entity_id' => $copy->id)
-    );
+      ), array(
+        'entity_id' => $copy->id,
+      ));
 
-    $copyUFJoin = &CRM_Core_DAO::copyGeneric('CRM_Core_DAO_UFJoin',
-      array(
+    $copyUFJoin = &CRM_Core_DAO::copyGeneric('CRM_Core_DAO_UFJoin', array(
         'entity_id' => $id,
         'entity_table' => 'civicrm_contribution_page',
-      ),
-      array('entity_id' => $copy->id)
-    );
+      ), array(
+        'entity_id' => $copy->id,
+      ));
 
-    $copyWidget = &CRM_Core_DAO::copyGeneric('CRM_Contribute_DAO_Widget',
-      array('contribution_page_id' => $id),
-      array('contribution_page_id' => $copy->id)
-    );
+    $copyWidget = &CRM_Core_DAO::copyGeneric('CRM_Contribute_DAO_Widget', array(
+        'contribution_page_id' => $id,
+      ), array(
+        'contribution_page_id' => $copy->id,
+      ));
 
+    //copy price sets
+    CRM_Price_BAO_Set::copyPriceSet('civicrm_contribution_page', $id, $copy->id);
 
-    //copy option group and values
-    require_once 'CRM/Core/BAO/OptionGroup.php';
-    $copy->default_amount_id = CRM_Core_BAO_OptionGroup::copyValue('contribution',
-      $id,
-      $copy->id,
-      CRM_Core_DAO::getFieldValue('CRM_Contribute_DAO_ContributionPage',
-        $id,
-        'default_amount_id'
-      )
-    );
-    $copyTellFriend = &CRM_Core_DAO::copyGeneric('CRM_Friend_DAO_Friend',
-      array(
+    $copyTellFriend = &CRM_Core_DAO::copyGeneric('CRM_Friend_DAO_Friend', array(
         'entity_id' => $id,
         'entity_table' => 'civicrm_contribution_page',
-      ),
-      array('entity_id' => $copy->id)
-    );
+      ), array(
+        'entity_id' => $copy->id,
+      ));
 
-    $copyPersonalCampaignPages = &CRM_Core_DAO::copyGeneric('CRM_PCP_DAO_PCPBlock',
-      array(
+    $copyPersonalCampaignPages = &CRM_Core_DAO::copyGeneric('CRM_PCP_DAO_PCPBlock', array(
         'entity_id' => $id,
         'entity_table' => 'civicrm_contribution_page',
-      ),
-      array('entity_id' => $copy->id)
-    );
+      ), array(
+        'entity_id' => $copy->id,
+      ));
 
-    $copyPremium = &CRM_Core_DAO::copyGeneric('CRM_Contribute_DAO_Premium',
-      array(
+    $copyPremium = &CRM_Core_DAO::copyGeneric('CRM_Contribute_DAO_Premium', array(
         'entity_id' => $id,
         'entity_table' => 'civicrm_contribution_page',
-      ),
-      array('entity_id' => $copy->id)
-    );
-    $premiumQuery = "        
+      ), array(
+        'entity_id' => $copy->id,
+      ));
+    $premiumQuery = "
 SELECT id
 FROM civicrm_premiums
 WHERE entity_table = 'civicrm_contribution_page'
@@ -576,16 +560,15 @@ WHERE entity_table = 'civicrm_contribution_page'
     $premiumDao = CRM_Core_DAO::executeQuery($premiumQuery, CRM_Core_DAO::$_nullArray);
     while ($premiumDao->fetch()) {
       if ($premiumDao->id) {
-        $copyPremiumProduct = &CRM_Core_DAO::copyGeneric('CRM_Contribute_DAO_PremiumsProduct',
-          array('premiums_id' => $premiumDao->id),
-          array('premiums_id' => $copyPremium->id)
+        $copyPremiumProduct = &CRM_Core_DAO::copyGeneric('CRM_Contribute_DAO_PremiumsProduct', 
+          array('premiums_id' => $premiumDao->id), 
+          array('premiums_id' => $copyPremium->id),
         );
       }
     }
 
     $copy->save();
 
-    require_once 'CRM/Utils/Hook.php';
     CRM_Utils_Hook::copy('ContributionPage', $copy);
 
     return $copy;
@@ -598,18 +581,18 @@ WHERE entity_table = 'civicrm_contribution_page'
    * @param int $contributionPageId Contribution Page Id
    *
    * @return boolean true if payment processor supports recurring
-   *                 else false
+   * else false
    *
    * @access public
    * @static
    */
-  static
-  function checkRecurPaymentProcessor($contributionPageId) {
+  static function checkRecurPaymentProcessor($contributionPageId) {
+    //FIXME
     $sql = "
   SELECT pp.is_recur
   FROM   civicrm_contribution_page  cp,
          civicrm_payment_processor  pp
-  WHERE  cp.payment_processor_id = pp.id
+  WHERE  cp.payment_processor = pp.id
     AND  cp.id = {$contributionPageId}
 ";
 
@@ -624,8 +607,9 @@ WHERE entity_table = 'civicrm_contribution_page'
    *
    * @return array $info info regarding all sections.
    * @access public
+   * @static
    */
-  function getSectionInfo($contribPageIds = array(
+  static function getSectionInfo($contribPageIds = array(
     )) {
     $info = array();
     $whereClause = NULL;
@@ -649,7 +633,7 @@ LEFT JOIN  civicrm_uf_join             ON ( civicrm_uf_join.entity_id = civicrm_
                                             AND module = 'CiviGrant' 
                                             AND civicrm_uf_join.is_active = 1 )
            $whereClause";
- 
+
     $contributionPage = CRM_Core_DAO::executeQuery($query);
     while ($contributionPage->fetch()) {
       if (!isset($info[$contributionPage->id]) || !is_array($info[$contributionPage->id])) {
