@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.2                                                |
+ | CiviCRM version 4.3                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2012                                |
+ | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -28,7 +28,7 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2012
+ * @copyright CiviCRM LLC (c) 2004-2013
  * $Id$
  *
  */
@@ -43,7 +43,7 @@ class CRM_Grant_BAO_Grant_Utils {
    * @param array   $premiumParams   array with premium related key
    * value pairs
    * @param int     $contactID       contact id
-   * @param int     $contributionTypeId   contribution type id
+   * @param int     $contributionTypeId   financial type id
    * @param int     $component   component id
    *
    * @return array associated array
@@ -59,6 +59,39 @@ class CRM_Grant_BAO_Grant_Utils {
     $component = 'grant',
     $fieldTypes = NULL
   ) {
+    CRM_Core_Payment_Form::mapParams($form->_bltID, $form->_params, $paymentParams, TRUE);
+
+    $contributionType = new CRM_Financial_DAO_FinancialType();
+    if (isset($paymentParams['financial_type'])) {
+      $contributionType->id = $paymentParams['financial_type'];
+    }
+    elseif (CRM_Utils_Array::value('pledge_id', $form->_values)) {
+      $contributionType->id = CRM_Core_DAO::getFieldValue('CRM_Pledge_DAO_Pledge',
+        $form->_values['pledge_id'],
+        'financial_type_id'
+      );
+    }
+    else {
+      $contributionType->id = $grantTypeId;
+    }
+    if (!$contributionType->find(TRUE)) {
+      CRM_Core_Error::fatal('Could not find a system table');
+    }
+
+    // add some financial type details to the params list
+    // if folks need to use it
+    $paymentParams['contributionType_name'] = $form->_params['contributionType_name'] = $contributionType->name;
+    //CRM-11456
+    $paymentParams['contributionType_accounting_code'] = $form->_params['contributionType_accounting_code'] = CRM_Financial_BAO_FinancialAccount::getAccountingCode($contributionType->id);
+    $paymentParams['contributionPageID'] = $form->_params['contributionPageID'] = $form->_values['id'];
+
+
+    $payment = NULL;
+    $paymentObjError = ts('The system did not record payment details for this payment and so could not process the transaction. Please report this error to the site administrator.');
+    if (CRM_Utils_Array::value('is_monetary', $form->_values) && $form->_amount > 0.0 && is_array($form->_paymentProcessor)) {
+      $payment = CRM_Core_Payment::singleton($form->_mode, $form->_paymentProcessor, $form);
+    }
+
     //fix for CRM-2062
     $now = date('YmdHis');
 
@@ -78,7 +111,7 @@ class CRM_Grant_BAO_Grant_Utils {
       );
       
       if ($grant) {
-      $form->_params['contributionID'] = $grant->id;
+        $form->_params['contributionID'] = $grant->id;
       }
       
       $form->_params['contributionTypeID'] = $grantTypeId;
@@ -89,7 +122,6 @@ class CRM_Grant_BAO_Grant_Utils {
       if ($grant) {
           
           $form->_values['contribution_id'] = $grant->id;
-          CRM_Core_Error::debug( '$form', $form->_values );
         
           
           CRM_Grant_BAO_GrantApplicationPage::sendMail($contactID, 
@@ -148,7 +180,7 @@ class CRM_Grant_BAO_Grant_Utils {
     $customFields = CRM_Core_BAO_CustomField::getFields('Grant',
       FALSE,
       FALSE,
-      CRM_Utils_Array::value('contribution_type_id',
+      CRM_Utils_Array::value('financial_type_id',
         $params
       )
     );
