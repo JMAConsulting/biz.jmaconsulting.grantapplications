@@ -50,9 +50,8 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
   public function preProcess() {
     parent::preProcess();
  
-
-    // Make the contributionPageID avilable to the template
-    $this->assign('contributionPageID', $this->_id);
+    // Make the grantPageID avilable to the template
+    $this->assign('grantPageID', $this->_id);
    
     $this->assign('isConfirmEnabled', 1) ;
 
@@ -88,7 +87,6 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     if (CRM_Utils_Array::value('footer_text', $this->_values)) {
       $this->assign('footer_text', $this->_values['footer_text']);
     }
-
   }
 
   function setDefaultValues() {
@@ -110,7 +108,6 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
      
       // remove component related fields
       foreach ($this->_fields as $name => $dontCare) {
-          //don't set custom data Used for Grants (CRM-1344)
         if (substr($name, 0, 7) == 'custom_') {
           $id = substr($name, 7);
           if (!CRM_Core_BAO_CustomGroup::checkCustomField($id, $removeCustomFieldTypes)) {
@@ -169,7 +166,6 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     $config = CRM_Core_Config::singleton();
     // set default country from config if no country set
  
-
     // now fix all state country selectors
     CRM_Core_BAO_Address::fixAllStateSelects($this, $this->_defaults);
 
@@ -197,27 +193,27 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     $this->buildCustom($this->_values['custom_pre_id'], 'customPre');
     $this->buildCustom($this->_values['custom_post_id'], 'customPost');
     
-    if ( !CRM_Utils_Array::value('grant_amount_requested', $this->_fields) && CRM_Utils_Array::value('default_amount', $this->_values) ){
+    if ( !CRM_Utils_Array::value('amount_total', $this->_fields) && CRM_Utils_Array::value('default_amount', $this->_values) ){
         $this->assign('defaultAmount', $this->_values['default_amount']);
         $this->add('hidden', "default_amount_hidden",
-                   $this->_values['default_amount'] ? $this->_values['default_amount'] : '0', '', FALSE
-                   );
-    } else if ( !CRM_Utils_Array::value('default_amount', $this->_fields) && !CRM_Utils_Array::value('grant_amount_requested', $this->_fields) ) {
+          $this->_values['default_amount'] ? $this->_values['default_amount'] : '0', '', FALSE
+        );
+    } else if ( !CRM_Utils_Array::value('default_amount', $this->_fields) && !CRM_Utils_Array::value('amount_total', $this->_fields) ) {
         $this->assign('defaultAmount', '0.00');
         $this->add('hidden', "default_amount_hidden",
-                   '0.00', '', FALSE
-                   );
+          '0.00', '', FALSE
+        );
     }
-    if ( CRM_Utils_Array::value('grant_amount_requested', $this->_fields) ) {
-        $this->addRule('grant_amount_requested', ts('Please enter a valid amount (numbers and decimal point only).'), 'money');
+    if ( CRM_Utils_Array::value('amount_total', $this->_fields) ) {
+      $this->addRule('amount_total', ts('Please enter a valid amount (numbers and decimal point only).'), 'money');
     }
 
     if ( !empty( $this->_fields ) ) {
       $profileAddressFields = array();
       foreach( $this->_fields as $key => $value ) {
-          CRM_Core_BAO_UFField::assignAddressField($key, $profileAddressFields);
-          $this->set('profileAddressFields', $profileAddressFields);
-            }
+        CRM_Core_BAO_UFField::assignAddressField($key, $profileAddressFields);
+        $this->set('profileAddressFields', $profileAddressFields);
+      }
     }
 
     //to create an cms user
@@ -251,16 +247,16 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
         CRM_Core_BAO_CMSUser::buildForm($this, $profileID, TRUE);
       }
     }
-      $this->addButtons(array(
-          array(
-            'type' => 'upload',
-            'name' => ts('Confirm Grant Application'),
-            'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
-            'isDefault' => TRUE,
-          ),
-        )
-      );
-      $this->addFormRule(array('CRM_Grant_Form_Grant_Main', 'formRule'), $this);
+    $this->addButtons(array(
+      array(
+        'type' => 'upload',
+        'name' => ts('Confirm Grant Application'),
+        'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+        'isDefault' => TRUE,
+      ),
+     )
+    );
+    $this->addFormRule(array('CRM_Grant_Form_Grant_Main', 'formRule'), $this);
   }
   
   /**
@@ -310,10 +306,10 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     // get the submitted form values.
     $params = $this->controller->exportValues($this->_name);
    
-    if ( isset($params['default_amount_hidden']) ) {  
+    if (CRM_Utils_Array::value('default_amount_hidden', $params) > 0 && !CRM_Utils_Array::value('amount_total', $params)) {  
         $this->set('default_amount', $params['default_amount_hidden']);
-    } elseif (isset($params['grant_amount_requested']) )  {
-        $this->set('default_amount', $params['grant_amount_requested']);
+    } elseif (CRM_Utils_Array::value('amount_requested', $params))  {
+        $this->set('default_amount', $params['amount_total']);
     }
   }
 }
