@@ -37,8 +37,7 @@
  * Helper class to build navigation links
  */
 class CRM_Grant_Form_GrantPage_TabHeader {
-  static
-  function build(&$form) {
+  static function build(&$form) {
     $tabs = $form->get('tabHeader');
     if (!$tabs || !CRM_Utils_Array::value('reset', $_GET)) {
       $tabs = self::process($form);
@@ -100,7 +99,7 @@ class CRM_Grant_Form_GrantPage_TabHeader {
           $tabs[$key]['qfKey'] = NULL;
         }
         $tabs[$key]['link'] = CRM_Utils_System::url("civicrm/admin/grant/{$key}",
-          "{$reset}action=update&snippet=5&id={$grantPageId}"
+          "{$reset}action=update&snippet=5&id={$grantPageId}{$tabs[$key]['qfKey']}"
         );
         $tabs[$key]['active'] = $tabs[$key]['valid'] = TRUE;
       

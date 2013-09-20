@@ -71,11 +71,11 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
    * @access public
    */
   public function preProcess() {
-    // current contribution page id
+    // current grant application page id
     $this->_id = CRM_Utils_Request::retrieve('id', 'Positive',
       $this, FALSE, NULL, 'REQUEST'
     );
-    $this->assign('contributionPageID', $this->_id);
+    $this->assign('grantApplicationPageID', $this->_id);
 
     // get the requested action
     $this->_action = CRM_Utils_Request::retrieve('action', 'String',
@@ -83,7 +83,7 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
       $this, FALSE, 'browse'
     );
 
-    // setting title and 3rd level breadcrumb for html page if contrib page exists
+    // setting title and 3rd level breadcrumb for html page if application page exists
     if ($this->_id) {
       $title = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantApplicationPage', $this->_id, 'title');
 

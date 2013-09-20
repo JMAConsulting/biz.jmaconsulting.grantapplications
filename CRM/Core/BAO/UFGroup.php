@@ -895,13 +895,15 @@ class CRM_Core_BAO_UFGroup extends CRM_Core_DAO_UFGroup {
       $params = array_merge($params, $componentWhere);
     }
 
-    $query = new CRM_Contact_BAO_Query($params, $returnProperties, $fields, NULL, NULL, 128);
+    $query = new CRM_Contact_BAO_Query($params, $returnProperties, $fields);
     $options = &$query->_options;
 
-    $details = $query->searchQuery( 0, 0, NULL, FALSE, FALSE, FALSE, FALSE, FALSE, $additionalWhereClause);
+    $details = $query->searchQuery( 0, 0, NULL, FALSE, FALSE,
+      FALSE, FALSE, FALSE, $additionalWhereClause);
     if (!$details->fetch()) {
       return;
     }
+
     $config = CRM_Core_Config::singleton();
 
     $locationTypes = CRM_Core_PseudoConstant::locationType();
@@ -1212,6 +1214,7 @@ class CRM_Core_BAO_UFGroup extends CRM_Core_DAO_UFGroup {
       if ((CRM_Utils_Array::value('visibility', $field) == 'Public Pages and Listings') &&
         CRM_Core_Permission::check('profile listings and forms')
       ) {
+
         if (CRM_Utils_System::isNull($params[$index])) {
           $params[$index] = $values[$index];
         }
@@ -1577,11 +1580,7 @@ AND    ( entity_id IS NULL OR entity_id <= 0 )
    * @access public
    * @static
    */
-  public static function getModuleUFGroup($moduleName = NULL, 
-    $count = 0, 
-    $skipPermission = TRUE, 
-    $op = CRM_Core_Permission::VIEW
-  ) {
+  public static function getModuleUFGroup($moduleName = NULL, $count = 0, $skipPermission = TRUE, $op = CRM_Core_Permission::VIEW) {
     $queryString = 'SELECT civicrm_uf_group.id, title, civicrm_uf_group.is_active, is_reserved, group_type
                         FROM civicrm_uf_group
                         LEFT JOIN civicrm_uf_join ON (civicrm_uf_group.id = uf_group_id)';
@@ -2417,10 +2416,6 @@ AND    ( entity_id IS NULL OR entity_id <= 0 )
       self::setComponentDefaults($fields, $componentId, $component, $defaults);
     }
 
-    if (CRM_Core_Permission::access('CiviGrant') && $component == 'Grant') {
-      self::setComponentDefaults($fields, $componentId, $component, $defaults);
-    }
-
     //Handling membership Part of the batch profile
     if (CRM_Core_Permission::access('CiviMember') && $component == 'Membership') {
       self::setComponentDefaults($fields, $componentId, $component, $defaults);
@@ -2430,6 +2425,11 @@ AND    ( entity_id IS NULL OR entity_id <= 0 )
     if ($component == 'Activity') {
       self::setComponentDefaults($fields, $componentId, $component, $defaults);
     }
+
+    if ($component == 'Grant') {
+      self::setComponentDefaults($fields, $componentId, $component, $defaults);
+    }
+
   }
 
   /**
@@ -3057,13 +3057,7 @@ AND    ( entity_id IS NULL OR entity_id <= 0 )
       case 'Contribute':
         $componentBAO     = 'CRM_Contribute_BAO_Contribution';
         $componentBAOName = 'Contribution';
-        $componentSubType = array( 'financial_type_id' );
-        break;
-
-      case 'Grant':
-        $componentBAO     = 'CRM_Grant_BAO_Grant';
-        $componentBAOName = 'Grant';
-        $componentSubType = array( 'grant_type_id' );
+            $componentSubType = array( 'financial_type_id' );
         break;
 
       case 'Event':
@@ -3076,6 +3070,12 @@ AND    ( entity_id IS NULL OR entity_id <= 0 )
         $componentBAO     = 'CRM_Activity_BAO_Activity';
         $componentBAOName = 'Activity';
         $componentSubType = array('activity_type_id');
+        break;
+
+      case 'Grant':
+        $componentBAO     = 'CRM_Grant_BAO_Grant';
+        $componentBAOName = 'Grant';
+        $componentSubType = array('grant_type_id');
         break;
     }
 
@@ -3319,7 +3319,7 @@ SELECT  group_id
     $contactTypes = array('Individual', 'Household', 'Organization');
     $subTypes = CRM_Contact_BAO_ContactType::subTypes();
 
-    $components = array('Contribution', 'Participant', 'Membership', 'Activity');
+    $components = array('Contribution', 'Participant', 'Membership', 'Activity', 'Grant');
 
     $typeCount = array('ctype' => array(), 'subtype' => array());
     foreach ($profileIds as $gid) {

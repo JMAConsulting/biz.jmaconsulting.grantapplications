@@ -894,7 +894,7 @@ SELECT  id
     }
 
     if (CRM_Core_Permission::access('CiviGrant')) {
-      $grantFields = CRM_Grant_BAO_Grant::getGrantFields();
+      $grantFields = getGrantFields();
       if (!empty($grantFields)) {
         $fields['Grant'] = $grantFields;
       }
