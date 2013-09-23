@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.2                                                |
+ | CiviCRM version 4.3                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2012                                |
+ | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -28,7 +28,7 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2012
+ * @copyright CiviCRM LLC (c) 2004-2013
  * $Id$
  *
  */
@@ -38,12 +38,7 @@ class CRM_Grant_BAO_Grant_Utils {
    * Function to process payment after confirmation
    *
    * @param object  $form   form object
-   * @param array   $paymentParams   array with payment related key
-   * value pairs
-   * @param array   $premiumParams   array with premium related key
-   * value pairs
    * @param int     $contactID       contact id
-   * @param int     $contributionTypeId   contribution type id
    * @param int     $component   component id
    *
    * @return array associated array
@@ -52,122 +47,41 @@ class CRM_Grant_BAO_Grant_Utils {
    * @access public
    */
   static function processConfirm(&$form,
-    &$paymentParams,
-    &$premiumParams,
+    $params,
     $contactID,
     $grantTypeId,
     $component = 'grant',
     $fieldTypes = NULL
   ) {
-    //fix for CRM-2062
+
+    $params['grantApplicationPageID'] = $form->_params['grantApplicationPageID'] = $form->_values['id'];
+    $params['contactID'] = $form->_params['contactID'] = $contactID;
+    $grant = CRM_Grant_Form_Grant_Confirm::processApplication(
+      $form,
+      $params,
+      $contactID,
+      $grantTypeId,
+      TRUE
+    );
+      
+    if ($grant) {
+      $form->_params['grantID'] = $grant->id;
+    }
     $now = date('YmdHis');
-
-    $result = NULL;
-   
-      // this is not going to come back, i.e. we fill in the other details
-      // when we get a callback from the payment processor
-      // also add the contact ID and contribution ID to the params list
-      $paymentParams['contactID'] = $form->_params['contactID'] = $contactID;
-      $grant = CRM_Grant_Form_Grant_Confirm::processContribution(
-        $form,
-        $paymentParams,
-        NULL,
-        $contactID,
-        $grantTypeId,
-        TRUE, TRUE, TRUE
+    $form->_params['grantTypeID'] = $grantTypeId;
+    $form->_params['item_name'] = $form->_params['description'];
+    $form->_params['application_received_date'] = $now;
+    $form->set('params', $form->_params);
+    // finally send an email receipt
+    if ($grant) {   
+      $form->_values['grant_id'] = $grant->id;
+      CRM_Grant_BAO_GrantApplicationPage::sendMail($contactID, 
+        $form->_values,
+        FALSE,
+        $fieldTypes
       );
-      
-      if ($grant) {
-      $form->_params['contributionID'] = $grant->id;
-      }
-      
-      $form->_params['contributionTypeID'] = $grantTypeId;
-      $form->_params['item_name'] = $form->_params['description'];
-      $form->_params['receive_date'] = $now;
-      $form->set('params', $form->_params);
-      // finally send an email receipt
-      if ($grant) {
-          
-          $form->_values['contribution_id'] = $grant->id;
-          CRM_Core_Error::debug( '$form', $form->_values );
-        
-          
-          CRM_Grant_BAO_GrantApplicationPage::sendMail($contactID, 
-                                                        $form->_values, FALSE,
-                                                        FALSE, $fieldTypes
-                                                        );
-      }
-  }
-
- 
-
-  
-
-  static function createCMSUser(&$params, $contactID, $mail) {
-    // lets ensure we only create one CMS user
-    static $created = FALSE;
-
-    if ($created) {
-      return;
-    }
-    $created = TRUE;
-
-    if (CRM_Utils_Array::value('cms_create_account', $params)) {
-      $params['contactID'] = $contactID;
-      if (!CRM_Core_BAO_CMSUser::create($params, $mail)) {
-        CRM_Core_Error::statusBounce(ts('Your profile is not saved and Account is not created.'));
-      }
     }
   }
-
-  static function processAPIContribution($params) {
-    if (empty($params) || array_key_exists('error', $params)) {
-      return FALSE;
-    }
-
-    // add contact using dedupe rule
-    $dedupeParams = CRM_Dedupe_Finder::formatParams($params, 'Individual');
-    $dedupeParams['check_permission'] = FALSE;
-    $dupeIds = CRM_Dedupe_Finder::dupesByParams($dedupeParams, 'Individual');
-    // if we find more than one contact, use the first one
-    if (CRM_Utils_Array::value(0, $dupeIds)) {
-      $params['contact_id'] = $dupeIds[0];
-    }
-    $contact = CRM_Contact_BAO_Contact::create($params);
-    if (!$contact->id) {
-      return FALSE;
-    }
-
-    // only pass transaction params to contribution::create, if available
-    if (array_key_exists('transaction', $params)) {
-      $params = $params['transaction'];
-      $params['contact_id'] = $contact->id;
-    }
-
-    // handle contribution custom data
-    $customFields = CRM_Core_BAO_CustomField::getFields('Grant',
-      FALSE,
-      FALSE,
-      CRM_Utils_Array::value('contribution_type_id',
-        $params
-      )
-    );
-    $params['custom'] = CRM_Core_BAO_CustomField::postProcess($params,
-      $customFields,
-      CRM_Utils_Array::value('id', $params, NULL),
-      'Grant'
-    );
-   
-    $contribution = &CRM_Contribute_BAO_Contribution::create($params,
-      CRM_Core_DAO::$_nullArray
-    );
-    if (!$contribution->id) {
-      return FALSE;
-    }
-
-    return TRUE;
-  }
-  
-  }
+ }
 
 

@@ -165,7 +165,7 @@ class CRM_Grant_Form_GrantPage_Custom extends CRM_Grant_Form_GrantPage {
     return ts('Include Profiles');
   }
 
-  /**
+ /**
    * global form rule
    *
    * @param array $fields  the input form values
@@ -174,39 +174,9 @@ class CRM_Grant_Form_GrantPage_Custom extends CRM_Grant_Form_GrantPage {
    * @access public
    * @static
    */
-  static
-  function formRule($fields, $files, $contributionPageId) {
+  static function formRule($fields, $files, $grantApplicationPageId) {
     $errors = array();
     $preProfileType = $postProfileType = NULL;
-    /* // for membership profile make sure Membership section is enabled */
-    /* // get membership section for this contribution page */
-    /* $dao               = new CRM_Member_DAO_MembershipBlock(); */
-    /* $dao->entity_table = 'civicrm_contribution_page'; */
-    /* $dao->entity_id    = $contributionPageId; */
-
-    /* $membershipEnable = FALSE; */
-
-    /* if ($dao->find(TRUE) && $dao->is_active) { */
-    /*   $membershipEnable = TRUE; */
-    /* } */
-
-    /* if ($fields['custom_pre_id']) { */
-    /*   $preProfileType = CRM_Core_BAO_UFField::getProfileType($fields['custom_pre_id']); */
-    /* } */
-
-    /* if ($fields['custom_post_id']) { */
-    /*   $postProfileType = CRM_Core_BAO_UFField::getProfileType($fields['custom_post_id']); */
-    /* } */
-
-    /* $errorMsg = ts('You must enable the Membership Block for this Contribution Page if you want to include a Profile with Membership fields.'); */
-
-    /* if (($preProfileType == 'Membership') && !$membershipEnable) { */
-    /*   $errors['custom_pre_id'] = $errorMsg; */
-    /* } */
-
-    /* if (($postProfileType == 'Membership') && !$membershipEnable) { */
-    /*   $errors['custom_post_id'] = $errorMsg; */
-    /* } */
 
     return empty($errors) ? TRUE : $errors;
   }

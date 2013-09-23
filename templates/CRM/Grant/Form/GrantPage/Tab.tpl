@@ -27,14 +27,14 @@
 <div class="crm-actions-ribbon crm-grantpage-tab-actions-ribbon">
    <ul id="actions">
     	<li><div id="crm-grantpage-links-wrapper">
-    	      <div id="crm-grantpage-links-link">
+    	      <a id="crm-grantpage-links-link" class="button">
                 <span><div class="icon dropdown-icon"></div>{ts}Grant Application Links{/ts}</span>
-              </div>
+              </a>
     	        <div class="ac_results" id="crm-grantpage-links-list">
     	      	   <div class="crm-grantpage-links-list-inner">
     	      	   	<ul>
-                            <li><a class="crm-grantpage-contribution" href="{crmURL p='civicrm/grant/add' q="reset=1&action=add&context=standalone"}">{ts}New Grant{/ts}</a></li>
-                            <li><a class="crm-grant-live" href="{crmURL p='civicrm/grant/transact' q="reset=1&id=`$contributionPageID`" fe='true'}" target="_blank">{ts}Grant Application Page (Live){/ts}</a></li>
+                            <li><a class="crm-grantpage-grant" href="{crmURL p='civicrm/grant/add' q="reset=1&action=add&context=standalone"}">{ts}New Grant{/ts}</a></li>
+                            <li><a class="crm-grant-live" href="{crmURL p='civicrm/grant/transact' q="reset=1&id=`$grantApplicationPageID`" fe='true'}" target="_blank">{ts}Grant Application Page (Live){/ts}</a></li>
     		        </ul>
     	           </div>
     	      </div>
