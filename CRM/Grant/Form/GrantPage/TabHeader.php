@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.2                                                |
+ | CiviCRM version 4.3                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2012                                |
+ | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -28,7 +28,7 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2012
+ * @copyright CiviCRM LLC (c) 2004-2013
  * $Id$
  *
  */
@@ -37,17 +37,14 @@
  * Helper class to build navigation links
  */
 class CRM_Grant_Form_GrantPage_TabHeader {
-  static
-  function build(&$form) {
+  static function build(&$form) {
     $tabs = $form->get('tabHeader');
     if (!$tabs || !CRM_Utils_Array::value('reset', $_GET)) {
-       $tabs = self::process($form);
-       $form->set('tabHeader', $tabs);
+      $tabs = self::process($form);
+      $form->set('tabHeader', $tabs);
     }
-   
     $form->assign_by_ref('tabHeader', $tabs);
-    $form->assign_by_ref('selectedTab', self::getCurrentTab($tabs));
-   
+    $form->assign('selectedTab', self::getCurrentTab($tabs));
     return $tabs;
   }
 
@@ -86,19 +83,23 @@ class CRM_Grant_Form_GrantPage_TabHeader {
         $class = strtolower($className);
     }
 
-    $qfKey = $form->get('qfKey');
-    $form->assign('qfKey', $qfKey);
-
     if (array_key_exists($class, $tabs)) {
       $tabs[$class]['current'] = TRUE;
+      $qfKey = $form->get('qfKey');
+      if ($qfKey) {
+        $tabs[$class]['qfKey'] = "&qfKey={$qfKey}";
+      }
     }
 
     if ($grantPageId) {
       $reset = CRM_Utils_Array::value('reset', $_GET) ? 'reset=1&' : '';
      
       foreach ($tabs as $key => $value) {
+        if (!isset($tabs[$key]['qfKey'])) {
+          $tabs[$key]['qfKey'] = NULL;
+        }
         $tabs[$key]['link'] = CRM_Utils_System::url("civicrm/admin/grant/{$key}",
-          "{$reset}action=update&snippet=4&id={$grantPageId}&qfKey={$qfKey}"
+          "{$reset}action=update&snippet=5&id={$grantPageId}{$tabs[$key]['qfKey']}"
         );
         $tabs[$key]['active'] = $tabs[$key]['valid'] = TRUE;
       
@@ -115,20 +116,18 @@ class CRM_Grant_Form_GrantPage_TabHeader {
       }
     }
     return $tabs;
-    }
+  }
 
-  static
-  function reset(&$form) {
+  static function reset(&$form) {
     $tabs = self::process($form);
     $form->set('tabHeader', $tabs);
   }
 
-  static
-  function getCurrentTab($tabs) {
+  static function getCurrentTab($tabs) {
     static $current = FALSE;
 
     if ($current) {
-         return $current;
+      return $current;
     }
 
     if (is_array($tabs)) {
