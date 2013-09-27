@@ -167,6 +167,11 @@ function grantprofiles_civicrm_buildForm($formName, &$form) {
         }
       }
     } 
+    if ($form->_defaultValues && array_key_exists('field_name', $form->_defaultValues) 
+      && $form->_defaultValues['field_name'][0] == 'Grant') {
+      $defaults['field_name'] = $form->_defaultValues['field_name'];
+      $form->setDefaults($defaults);
+    }
   }
 }
 
