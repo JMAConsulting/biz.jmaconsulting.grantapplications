@@ -27,13 +27,13 @@
 
 DROP TABLE IF EXISTS civicrm_grant_app_page;
 
-DELETE FROM civicrm_option_value WHERE option_group_id IN (SELECT id FROM civicrm_option_group WHERE name = 'msg_tpl_workflow_grant');
-
 DELETE FROM civicrm_navigation WHERE name = 'New Grant Application Page';
 
-DELETE FROM civicrm_msg_template WHERE workflow_id IN (SELECT id FROM civicrm_option_group WHERE name = 'msg_tpl_workflow_grant');
-
-DELETE FROM civicrm_option_group WHERE name = 'msg_tpl_workflow_grant';
+DELETE  civicrm_option_value.*, civicrm_option_group.*, civicrm_msg_template.* 
+FROM civicrm_option_value 
+INNER JOIN civicrm_option_group ON  civicrm_option_value.option_group_id = civicrm_option_group.id
+INNER JOIN civicrm_msg_template ON civicrm_msg_template.workflow_id = civicrm_option_value.id
+WHERE civicrm_option_group.name LIKE 'msg_tpl_workflow_grant';
 
 DELETE uj.*, uf.* FROM civicrm_uf_group g
 LEFT JOIN civicrm_uf_join uj ON uj.uf_group_id = g.id
