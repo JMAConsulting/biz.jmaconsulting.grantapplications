@@ -85,7 +85,8 @@ function grantprofiles_civicrm_managed(&$entities) {
 
 function grantprofiles_civicrm_validate($formName, &$fields, &$files, &$form) {
   $errors = array();
-  if ($formName == "CRM_UF_Form_Field" && CRM_Core_Permission::access('CiviGrant')) {
+  if ($formName == "CRM_UF_Form_Field" && CRM_Core_Permission::access('CiviGrant') 
+    && ($form->getVar('_action') != CRM_Core_Action::DELETE)) {
     $fieldType = $fields['field_name'][0];
     $errorField = FALSE;
     //get the group type.
@@ -441,18 +442,24 @@ function formatConfigureLinks($sectionsInfo) {
 }
 
 function grantprofiles_addRemoveMenu($enable) {
-  $config_backend = unserialize(CRM_Core_DAO::singleValueQuery('SELECT config_backend FROM civicrm_domain WHERE id = 1'));
-  $params['enableComponents'] = $config_backend['enableComponents'];
-  $params['enableComponentIDs'] = $config_backend['enableComponentIDs'];
+  $config = CRM_Core_Config::singleton();
+
+  $params['enableComponents'] = $config->enableComponents;
+  $params['enableComponentIDs'] = $config->enableComponentIDs;
+  $grantComponentID = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_component WHERE name = "CiviGrant"');
   if ($enable) {
     $params['enableComponents'][] = 'CiviGrant';
-    $params['enableComponentIDs'][] = CRM_Core_DAO::singleValueQuery("SELECT id FROM civicrm_component WHERE name = 'CiviGrant'");
+    $params['enableComponentIDs'][] = $grantComponentID;
   }
   else {
-    foreach (array_keys($params['enableComponents'], 'CiviGrant', TRUE) as $key) {
+    $params['enableComponents'] = array_unique($params['enableComponents']);
+    $params['enableComponentIDs'] = array_unique($params['enableComponentIDs']);
+    $key = array_search('CiviGrant', $params['enableComponents']);
+    if ($key) {
       unset($params['enableComponents'][$key]);
     }
-    foreach (array_keys($params['enableComponentIDs'], (int)CRM_Core_DAO::singleValueQuery("SELECT id FROM civicrm_component WHERE name = 'CiviGrant'"), TRUE) as $key) {
+    $key = array_search($grantComponentID, $params['enableComponentIDs']);
+    if ($key) {
       unset($params['enableComponentIDs'][$key]);
     }
   }

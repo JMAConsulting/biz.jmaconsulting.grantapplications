@@ -25,13 +25,14 @@
  *          Canada   M5T 2C7
  */
 
-UPDATE civicrm_option_group SET is_active = 1 WHERE name = 'msg_tpl_workflow_grant';
-
 UPDATE civicrm_uf_group SET is_active = 1 WHERE group_type LIKE '%Grant%';
 
-UPDATE civicrm_option_value SET is_active = 1 WHERE option_group_id IN (SELECT id FROM civicrm_option_group WHERE name = 'msg_tpl_workflow_grant');
+UPDATE civicrm_option_value 
+INNER JOIN civicrm_option_group ON  civicrm_option_value.option_group_id = civicrm_option_group.id
+INNER JOIN civicrm_msg_template ON civicrm_msg_template.workflow_id = civicrm_option_value.id
+SET civicrm_option_value.is_active = 1,
+  civicrm_option_group.is_active = 1,
+  civicrm_msg_template.is_active = 1
+WHERE civicrm_option_group.name LIKE 'msg_tpl_workflow_grant';
 
 UPDATE civicrm_navigation SET is_active = 1 WHERE name = 'New Grant Application Page';
-
-UPDATE civicrm_msg_template SET is_active = 1 WHERE workflow_id IN (SELECT id FROM civicrm_option_group WHERE name = 'msg_tpl_workflow_grant');
-
