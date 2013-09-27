@@ -285,7 +285,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
         'amount_granted' => 1,
         'application_received_date' => 1,
         'decision_date' => 1,
-        'money_transfer_date' => 1,
+        'grant_money_transfer_date' => 1,
         'grant_due_date' => 1,
         'grant_report_received' => 1,
         'grant_type_id' => 1,
