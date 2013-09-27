@@ -144,7 +144,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
       $returnMessageText
     ) {
       $template = CRM_Core_Smarty::singleton();
-
+      
       if (!$email) {
         list($displayName, $email) = CRM_Contact_BAO_Contact_Location::getEmailDetails($contactID);
       }
@@ -161,7 +161,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
             $userID = CRM_Utils_Array::value('related_contact', $values);
           }
         }
-        CRM_Contribute_BAO_ContributionPage::buildCustomDisplay($preID, 'customPre', $userID, $template, $params['custom_pre_id']);
+        self::buildCustomProfile($preID, 'customPre', $userID, $template, $params['custom_pre_id']);
       }
       $userID = $contactID;
       if ($postID = CRM_Utils_Array::value('custom_post_id', $values)) {
@@ -172,7 +172,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
             $userID = CRM_Utils_Array::value('related_contact', $values);
           }
         }
-        CRM_Contribute_BAO_ContributionPage::buildCustomDisplay($postID, 'customPost', $userID, $template, $params['custom_post_id']);
+        self::buildCustomProfile($postID, 'customPost', $userID, $template, $params['custom_post_id']);
       }
 
       $title = isset($values['title']) ? $values['title'] : CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantApplicationPage', $values['id'], 'title');
@@ -291,6 +291,64 @@ AND module = 'CiviGrant'  AND civicrm_uf_join.is_active = 1 ) $whereClause";
     }
 
     return $info;
+  }
+  
+  /**
+   * Function to alter CustomPre/CustomPost mail Params
+   *
+   * @access public
+   * @static
+   */
+  static function buildCustomProfile($gid, $name, $cid, &$template, &$params) {
+    //Ignore fields for mails
+    $fieldsToIgnore = array(
+      'amount_granted' => 1,
+      'application_received_date' => 1,
+      'decision_date' => 1,
+      'grant_money_transfer_date' => 1,
+      'grant_due_date' => 1,
+      'grant_report_received' => 1,
+      'grant_type_id' => 1,
+      'currency' => 1,
+      'rationale' => 1,
+      'status_id' => 1
+    );
+    
+    if ($gid) {
+      if (CRM_Core_BAO_UFGroup::filterUFGroups($gid, $cid)) {
+        $values = array();
+        $groupTitle = NULL;
+        $fields = CRM_Core_BAO_UFGroup::getFields($gid, FALSE, CRM_Core_Action::VIEW, NULL, NULL, FALSE, NULL, FALSE, NULL, CRM_Core_Permission::CREATE, NULL);
+        $fields = array_diff_key($fields, $fieldsToIgnore);
+        foreach ($fields as $k => $v) {
+          if (!$groupTitle) {
+            $groupTitle = $v["groupTitle"];
+          }
+          // suppress all file fields from display and formatting fields
+          if (
+            CRM_Utils_Array::value('data_type', $v, '') == 'File' ||
+            CRM_Utils_Array::value('name', $v, '') == 'image_URL' ||
+            CRM_Utils_Array::value('field_type', $v) == 'Formatting'
+          ) {
+            unset($fields[$k]);
+          }
+
+          if (!empty($fieldTypes) && (!in_array($v['field_type'], $fieldTypes))) {
+            unset($fields[$k]);
+          }
+        }
+
+        if ($groupTitle) {
+          $template->assign($name . "_grouptitle", $groupTitle);
+        }
+
+        CRM_Core_BAO_UFGroup::getValues($cid, $fields, $values, FALSE, $params);
+
+        if (count($values)) {
+          $template->assign($name, $values);
+        }
+      }
+    }
   }
 }
 
