@@ -60,8 +60,15 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
    * @access protected
    */
   protected $_first = FALSE;
-
-
+  
+  /**
+   * is this the last page?
+   *
+   * @var boolean
+   * @access protected
+   */
+  protected $_isLast = FALSE;
+  
   protected $_values;
 
   /**
@@ -139,55 +146,44 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
 
 
     if ($this->_single) {
-      $this->addButtons(array(
-          array(
-            'type' => 'next',
-            'name' => ts('Save'),
-            'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
-            'isDefault' => TRUE,
-          ),
-          array(
-            'type' => 'upload',
-            'name' => ts('Save and Done'),
-            'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
-            'subName' => 'done',
-          ),
-          array(
-            'type' => 'submit',
-            'name' => ts('Save and Next'),
-            'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
-            'subName' => 'savenext',
-          ),
-          array(
-            'type' => 'cancel',
-            'name' => ts('Cancel'),
-          ),
-        )
+      $buttons = array( 
+        array(
+          'type' => 'next',
+          'name' => ts('Save'),
+          'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+          'isDefault' => TRUE,
+        ),
+        array(
+          'type' => 'upload',
+          'name' => ts('Save and Done'),
+          'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+          'subName' => 'done',
+        ),
       );
+      if (!$this->_isLast) {
+        $buttons[] = array(
+          'type' => 'submit',
+          'name' => ts('Save and Next'),
+          'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+          'subName' => 'savenext',
+        );
+      }
     }
     else {
       $buttons = array();
-      if (!$this->_first) {
-        $buttons[] = array(
-          'type' => 'back',
-          'name' => ts('<< Previous'),
-          'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
-        );
-      }
       $buttons[] = array(
         'type' => 'next',
         'name' => ts('Continue >>'),
         'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
         'isDefault' => TRUE,
       );
-      $buttons[] = array(
-        'type' => 'cancel',
-        'name' => ts('Cancel'),
-      );
-
-      $this->addButtons($buttons);
     }
 
+    $buttons[] = array(
+      'type' => 'cancel',
+      'name' => ts('Cancel'),
+    );
+    $this->addButtons($buttons);
     $session->replaceUserContext($this->_cancelURL);
     // views are implemented as frozen form
     if ($this->_action & CRM_Core_Action::VIEW) {
