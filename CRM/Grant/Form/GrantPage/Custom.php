@@ -45,6 +45,9 @@ class CRM_Grant_Form_GrantPage_Custom extends CRM_Grant_Form_GrantPage {
    * @access public
    */
   public function buildQuickForm() {
+   
+    //GEP-11
+    $this->_isLast = TRUE;
     $types = array_merge(array('Contact', 'Individual', 'Grant'),
       CRM_Contact_BAO_ContactType::subTypes('Individual')
     );
