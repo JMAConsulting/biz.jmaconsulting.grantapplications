@@ -169,17 +169,6 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
         // form is inactive, die a fatal death
         CRM_Core_Error::fatal(ts('The page you requested is currently unavailable.'));
       }
-
-      /* // also check for billing informatin */
-      /* // get the billing location type */
-      /* $locationTypes = CRM_Core_PseudoConstant::get('CRM_Core_DAO_Address', 'location_type_id'); */
-      /* // CRM-8108 remove ts around Billing location type */
-      /* //$this->_bltID = array_search( ts('Billing'),  $locationTypes ); */
-      /* $this->_bltID = array_search('Billing', $locationTypes); */
-      /* if (!$this->_bltID) { */
-      /*   CRM_Core_Error::fatal(ts('Please set a location type of %1', array(1 => 'Billing'))); */
-      /* } */
-      /* $this->set('bltID', $this->_bltID); */
       
       if ($this->_values['custom_pre_id']) {
         $preProfileType = CRM_Core_BAO_UFField::getProfileType($this->_values['custom_pre_id']);

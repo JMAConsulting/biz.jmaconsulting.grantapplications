@@ -23,6 +23,15 @@
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
 *}
+{if $action eq 8}
+    <div class="messages status no-popup">
+      <div class="icon inform-icon"></div>
+          {ts}WARNING: Are you sure you want to Delete the selected Grant Application Page? A Delete operation cannot be undone. Do you want to continue?{/ts}
+      </div>
+<div class="form-item">
+    {include file="CRM/common/formButtons.tpl"}
+</div>
+{else}
 <div class="crm-block crm-form-block crm-grant-grantpage-settings-form-block">
 <div id="help">
     {if $action eq 0}
@@ -86,4 +95,4 @@
 
 {* include jscript to warn if unsaved form field changes *}
 {include file="CRM/common/formNavigate.tpl"}
-
+{/if}
