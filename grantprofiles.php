@@ -177,15 +177,10 @@ function grantprofiles_civicrm_buildForm($formName, &$form) {
 
 function grantprofiles_civicrm_pageRun( &$page ) {
   if( $page->getVar('_name') == 'CRM_Grant_Page_DashBoard') {
-    if (CRM_Utils_Request::retrieve('action', 'String') & CRM_Core_Action::DELETE) {
-      return;
-    }
-    else {
-       browse();
-      CRM_Core_Region::instance('page-body')->add(array(
-        'template' => 'CRM/Grant/Page/GrantApplicationDashboard.tpl',
-      ));
-    }
+    browse();
+    CRM_Core_Region::instance('page-body')->add(array(
+      'template' => 'CRM/Grant/Page/GrantApplicationDashboard.tpl',
+    ));
   }
 }
 
