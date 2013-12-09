@@ -109,24 +109,6 @@ function grantprofiles_civicrm_validate($formName, &$fields, &$files, &$form) {
 }
 
 function grantprofiles_civicrm_buildForm($formName, &$form) { 
-  /* if ($formName == "CRM_Grant_Form_Search" && ($form->getVar('_action') & CRM_Core_Action::DELETE)) { */
-  /*   $form->setVar('_title', CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantApplicationPage', $this->_id, 'title'); */
-  /*   $form->assign('title', $form->_title); */
-
-  /*   $buttons = array(); */
-  /*     $buttons[] = array( */
-  /*       'type' => 'next', */
-  /*       'name' => ts('Delete Grant Application Page'), */
-  /*       'isDefault' => TRUE, */
-  /*     ); */
-
-  /*   $buttons[] = array( */
-  /*     'type' => 'cancel', */
-  /*     'name' => ts('Cancel'), */
-  /*   ); */
-
-  /*   $this->addButtons($buttons); */
-  // }
   if ($formName == "CRM_Grant_Form_GrantPage_Settings" || 
     $formName == "CRM_Grant_Form_GrantPage_Custom" || 
     $formName == "CRM_Grant_Form_GrantPage_ThankYou") {
