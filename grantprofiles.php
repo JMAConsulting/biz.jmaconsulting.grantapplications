@@ -108,8 +108,8 @@ function grantprofiles_civicrm_validate($formName, &$fields, &$files, &$form) {
   return $errors;
 }
 
-function grantprofiles_civicrm_buildForm($formName, &$form) { 
-  
+function grantprofiles_civicrm_buildForm($formName, &$form) {
+ 
   if ($formName == "CRM_Grant_Form_GrantPage_Settings" || 
     $formName == "CRM_Grant_Form_GrantPage_Custom" || 
     $formName == "CRM_Grant_Form_GrantPage_ThankYou") {
@@ -179,8 +179,8 @@ function grantprofiles_civicrm_pageRun( &$page ) {
   if( $page->getVar('_name') == 'CRM_Grant_Page_DashBoard') {
     browse();
     CRM_Core_Region::instance('page-body')->add(array(
-        'template' => 'CRM/Grant/Page/GrantApplicationDashboard.tpl',
-      ));
+      'template' => 'CRM/Grant/Page/GrantApplicationDashboard.tpl',
+    ));
   }
 }
 
@@ -395,9 +395,9 @@ function &actionLinks() {
         ),
         CRM_Core_Action::DELETE => array(
           'name' => ts('Delete'),
-          'url' => CRM_Utils_System::currentPath(),
-          'qs' => 'action=delete&reset=1&id=%%id%%',
-          'title' => ts('Delete Custom Field'),
+          'url' => 'civicrm/admin/grant/settings',
+          'qs' => 'reset=1&action=delete&id=%%id%%',
+          'title' => ts('Delete'),
           'extra' => 'onclick = "return confirm(\'' . $deleteExtra . '\');"',
         ),
       );

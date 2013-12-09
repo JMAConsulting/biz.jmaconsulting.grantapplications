@@ -68,6 +68,29 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
     return CRM_Core_DAO::setFieldValue('CRM_Grant_DAO_GrantApplicationPage', $id, 'is_active', $is_active);
   }
 
+  function deleteGrantApplicationPage($id, $title) {
+    $transaction = new CRM_Core_Transaction();
+    
+    // first delete the join entries associated with this grant application page
+    $dao = new CRM_Core_DAO_UFJoin();
+    
+    $params = array(
+      'entity_table' => 'civicrm_grant_app_page',
+      'entity_id' => $id,
+    );
+    $dao->copyValues($params);
+    $dao->delete();
+           
+    // finally delete the grant application page
+    $dao = new CRM_Grant_DAO_GrantApplicationPage();
+    $dao->id = $id;
+    $dao->delete();
+
+    $transaction->commit();
+
+    CRM_Core_Session::setStatus(ts('The Grant Application page \'%1\' has been deleted.', array(1 => $title)));
+  }
+
   static function setValues($id, &$values) {
     $params = array(
       'id' => $id,

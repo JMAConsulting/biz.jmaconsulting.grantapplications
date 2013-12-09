@@ -60,9 +60,13 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
         $this->_id,
         'title'
       );
-      CRM_Utils_System::setTitle(ts('Title and Settings (%1)',
-        array(1 => $title)
-      ));
+      if ($this->_action & CRM_Core_Action::UPDATE) {
+        $titleView = 'Title and Settings (%1)';
+      }
+      if ($this->_action & CRM_Core_Action::DELETE) {
+        $titleView = 'Delete Grant Application Page \'%1\'?';
+      }
+      CRM_Utils_System::setTitle(ts($titleView, array(1 => $title)));
     }
     else {
       CRM_Utils_System::setTitle(ts('Title and Settings'));
@@ -78,7 +82,25 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
    * @access public
    */
   public function buildQuickForm() {
+    // Set up the delete form
+    if ($this->_action & CRM_Core_Action::DELETE) {
+      $this->_title = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantApplicationPage', $this->_id, 'title');
 
+      $buttons = array();
+      $buttons[] = array(
+        'type' => 'next',
+        'name' => ts('Delete Grant Application Page'),
+        'isDefault' => TRUE,
+      );
+
+      $buttons[] = array(
+        'type' => 'cancel',
+        'name' => ts('Cancel'),
+      );
+
+      $this->addButtons($buttons);
+      return;
+    }
     $this->_first = TRUE;
     $attributes = CRM_Core_DAO::getAttribute('CRM_Grant_DAO_GrantApplicationPage');
 
@@ -141,6 +163,13 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
    * @access public
    */
   public function postProcess() {
+    if ($this->_action & CRM_Core_Action::DELETE) {
+      CRM_Grant_BAO_GrantApplicationPage::deleteGrantApplicationPage($this->_id, $this->_title);
+      $url = 'civicrm/grant';
+      $urlParams = 'reset=1';
+      CRM_Utils_System::redirect(CRM_Utils_System::url($url, $urlParams));
+      return;
+    }
     // get the submitted form values.
     $params = $this->controller->exportValues($this->_name);
     
