@@ -108,7 +108,8 @@ function grantprofiles_civicrm_validate($formName, &$fields, &$files, &$form) {
   return $errors;
 }
 
-function grantprofiles_civicrm_buildForm($formName, &$form) { 
+function grantprofiles_civicrm_buildForm($formName, &$form) {
+ 
   if ($formName == "CRM_Grant_Form_GrantPage_Settings" || 
     $formName == "CRM_Grant_Form_GrantPage_Custom" || 
     $formName == "CRM_Grant_Form_GrantPage_ThankYou") {
@@ -176,14 +177,7 @@ function grantprofiles_civicrm_buildForm($formName, &$form) {
 
 function grantprofiles_civicrm_pageRun( &$page ) {
   if( $page->getVar('_name') == 'CRM_Grant_Page_DashBoard') {
-
     if (CRM_Utils_Request::retrieve('action', 'String') & CRM_Core_Action::DELETE) {
-
-      $session = CRM_Core_Session::singleton();
-      $session->pushUserContext(CRM_Utils_System::url(CRM_Utils_System::currentPath(),
-                                                      'reset=1&action=browse'
-                                                      ));
-      $page->_id = CRM_Utils_Request::retrieve('id', 'Positive', $page, FALSE, 0); 
       return;
     }
     else {
