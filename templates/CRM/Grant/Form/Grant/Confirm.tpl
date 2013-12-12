@@ -1,8 +1,8 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.2                                                |
+ | CiviCRM version 4.4                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2012                                |
+ | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -50,17 +50,27 @@
            {include file="CRM/UF/Form/Block.tpl" fields=$customPre}
        </fieldset>
     {/if}
-        {if $email}
-            <div class="crm-group grantee_email-group">
-                <div class="header-dark">
-                    {ts}Your Email{/ts}
-                </div>
-                <div class="crm-section no-label grantee_email-section">
-                	<div class="content">{$email}</div>
-                	<div class="clear"></div>
-                </div>
+    {if $onbehalfProfile}
+      <div class="crm-group onBehalf_display-group label-left crm-profile-view">
+         {include file="CRM/UF/Form/Block.tpl" fields=$onbehalfProfile}
+         <div class="crm-section organization_email-section">
+            <div class="label">{ts}Organization Email{/ts}</div>
+            <div class="content">{$onBehalfEmail}</div>
+            <div class="clear"></div>
+         </div>
+      </div>
+    {/if}
+    {if $email}
+        <div class="crm-group grantee_email-group">
+            <div class="header-dark">
+                {ts}Your Email{/ts}
             </div>
-        {/if}
+            <div class="crm-section no-label grantee_email-section">
+             	<div class="content">{$email}</div>
+            	<div class="clear"></div>
+            </div>
+        </div>
+    {/if}
    	{if $customPost}
             <fieldset class="label-left">
                 {include file="CRM/UF/Form/Block.tpl" fields=$customPost}

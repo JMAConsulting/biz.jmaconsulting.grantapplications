@@ -1,34 +1,34 @@
 <?php
 /*
- +--------------------------------------------------------------------+
- | CiviCRM version 4.2                                                |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2012                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
- |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
- +--------------------------------------------------------------------+
+  +--------------------------------------------------------------------+
+  | CiviCRM version 4.4                                                |
+  +--------------------------------------------------------------------+
+  | Copyright CiviCRM LLC (c) 2004-2013                                |
+  +--------------------------------------------------------------------+
+  | This file is a part of CiviCRM.                                    |
+  |                                                                    |
+  | CiviCRM is free software; you can copy, modify, and distribute it  |
+  | under the terms of the GNU Affero General Public License           |
+  | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
+  |                                                                    |
+  | CiviCRM is distributed in the hope that it will be useful, but     |
+  | WITHOUT ANY WARRANTY; without even the implied warranty of         |
+  | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
+  | See the GNU Affero General Public License for more details.        |
+  |                                                                    |
+  | You should have received a copy of the GNU Affero General Public   |
+  | License and the CiviCRM Licensing Exception along                  |
+  | with this program; if not, contact CiviCRM LLC                     |
+  | at info[AT]civicrm[DOT]org. If you have questions about the        |
+  | GNU Affero General Public License or the licensing of CiviCRM,     |
+  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+  +--------------------------------------------------------------------+
 */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2012
+ * @copyright CiviCRM LLC (c) 2004-2013
  * $Id$
  *
  */
@@ -39,6 +39,9 @@
  */
 class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
 
+  public $_relatedOrganizationFound;
+  public $_onBehalfRequired = FALSE;
+  public $_onbehalf = FALSE;
   protected $_defaults;
 
   /**
@@ -56,17 +59,9 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     $this->assign('isConfirmEnabled', 1) ;
 
     // make sure we have right permission to edit this user
-    $csContactID = CRM_Utils_Request::retrieve('cid', 'Positive', $this, FALSE, $this->_userID);
+    $csContactID = $this->getContactID();
     $reset       = CRM_Utils_Request::retrieve('reset', 'Boolean', CRM_Core_DAO::$_nullObject);
     $mainDisplay = CRM_Utils_Request::retrieve('_qf_Main_display', 'Boolean', CRM_Core_DAO::$_nullObject);
-   
-    if ($csContactID != $this->_userID) {
-      if (CRM_Contact_BAO_Contact_Permission::validateChecksumContact($csContactID, $this)) {
-        $session = CRM_Core_Session::singleton();
-        $session->set('userID', $csContactID);
-        $this->_userID = $csContactID;
-      }
-    }
 
     if ($reset) {
       $this->assign('reset', $reset);
@@ -76,7 +71,33 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       $this->assign('mainDisplay', $mainDisplay);
     }
 
-    if (CRM_Utils_Array::value('intro_text', $this->_values)) {
+    // Possible values for 'is_for_organization':
+    // * 0 - org profile disabled
+    // * 1 - org profile optional
+    // * 2 - org profile required
+    $this->_onbehalf = FALSE;
+    if (!empty($this->_values['is_for_organization'])) {
+      if ($this->_values['is_for_organization'] == 2) {
+        $this->_onBehalfRequired = TRUE;
+      }
+      // Add organization profile if 1 of the following are true:
+      // If the org profile is required
+      if ($this->_onBehalfRequired ||
+        // Or we are building the form for the first time
+        empty($_POST) ||
+        // Or the user has submitted the form and checked the "On Behalf" checkbox
+        !empty($_POST['is_for_organization'])
+      ) {
+        $this->_onbehalf = TRUE;
+        CRM_Grant_Form_Grant_OnBehalfOf::preProcess($this);
+      }
+    }
+    $this->assign('onBehalfRequired', $this->_onBehalfRequired);
+
+    if (!empty($this->_pcpInfo['id']) && !empty($this->_pcpInfo['intro_text'])) {
+      $this->assign('intro_text', $this->_pcpInfo['intro_text']);
+    }
+    elseif (!empty($this->_values['intro_text'])) {
       $this->assign('intro_text', $this->_values['intro_text']);
     }
 
@@ -87,20 +108,45 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     if (CRM_Utils_Array::value('footer_text', $this->_values)) {
       $this->assign('footer_text', $this->_values['footer_text']);
     }
+
+    //CRM-5001
+    if (CRM_Utils_Array::value('is_for_organization', $this->_values)) {
+      $msg = ts('Mixed profile not allowed for on behalf of registration/sign up.');
+      if ($preID = CRM_Utils_Array::value('custom_pre_id', $this->_values)) {
+        $preProfile = CRM_Core_BAO_UFGroup::profileGroups($preID);
+        foreach (array(
+            'Individual', 'Organization', 'Household') as $contactType) {
+          if (in_array($contactType, $preProfile) &&
+            (in_array('Membership', $preProfile) ||
+              in_array('Contribution', $preProfile)
+            )
+          ) {
+            CRM_Core_Error::fatal($msg);
+          }
+        }
+      }
+
+      if ($postID = CRM_Utils_Array::value('custom_post_id', $this->_values)) {
+        $postProfile = CRM_Core_BAO_UFGroup::profileGroups($postID);
+        foreach (array(
+            'Individual', 'Organization', 'Household') as $contactType) {
+          if (in_array($contactType, $postProfile) &&
+            (in_array('Membership', $postProfile) ||
+              in_array('Contribution', $postProfile)
+            )
+          ) {
+            CRM_Core_Error::fatal($msg);
+          }
+        }
+      }
+    }
   }
 
   function setDefaultValues() {
-    // process defaults only once
-    if (!empty($this->_defaults)) {
- 
-    }
- 
     // check if the user is registered and we have a contact ID
-     $session = CRM_Core_Session::singleton();
-   
-    $contactID = $this->_userID;
+    $contactID = $this->getContactID();
 
-    if ($contactID) {
+    if (!empty($contactID)) {
       $options = array();
       $fields = array();
       $removeCustomFieldTypes = array('Contribution', 'Membership', 'Activity', 'Participant', 'Grant');
@@ -181,7 +227,11 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
   public function buildQuickForm() {
    
     $config = CRM_Core_Config::singleton();
- 
+
+    if ($this->_onbehalf) {
+      CRM_Grant_Form_Grant_OnBehalfOf::buildQuickForm($this);
+    }
+
     $this->applyFilter('__ALL__', 'trim');
     $this->add('text', "email-{$this->_bltID}",
       ts('Email Address'), array(
@@ -206,6 +256,10 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     }
     if ( CRM_Utils_Array::value('amount_total', $this->_fields) ) {
       $this->addRule('amount_total', ts('Please enter a valid amount (numbers and decimal point only).'), 'money');
+    }
+
+    if ($this->_values['is_for_organization']) {
+      $this->buildOnBehalfOrganization();
     }
 
     if ( !empty( $this->_fields ) ) {
@@ -288,6 +342,24 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       }
     }
     return empty($errors) ? TRUE : $errors;
+  }
+
+  /**
+   * build elements to enable grant application on behalf of an organization.
+   *
+   * @access public
+   */
+  function buildOnBehalfOrganization() {
+  
+    if (!$this->_onBehalfRequired) {
+      $this->addElement('checkbox', 'is_for_organization',
+        $this->_values['for_organization'],
+        NULL, array('onclick' => "showOnBehalf( );")
+      );
+    }
+
+    $this->assign('is_for_organization', TRUE);
+    $this->assign('urlPath', 'civicrm/grant/transact');
   }
 
   /**
