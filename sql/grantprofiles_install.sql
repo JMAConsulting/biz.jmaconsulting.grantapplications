@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `civicrm_grant_app_page` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Grant Application Page Id.',
   `title` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Grant Application Page title. For top of page display.',
   `intro_text` text COLLATE utf8_unicode_ci COMMENT 'Text and html allowed. Displayed below title.',
-  `footer_text` text COLLATE utf8_unicode_ci COMMENT 'Text and html allowed. Displayed at the bottom of the first page of the contribution wizard.',
+  `footer_text` text COLLATE utf8_unicode_ci COMMENT 'Text and html allowed. Displayed at the bottom of the first page of the grant application wizard.',
   `grant_type_id` int(10) unsigned NOT NULL COMMENT 'Grant type assigned to applications submitted via this page.',
   `default_amount` decimal(20,2) DEFAULT NULL COMMENT 'Default amount of grant applied for.',
   `thankyou_title` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Title for Thank-you page (header title tag, and display at the top of the page).',
@@ -47,17 +47,32 @@ CREATE TABLE IF NOT EXISTS `civicrm_grant_app_page` (
   `is_active` tinyint(4) DEFAULT NULL COMMENT 'Is this grant application page active?',
   `start_date` datetime DEFAULT NULL COMMENT 'Date and time that this page starts.',
   `end_date` datetime DEFAULT NULL COMMENT 'Date and time that this page ends. May be NULL if no defined end date/time',
-  `created_id` int(10) unsigned DEFAULT NULL COMMENT 'FK to civicrm_contact, who created this contribution page',
-  `created_date` datetime DEFAULT NULL COMMENT 'Date and time that grant application page was created.',
+  `created_id` int(10) unsigned DEFAULT NULL COMMENT 'FK to civicrm_contact, who created this grant application page',
+  `created_date` datetime DEFAULT NULL COMMENT 'Date and time that grant application page was created.', 
+  `is_for_organization` tinyint(4) DEFAULT '0' COMMENT 'if true, signup is done on behalf of an organization',
+  `for_organization` text COLLATE utf8_unicode_ci COMMENT 'This text field is shown when is_for_organization is checked. For example - I am submitting grant application on behalf of an organization.',
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_grant_app_page_created_id` (`created_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+ALTER TABLE `civicrm_grant_app_page`
+  ADD CONSTRAINT `FK_civicrm_grant_app_page_created_id` FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL;
 --
 -- Dumping data for table `civicrm_navigation`
 
-SELECT @parentId := id FROM civicrm_navigation WHERE name = 'Grants';
+SELECT @parentId := id FROM `civicrm_navigation` WHERE `name` = 'Grants';
 
 INSERT INTO `civicrm_navigation` (`domain_id`, `label`, `name`, `url`, `permission`, `permission_operator`, `parent_id`, `is_active`, `has_separator`, `weight`) VALUES
 (1, 'New Grant Application Page', 'New Grant Application Page', 'civicrm/admin/grant/apply&reset=1&action=add', 'access CiviGrant', 'AND', @parentId, 1, 1, 4);
+
+SELECT @optionGroupId := id FROM `civicrm_option_group` WHERE `name` = 'activity_type';
+
+SELECT @maxValue := MAX( CAST( `value` AS UNSIGNED ) ) + 1 FROM  `civicrm_option_value` WHERE `option_group_id` = @optionGroupId;
+
+SELECT @maxWeight := MAX( CAST( `weight` AS UNSIGNED ) ) + 1 FROM  `civicrm_option_value` WHERE `option_group_id` = @optionGroupId;
+
+SELECT @activityTypeId := id FROM `civicrm_option_value` WHERE `name` = 'Grant';
+
+INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) VALUES
+(@activityTypeId, @optionGroupId, 'Grant', @maxValue, 'Grant', NULL, 1, NULL, @maxWeight, 'Online Grant Application', 0, 1, 1, 5, NULL, NULL);
 

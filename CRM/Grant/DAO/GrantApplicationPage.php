@@ -356,6 +356,17 @@ class CRM_Grant_DAO_GrantApplicationPage extends CRM_Core_DAO
                     'type' => CRM_Utils_Type::T_DATE + CRM_Utils_Type::T_TIME,
                     'title' => ts('Contribution Page Created Date') ,
                 ) ,
+                'is_for_organization' => array(
+                  'name' => 'is_for_organization',
+                  'type' => CRM_Utils_Type::T_BOOLEAN,
+                ) ,
+                'for_organization' => array(
+                  'name' => 'for_organization',
+                  'type' => CRM_Utils_Type::T_TEXT,
+                  'title' => ts('On Behalf Of Organization') ,
+                  'rows' => 2,
+                  'cols' => 50,
+                ) ,
             );
         }
         return self::$_fields;
