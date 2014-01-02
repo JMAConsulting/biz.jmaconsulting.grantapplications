@@ -82,19 +82,6 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
     else {
       CRM_Utils_System::setTitle(ts('Title and Settings'));
     }
-
-    if (!isset($defaults['for_organization'])) {
-      $defaults['for_organization'] = ts('I am applying for a grant on behalf of an organization.');
-    } 
-    
-    if (CRM_Utils_Array::value('is_for_organization', $defaults)) {
-      $defaults['is_organization'] = 1;
-    }
-    else {
-      $defaults['is_for_organization'] = 1;
-    }
-
-
     return $defaults;
   }
 
@@ -257,6 +244,7 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
     $params['is_active'] = CRM_Utils_Array::value('is_active', $params, FALSE);
     $params['default_amount'] = CRM_Utils_Rule::cleanMoney($params['default_amount']);
 
+    $params['is_for_organization'] = CRM_Utils_Array::value('is_organization', $params) ? CRM_Utils_Array::value('is_for_organization', $params, FALSE) : 0;
     $params['start_date'] = CRM_Utils_Date::processDate($params['start_date'], $params['start_date_time'], TRUE);
     $params['end_date'] = CRM_Utils_Date::processDate($params['end_date'], $params['end_date_time'], TRUE);
 
