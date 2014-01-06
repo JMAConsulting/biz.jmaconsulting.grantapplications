@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
- * Support: https://github.com/JMAConsulting/biz.jmaconsulting.grantprofiles/issues
+ * Support: https://github.com/JMAConsulting/biz.jmaconsulting.grantapplications/issues
  * 
  * Contact: info@jmaconsulting.biz
  *          JMA Consulting
@@ -25,19 +25,14 @@
  *          Canada   M5T 2C7
  */
 
-DROP TABLE IF EXISTS civicrm_grant_app_page;
+UPDATE civicrm_uf_group SET is_active = 1 WHERE group_type LIKE '%Grant%';
 
-DELETE FROM civicrm_navigation WHERE name = 'New Grant Application Page';
-
-DELETE  civicrm_option_value.*, civicrm_option_group.*, civicrm_msg_template.* 
-FROM civicrm_option_value 
+UPDATE civicrm_option_value 
 INNER JOIN civicrm_option_group ON  civicrm_option_value.option_group_id = civicrm_option_group.id
 INNER JOIN civicrm_msg_template ON civicrm_msg_template.workflow_id = civicrm_option_value.id
+SET civicrm_option_value.is_active = 1,
+  civicrm_option_group.is_active = 1,
+  civicrm_msg_template.is_active = 1
 WHERE civicrm_option_group.name LIKE 'msg_tpl_workflow_grant';
 
-DELETE uj.*, uf.* FROM civicrm_uf_group g
-LEFT JOIN civicrm_uf_join uj ON uj.uf_group_id = g.id
-LEFT JOIN civicrm_uf_field uf ON uf.uf_group_id = g.id
-WHERE g.group_type LIKE '%Grant%';
-
-DELETE FROM civicrm_uf_group WHERE group_type LIKE '%Grant%';
+UPDATE civicrm_navigation SET is_active = 1 WHERE name = 'New Grant Application Page';

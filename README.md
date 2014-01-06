@@ -1,2 +1,2 @@
-biz.jmaconsulting.grantprofiles
+biz.jmaconsulting.grantapplications
 ===============================
