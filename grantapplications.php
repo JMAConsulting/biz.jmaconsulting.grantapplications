@@ -1,12 +1,12 @@
 <?php
 
-require_once 'grantprofiles.civix.php';
+require_once 'grantapplications.civix.php';
 
 /**
  * Implementation of hook_civicrm_config
  */
-function grantprofiles_civicrm_config(&$config) {
-  _grantprofiles_civix_civicrm_config($config);
+function grantapplications_civicrm_config(&$config) {
+  _grantapplications_civix_civicrm_config($config);
 }
 
 /**
@@ -14,50 +14,50 @@ function grantprofiles_civicrm_config(&$config) {
  *
  * @param $files array(string)
  */
-function grantprofiles_civicrm_xmlMenu(&$files) {
-  _grantprofiles_civix_civicrm_xmlMenu($files);
+function grantapplications_civicrm_xmlMenu(&$files) {
+  _grantapplications_civix_civicrm_xmlMenu($files);
 }
 
 /**
  * Implementation of hook_civicrm_install
  */
-function grantprofiles_civicrm_install() {
-  _grantprofiles_civix_civicrm_install();
+function grantapplications_civicrm_install() {
+  _grantapplications_civix_civicrm_install();
 
   $smarty = CRM_Core_Smarty::singleton();
   $config = CRM_Core_Config::singleton();
-  $data = $smarty->fetch($config->extensionsDir . 'biz.jmaconsulting.grantprofiles/sql/civicrm_msg_template.tpl');
+  $data = $smarty->fetch($config->extensionsDir . 'biz.jmaconsulting.grantapplications/sql/civicrm_msg_template.tpl');
   file_put_contents($config->uploadDir . "civicrm_data.sql", $data);
   CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->uploadDir . "civicrm_data.sql");
-  grantprofiles_addRemoveMenu(TRUE);
+  grantapplications_addRemoveMenu(TRUE);
   return TRUE;
 }
 
 /**
  * Implementation of hook_civicrm_uninstall
  */
-function grantprofiles_civicrm_uninstall() {
-  return _grantprofiles_civix_civicrm_uninstall();
+function grantapplications_civicrm_uninstall() {
+  return _grantapplications_civix_civicrm_uninstall();
 }
 
 /**
  * Implementation of hook_civicrm_enable
  */
-function grantprofiles_civicrm_enable() {
+function grantapplications_civicrm_enable() {
   $config = CRM_Core_Config::singleton();
-  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->extensionsDir.'biz.jmaconsulting.grantprofiles/sql/grantprofiles_enable.sql');
-  grantprofiles_addRemoveMenu(TRUE);
-  return _grantprofiles_civix_civicrm_enable();
+  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->extensionsDir.'biz.jmaconsulting.grantapplications/sql/grantapplications_enable.sql');
+  grantapplications_addRemoveMenu(TRUE);
+  return _grantapplications_civix_civicrm_enable();
 }
 
 /**
  * Implementation of hook_civicrm_disable
  */
-function grantprofiles_civicrm_disable() {
+function grantapplications_civicrm_disable() {
   $config = CRM_Core_Config::singleton();
-  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->extensionsDir.'biz.jmaconsulting.grantprofiles/sql/grantprofiles_disable.sql');
-  grantprofiles_addRemoveMenu(FALSE);
-  return _grantprofiles_civix_civicrm_disable();
+  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->extensionsDir.'biz.jmaconsulting.grantapplications/sql/grantapplications_disable.sql');
+  grantapplications_addRemoveMenu(FALSE);
+  return _grantapplications_civix_civicrm_disable();
 }
 
 /**
@@ -69,8 +69,8 @@ function grantprofiles_civicrm_disable() {
  * @return mixed  based on op. for 'check', returns array(boolean) (TRUE if upgrades are pending)
  *                for 'enqueue', returns void
  */
-function grantprofiles_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
-  return _grantprofiles_civix_civicrm_upgrade($op, $queue);
+function grantapplications_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
+  return _grantapplications_civix_civicrm_upgrade($op, $queue);
 }
 
 /**
@@ -79,11 +79,11 @@ function grantprofiles_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
  * Generate a list of entities to create/deactivate/delete when this module
  * is installed, disabled, uninstalled.
  */
-function grantprofiles_civicrm_managed(&$entities) {
-  return _grantprofiles_civix_civicrm_managed($entities);
+function grantapplications_civicrm_managed(&$entities) {
+  return _grantapplications_civix_civicrm_managed($entities);
 }
 
-function grantprofiles_civicrm_validate($formName, &$fields, &$files, &$form) {
+function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form) {
   $errors = array();
   if ($formName == "CRM_UF_Form_Field" && CRM_Core_Permission::access('CiviGrant') 
     && ($form->getVar('_action') != CRM_Core_Action::DELETE)) {
@@ -108,13 +108,13 @@ function grantprofiles_civicrm_validate($formName, &$fields, &$files, &$form) {
   return $errors;
 }
 
-function grantprofiles_civicrm_buildForm($formName, &$form) {
+function grantapplications_civicrm_buildForm($formName, &$form) {
  
   if ($formName == "CRM_Grant_Form_GrantPage_Settings" || 
     $formName == "CRM_Grant_Form_GrantPage_Custom" || 
     $formName == "CRM_Grant_Form_GrantPage_ThankYou") {
     CRM_Core_Region::instance('page-body')->add(array(
-       'template' => 'CRM/css/grantprofiles.tpl',
+       'template' => 'CRM/css/grantapplications.tpl',
     ));
   } 
   // Code to be done to avoid core editing
@@ -175,7 +175,7 @@ function grantprofiles_civicrm_buildForm($formName, &$form) {
   }
 }
 
-function grantprofiles_civicrm_pageRun( &$page ) {
+function grantapplications_civicrm_pageRun( &$page ) {
   if( $page->getVar('_name') == 'CRM_Grant_Page_DashBoard') {
     browse();
     CRM_Core_Region::instance('page-body')->add(array(
@@ -446,7 +446,7 @@ function formatConfigureLinks($sectionsInfo) {
   return $formattedConfLinks;
 }
 
-function grantprofiles_addRemoveMenu($enable) {
+function grantapplications_addRemoveMenu($enable) {
   $config = CRM_Core_Config::singleton();
 
   $params['enableComponents'] = $config->enableComponents;
