@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.2                                                |
+ | CiviCRM version 4.4                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2012                                |
+ | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -90,6 +90,23 @@ class CRM_Grant_Form_Grant_ThankYou extends CRM_Grant_Form_GrantBase {
 
     $this->buildCustom($this->_values['custom_pre_id'], 'customPre', TRUE);
     $this->buildCustom($this->_values['custom_post_id'], 'customPost', TRUE);
+    if (CRM_Utils_Array::value('hidden_onbehalf_profile', $params)) {
+      $ufJoinParams = array(
+        'module' => 'onBehalf',
+        'entity_table' => 'civicrm_grant_app_page',
+        'entity_id' => $this->_id,
+      );
+      $OnBehalfProfile = CRM_Core_BAO_UFJoin::getUFGroupIds($ufJoinParams);
+      $profileId = $OnBehalfProfile[0];
+
+      $fieldTypes     = array('Contact', 'Organization');
+      $contactSubType = CRM_Contact_BAO_ContactType::subTypes('Organization');
+      $fieldTypes     = array_merge($fieldTypes, $contactSubType);
+      $fieldTypes = array_merge($fieldTypes, array('Grant'));
+      
+
+      $this->buildCustom($profileId, 'onbehalfProfile', TRUE, TRUE, $fieldTypes);
+    }
     $this->assign('application_received_date',
       CRM_Utils_Date::mysqlToIso(CRM_Utils_Array::value('receive_date', $this->_params))
     );
@@ -99,13 +116,32 @@ class CRM_Grant_Form_Grant_ThankYou extends CRM_Grant_Form_GrantBase {
     $fields = array();
     $removeCustomFieldTypes = array('Grant');
     foreach ($this->_fields as $name => $dontCare) {
+      if ($name == 'onbehalf') {
+        foreach ($dontCare as $key => $value) {
+          $fields['onbehalf'][$key] = 1;
+        }
+      }
+      else {
         $fields[$name] = 1;
+      }
     }
     $fields['state_province'] = $fields['country'] = $fields['email'] = 1;
     $contact = $this->_params = $this->controller->exportValues('Main');
 
     foreach ($fields as $name => $dontCare) {
-      if (isset($contact[$name])) {
+      if ($name == 'onbehalf') {
+        foreach ($dontCare as $key => $value) {
+          //$defaults[$key] = $contact['onbehalf'][$key];
+          if (isset($contact['onbehalf'][$key])) {
+          $defaults[$key] = $contact['onbehalf'][$key];
+        }
+          if (isset($contact['onbehalf']["{$key}_id"])) {
+            $defaults["{$key}_id"] = $contact['onbehalf']["{$key}_id"];
+      }
+
+        }
+      }
+      elseif (isset($contact[$name])) {
         $defaults[$name] = $contact[$name];
         if (substr($name, 0, 7) == 'custom_') {
           $timeField = "{$name}_time";

@@ -23,6 +23,15 @@
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
 *}
+{if $action eq 8}
+    <div class="messages status no-popup">
+      <div class="icon inform-icon"></div>
+          {ts}WARNING: Are you sure you want to Delete the selected Grant Application Page? A Delete operation cannot be undone. Do you want to continue?{/ts}
+      </div>
+<div class="form-item">
+    {include file="CRM/common/formButtons.tpl"}
+</div>
+{else}
 <div class="crm-block crm-form-block crm-grant-grantpage-settings-form-block">
 <div id="help">
     {if $action eq 0}
@@ -41,9 +50,42 @@
             <span class="description">{ts}Select the grant type to be assigned to grant applications made using this page.{/ts}</span></td>
 	</tr>
 	
-        <td>&nbsp;</td>
-        </td>
-    </tr>
+        <tr class="crm-contribution-contributionpage-settings-form-block-is_organization"><td>&nbsp;</td><td>{$form.is_organization.html} {$form.is_organization.label} {help id="id-is_organization"}</td></tr>
+  	<tr id="for_org_option" class="crm-contribution-form-block-is_organization">
+          <td>&nbsp;</td>
+          <td>
+            <table class="form-layout-compressed">
+            <tr class="crm-contribution-for_organization_help">
+                <td class="description" colspan="2">
+                    {capture assign="profileURL"}{crmURL p='civicrm/admin/uf/group' q='reset=1'}{/capture}
+                    {if $invalidProfiles}
+                      {ts 1=$profileURL}You must <a href="%1">configure a valid organization profile</a> in order to allow individuals to contribute on behalf of an organization. Valid profiles include Contact and / or Organization fields, and may include Contribution and Membership fields.{/ts}
+                    {else}
+                      {ts 1=$profileURL}To change the organization data collected use the "On Behalf Of Organization" profile (<a href="%1">Administer > Customize Data and Screens > Profiles</a>).{/ts}
+                    {/if}
+                </td>
+            </tr>
+           {if !$invalidProfiles}
+              <tr class="crm-contribution-onbehalf_profile_id">
+                <td class="label">{$form.onbehalf_profile_id.label}</td>
+                <td>{$form.onbehalf_profile_id.html}</td>
+              </tr>
+           {/if}
+            <tr id="for_org_text" class="crm-contribution-contributionpage-settings-form-block-for_organization">
+                <td class="label">{$form.for_organization.label} {if $action == 2}{include file='CRM/Core/I18n/Dialog.tpl' table='civicrm_contribution_page' field='for_organization' id=$contributionPageID}{/if}</td>
+                <td>{$form.for_organization.html}<br />
+                    <span class="description">{ts}Text displayed next to the checkbox on the contribution form.{/ts}</span>
+                </td>
+            </tr>
+            <tr class="crm-contribution-contributionpage-settings-form-block-is_for_organization">
+                <td>&nbsp;</td>
+                <td>{$form.is_for_organization.html}<br />
+                    <span class="description">{ts}Check 'Required' to force ALL users to contribute/signup on behalf of an organization.{/ts}</span>
+                </td>
+            </tr>
+            </table>
+          </td>
+    	</tr>
 	<tr class="crm-grant-grantpage-settings-form-block-intro_text">
 	    <td class ="label">{$form.intro_text.label}<br /> {if $action == 2}{include file='CRM/Core/I18n/Dialog.tpl' table='civicrm_grant_app_page' field='intro_text' id=$grantApplicationPageID}{/if} {help id="id-intro_msg"}</td><td>{$form.intro_text.html}</td>
 	</tr>
@@ -87,3 +129,21 @@
 {* include jscript to warn if unsaved form field changes *}
 {include file="CRM/common/formNavigate.tpl"}
 
+{include file="CRM/common/showHideByFieldValue.tpl"
+    trigger_field_id    ="is_organization"
+    trigger_value       = 1
+    target_element_id   ="for_org_text"
+    target_element_type ="table-row"
+    field_type          ="radio"
+    invert              = 0
+}
+
+{include file="CRM/common/showHideByFieldValue.tpl"
+    trigger_field_id    ="is_organization"
+    trigger_value       = 1
+    target_element_id   ="for_org_option"
+    target_element_type ="table-row"
+    field_type          ="radio"
+    invert              = 0
+}
+{/if}

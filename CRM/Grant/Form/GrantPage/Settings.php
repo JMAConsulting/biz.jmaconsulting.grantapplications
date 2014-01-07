@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.2                                                |
+ | CiviCRM version 4.4                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2012                                |
+ | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -28,7 +28,7 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2012
+ * @copyright CiviCRM LLC (c) 2004-2013
  * $Id$
  *
  */
@@ -60,14 +60,28 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
         $this->_id,
         'title'
       );
-      CRM_Utils_System::setTitle(ts('Title and Settings (%1)',
-        array(1 => $title)
-      ));
+      if ($this->_action & CRM_Core_Action::UPDATE) {
+        $titleView = 'Title and Settings (%1)';
+      }
+
+      $ufJoinParams = array(
+        'module' => 'OnBehalf',
+        'entity_table' => 'civicrm_grant_app_page',
+        'entity_id' => $this->_id,
+      );
+      $onBehalfIDs = CRM_Core_BAO_UFJoin::getUFGroupIds($ufJoinParams);
+      if ($onBehalfIDs) {
+        // get the first one only
+        $defaults['onbehalf_profile_id'] = $onBehalfIDs[0];
+      }
+      if ($this->_action & CRM_Core_Action::DELETE) {
+        $titleView = 'Delete Grant Application Page \'%1\'?';
+      }
+      CRM_Utils_System::setTitle(ts($titleView, array(1 => $title)));
     }
     else {
       CRM_Utils_System::setTitle(ts('Title and Settings'));
     }
-
     return $defaults;
   }
 
@@ -78,7 +92,25 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
    * @access public
    */
   public function buildQuickForm() {
+    // Set up the delete form
+    if ($this->_action & CRM_Core_Action::DELETE) {
+      $this->_title = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantApplicationPage', $this->_id, 'title');
 
+      $buttons = array();
+      $buttons[] = array(
+        'type' => 'next',
+        'name' => ts('Delete Grant Application Page'),
+        'isDefault' => TRUE,
+      );
+
+      $buttons[] = array(
+        'type' => 'cancel',
+        'name' => ts('Cancel'),
+      );
+
+      $this->addButtons($buttons);
+      return;
+    }
     $this->_first = TRUE;
     $attributes = CRM_Core_DAO::getAttribute('CRM_Grant_DAO_GrantApplicationPage');
 
@@ -103,7 +135,48 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
 
     // is this page active ?
     $this->addElement('checkbox', 'is_active', ts('Is this Grant Aplication Page Active?'));
- 
+    
+    $this->addElement('checkbox', 'is_organization', ts('Allow individuals to apply for grants on behalf of an organization?'), NULL, array('onclick' => "showHideByValue('is_organization',true,'for_org_text','table-row','radio',false);showHideByValue('is_organization',true,'for_org_option','table-row','radio',false);"));
+
+    $required = array('Contact', 'Organization');
+    $optional = array('Grant');
+
+    $profiles = CRM_Core_BAO_UFGroup::getValidProfiles($required, $optional);
+    //Check profiles for Organization subtypes
+    $contactSubType = CRM_Contact_BAO_ContactType::subTypes('Organization');
+    foreach ($contactSubType as $type) {
+      $required = array('Contact', $type);
+      $subTypeProfiles = CRM_Core_BAO_UFGroup::getValidProfiles($required, $optional);
+      foreach ($subTypeProfiles as $profileId => $profileName) {
+        $profiles[$profileId] = $profileName;
+      }
+    }
+    
+    $requiredProfileFields = array('organization_name', 'email');
+
+    if (!empty($profiles)) {
+      foreach ($profiles as $id => $dontCare) {
+        $validProfile = CRM_Core_BAO_UFGroup::checkValidProfile($id, $requiredProfileFields);
+        if (!$validProfile) {
+          unset($profiles[$id]);
+        }
+      }
+    }
+
+    if (empty($profiles)) {
+      $invalidProfiles = TRUE;
+      $this->assign('invalidProfiles', $invalidProfiles);
+    }
+
+    $this->add('select', 'onbehalf_profile_id', ts('Organization Profile'),
+      array(
+        '' => ts('- select -')) + $profiles
+    );
+    $options   = array();
+    $options[] = $this->createElement('radio', NULL, NULL, ts('Optional'), 1);
+    $options[] = $this->createElement('radio', NULL, NULL, ts('Required'), 2);
+    $this->addGroup($options, 'is_for_organization', ts(''));
+    $this->add('textarea', 'for_organization', ts('On behalf of Label'), $attributes['for_organization']);
     // add optional start and end dates
     $this->addDateTime('start_date', ts('Start Date'));
     $this->addDateTime('end_date', ts('End Date'));
@@ -131,6 +204,11 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
       $errors['title'] = ts("Please do not use '/' in Title");
     }
 
+    if (CRM_Utils_Array::value('is_organization', $values) &&
+      !CRM_Utils_Array::value('onbehalf_profile_id', $values)
+    ) {
+      $errors['onbehalf_profile_id'] = ts('Please select a profile to collect organization information on this contribution page.');
+    }
     return $errors;
   }
 
@@ -141,6 +219,13 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
    * @access public
    */
   public function postProcess() {
+    if ($this->_action & CRM_Core_Action::DELETE) {
+      CRM_Grant_BAO_GrantApplicationPage::deleteGrantApplicationPage($this->_id, $this->_title);
+      $url = 'civicrm/grant';
+      $urlParams = 'reset=1';
+      CRM_Utils_System::redirect(CRM_Utils_System::url($url, $urlParams));
+      return;
+    }
     // get the submitted form values.
     $params = $this->controller->exportValues($this->_name);
     
@@ -159,10 +244,28 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
     $params['is_active'] = CRM_Utils_Array::value('is_active', $params, FALSE);
     $params['default_amount'] = CRM_Utils_Rule::cleanMoney($params['default_amount']);
 
+    $params['is_for_organization'] = CRM_Utils_Array::value('is_organization', $params) ? CRM_Utils_Array::value('is_for_organization', $params, FALSE) : 0;
     $params['start_date'] = CRM_Utils_Date::processDate($params['start_date'], $params['start_date_time'], TRUE);
     $params['end_date'] = CRM_Utils_Date::processDate($params['end_date'], $params['end_date_time'], TRUE);
 
     $dao = CRM_Grant_BAO_GrantApplicationPage::create($params);
+
+    // make entry in UF join table for onbehalf of org profile
+    $ufJoinParams = array(
+      'is_active' => 1,
+      'module' => 'OnBehalf',
+      'entity_table' => 'civicrm_grant_app_page',
+      'entity_id' => $dao->id,
+    );
+
+    // first delete all past entries
+    CRM_Core_BAO_UFJoin::deleteAll($ufJoinParams);
+
+    if (CRM_Utils_Array::value('onbehalf_profile_id', $params)) {
+      $ufJoinParams['weight'] = 1;
+      $ufJoinParams['uf_group_id'] = $params['onbehalf_profile_id'];
+      CRM_Core_BAO_UFJoin::create($ufJoinParams);
+    }
  
     $this->set('id', $dao->id);
     if ($this->_action & CRM_Core_Action::ADD) {

@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.2                                                |
+ | CiviCRM version 4.4                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2012                                |
  +--------------------------------------------------------------------+
@@ -45,7 +45,6 @@ class CRM_Grant_Form_GrantPage_Custom extends CRM_Grant_Form_GrantPage {
    * @access public
    */
   public function buildQuickForm() {
-   
     //GEP-11
     $this->_isLast = TRUE;
     $types = array_merge(array('Contact', 'Individual', 'Grant'),
