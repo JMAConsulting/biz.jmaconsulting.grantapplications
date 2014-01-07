@@ -468,6 +468,8 @@ function grantapplications_addRemoveMenu($enable) {
       unset($params['enableComponentIDs'][$key]);
     }
   }
+  CRM_Core_BAO_Setting::setItem($params['enableComponents'],
+    CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,'enable_components');
   CRM_Core_BAO_ConfigSetting::create($params);
   return;
 }

@@ -68,6 +68,19 @@ class CRM_Grantapplications_Upgrader_Base {
   public function __construct($extensionName, $extensionDir) {
     $this->extensionName = $extensionName;
     $this->extensionDir = $extensionDir;
+    $domain = new CRM_Core_DAO_Domain();
+    $domain->find(TRUE);
+    $multilingual = (bool) $domain->locales;
+    $smarty = CRM_Core_Smarty::singleton();
+    $smarty->assign('multilingual', $multilingual);
+    $smarty->assign('locales', explode(CRM_Core_DAO::VALUE_SEPARATOR, $domain->locales));
+    
+    // we didn't call CRM_Core_BAO_ConfigSetting::retrieve(), so we need to set $dbLocale by hand
+    if ($multilingual) {
+      $config = CRM_Core_Config::singleton();
+      global $dbLocale;
+      $dbLocale = "_{$config->lcMessages}";
+    }
   }
 
   // ******** Task helpers ********
@@ -238,11 +251,18 @@ class CRM_Grantapplications_Upgrader_Base {
   // ******** Hook delegates ********
 
   public function onInstall() {
-    foreach (glob($this->extensionDir . '/sql/*_install.sql') as $file) {
-      CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $file);
+    $files = glob($this->extensionDir . '/sql/*_install.sql');
+    if (is_array($files)) {
+      $smarty = CRM_Core_Smarty::singleton();
+      foreach ($files as $file) {
+        CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $smarty->fetch($file), NULL, TRUE);
+      }
     }
-    foreach (glob($this->extensionDir . '/xml/*_install.xml') as $file) {
-      $this->executeCustomDataFileByAbsPath($file);
+    $files = glob($this->extensionDir . '/xml/*_install.xml');
+    if (is_array($files)) {
+      foreach ($files as $file) {
+        $this->executeCustomDataFileByAbsPath($file);
+      }
     }
     if (is_callable(array($this, 'install'))) {
       $this->install();
@@ -257,8 +277,11 @@ class CRM_Grantapplications_Upgrader_Base {
     if (is_callable(array($this, 'uninstall'))) {
       $this->uninstall();
     }
-    foreach (glob($this->extensionDir . '/sql/*_uninstall.sql') as $file) {
-      CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $file);
+    $files = glob($this->extensionDir . '/sql/*_uninstall.sql');
+    if (is_array($files)) {
+      foreach ($files as $file) {
+        CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $file);
+      }
     }
     $this->setCurrentRevision(NULL);
   }

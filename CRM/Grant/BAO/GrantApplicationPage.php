@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.3                                                |
+ | CiviCRM version 4.4                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
@@ -235,7 +235,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
       if ($preID = CRM_Utils_Array::value('custom_pre_id', $values)) {
         if (CRM_Utils_Array::value('related_contact', $values)) {
           $preProfileTypes = CRM_Core_BAO_UFGroup::profileGroups($preID);
-          if (in_array('Individual', $preProfileTypes) || in_array('Contact', $postProfileTypes)) {
+          if (in_array('Individual', $preProfileTypes) || in_array('Contact', $preProfileTypes)) {
             //Take Individual contact ID
             $userID = CRM_Utils_Array::value('related_contact', $values);
           }

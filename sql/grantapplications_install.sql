@@ -73,6 +73,6 @@ SELECT @maxWeight := MAX( CAST( `weight` AS UNSIGNED ) ) + 1 FROM  `civicrm_opti
 
 SELECT @activityTypeId := id FROM `civicrm_option_value` WHERE `name` = 'Grant';
 
-INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) VALUES
-(@activityTypeId, @optionGroupId, 'Grant', @maxValue, 'Grant', NULL, 1, NULL, @maxWeight, 'Online Grant Application', 0, 1, 1, 5, NULL, NULL);
+INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, {localize field='label'}`label`{/localize}, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, {localize field='description'}`description`{/localize}, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) VALUES
+(@activityTypeId, @optionGroupId, {localize}'{ts escape="sql"}Grant{/ts}'{/localize}, @maxValue, 'Grant', NULL, 1, NULL, @maxWeight, {localize}'Online Grant Application'{/localize}, 0, 1, 1, 5, NULL, NULL);
 
