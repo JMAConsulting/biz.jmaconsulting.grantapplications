@@ -1,11 +1,11 @@
 Grant Application Pages Extension
 =================================
 
-This extension to CiviCRM allows members of the public to apply for Grants. Administrators can create Grant Application Pages similar to Contribution Pages. Custom Profiles for Grants, including custom fields defined for grants, can be added to the Grant Application Pages in a manner similar to Contribution Pages.
+This extension to CiviCRM allows members of the public to apply for Grants. Administrators can create and administer Grant Application Pages in a manner similar to Contribution Pages. Custom Profiles for Grants and Contacts, including core and custom fields defined for grants and contacts, are added to Grant Application Pages.
 
 The 4.4 release of Grant Application Pages Extension (previously known as Grant Profiles Extension) adds support for:
-- An individual to apply for a Grant on behalf of an organization,
-- Short codes for WordPress.
+* An individual applying for a grant on behalf of an organization.
+* Short codes for WordPress.
 
 Installation
 ------------
