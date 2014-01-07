@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.2                                                |
+ | CiviCRM version 4.4                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2012                                |
+ | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -28,7 +28,7 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2012
+ * @copyright CiviCRM LLC (c) 2004-2013
  * $Id$
  *
  */
@@ -235,7 +235,15 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
       // set current date as start date
       list($defaults['start_date'], $defaults['start_date_time']) = CRM_Utils_Date::setDateDefaults();
     }
-
+    if (!isset($defaults['for_organization'])) {
+      $defaults['for_organization'] = ts('I am applying for a grant on behalf of an organization.');
+    }
+    if (CRM_Utils_Array::value('is_for_organization', $defaults)) {
+      $defaults['is_organization'] = 1;
+    }
+    else {
+      $defaults['is_for_organization'] = 1;
+    }
     return $defaults;
   }
 

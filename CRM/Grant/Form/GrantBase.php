@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.3                                                |
+ | CiviCRM version 4.4                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
@@ -169,17 +169,6 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
         // form is inactive, die a fatal death
         CRM_Core_Error::fatal(ts('The page you requested is currently unavailable.'));
       }
-
-      /* // also check for billing informatin */
-      /* // get the billing location type */
-      /* $locationTypes = CRM_Core_PseudoConstant::get('CRM_Core_DAO_Address', 'location_type_id'); */
-      /* // CRM-8108 remove ts around Billing location type */
-      /* //$this->_bltID = array_search( ts('Billing'),  $locationTypes ); */
-      /* $this->_bltID = array_search('Billing', $locationTypes); */
-      /* if (!$this->_bltID) { */
-      /*   CRM_Core_Error::fatal(ts('Please set a location type of %1', array(1 => 'Billing'))); */
-      /* } */
-      /* $this->set('bltID', $this->_bltID); */
       
       if ($this->_values['custom_pre_id']) {
         $preProfileType = CRM_Core_BAO_UFField::getProfileType($this->_values['custom_pre_id']);
@@ -256,6 +245,11 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
     }
 
     $this->assign('address', CRM_Utils_Address::format($addressFields));
+    if (CRM_Utils_Array::value('hidden_onbehalf_profile', $this->_params)) {
+      $this->assign('onBehalfName', $this->_params['organization_name']);
+      $locTypeId = array_keys($this->_params['onbehalf_location']['email']);
+      $this->assign('onBehalfEmail', $this->_params['onbehalf_location']['email'][$locTypeId[0]]['email']);
+    }
     $this->assign('email',
       $this->controller->exportValue('Main', "email-{$this->_bltID}")
     );
@@ -339,10 +333,34 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
             }
             $stateCountryMap[$index][$prefixName] = $key;
           }
-          CRM_Core_BAO_UFGroup::buildProfile($this, $field, CRM_Profile_Form::MODE_CREATE, $contactID, TRUE);
-          $this->_fields[$key] = $field;
-          
-          if ($field['add_captcha']) {
+
+          if ($onBehalf) {
+            if (!empty($fieldTypes) && in_array($field['field_type'], $fieldTypes)) {
+              CRM_Core_BAO_UFGroup::buildProfile(
+                $this,
+                $field,
+                CRM_Profile_Form::MODE_CREATE,
+                $contactID,
+                TRUE
+              );
+              $this->_fields['onbehalf'][$key] = $field;
+            }
+            else {
+              unset($fields[$key]);
+            }
+          }
+          else {
+            CRM_Core_BAO_UFGroup::buildProfile(
+              $this,
+              $field,
+              CRM_Profile_Form::MODE_CREATE,
+              $contactID,
+              TRUE
+            );
+            $this->_fields[$key] = $field;
+          }
+          // CRM-11316 Is ReCAPTCHA enabled for this profile AND is this an anonymous visitor
+          if ($field['add_captcha'] && !$this->_userID) {
             $addCaptcha = TRUE;
           }
         }
