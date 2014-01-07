@@ -41,3 +41,8 @@ LEFT JOIN civicrm_uf_field uf ON uf.uf_group_id = g.id
 WHERE g.group_type LIKE '%Grant%';
 
 DELETE FROM civicrm_uf_group WHERE group_type LIKE '%Grant%';
+
+DELETE ca.*, cv.* FROM `civicrm_activity` ca
+INNER JOIN civicrm_option_value cv ON cv.value = ca.activity_type_id
+INNER JOIN civicrm_option_group cg ON cg.id = cv.option_group_id
+WHERE cg.name = 'activity_type' AND cv.name = 'Grant';
