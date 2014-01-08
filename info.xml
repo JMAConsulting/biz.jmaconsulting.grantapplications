@@ -7,16 +7,16 @@
   <urls>
     <url desc="Support">https://github.com/JMAConsulting/biz.jmaconsulting.grantapplications/issues?state=open</url>
     <url desc="Main Extension Page">
-      https://github.com/JMAConsulting/biz.jmaconsulting.grantapplications/wiki/About-mte-%28Grant-Profiles%29
+      https://github.com/JMAConsulting/biz.jmaconsulting.grantapplications/wiki/About-grant-applications
     </url>
-    <url desc="Installation Instructions for 1.2">https://github.com/JMAConsulting/biz.jmaconsulting.grantapplications/blob/master/README.md</url>
+    <url desc="Installation Instructions for 1.1">https://github.com/JMAConsulting/biz.jmaconsulting.grantapplications/blob/master/README.md</url>
   </urls>
   <license>AGPL-3.0</license>
   <maintainer>
     <author>JMA Consulting</author>
     <email>joe.murray@jmaconsulting.biz</email>
   </maintainer>
-  <releaseDate>2013-09-28</releaseDate>
+  <releaseDate>2014-01-08</releaseDate>
   <version>1.1</version>
   <develStage>stable</develStage>
   <compatibility>
