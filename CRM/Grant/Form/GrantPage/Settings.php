@@ -269,7 +269,7 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
  
     $this->set('id', $dao->id);
     if ($this->_action & CRM_Core_Action::ADD) {
-      $url = 'civicrm/admin/grant/thankyou';
+      $url = 'civicrm/admin/grant/draft';
       $urlParams = "action=update&reset=1&id={$dao->id}";
       // special case for 'Save and Done' consistency.
       if ($this->controller->getButtonName('submit') == '_qf_Amount_upload_done') {

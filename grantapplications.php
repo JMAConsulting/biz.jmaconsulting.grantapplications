@@ -111,7 +111,8 @@ function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form
 function grantapplications_civicrm_buildForm($formName, &$form) {
  
   if ($formName == "CRM_Grant_Form_GrantPage_Settings" || 
-    $formName == "CRM_Grant_Form_GrantPage_Custom" || 
+    $formName == "CRM_Grant_Form_GrantPage_Custom" ||  
+    $formName == "CRM_Grant_Form_GrantPage_Draft" || 
     $formName == "CRM_Grant_Form_GrantPage_ThankYou") {
     CRM_Core_Region::instance('page-body')->add(array(
        'template' => 'CRM/css/grantapplications.tpl',

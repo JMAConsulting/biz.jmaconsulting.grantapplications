@@ -62,6 +62,13 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
    */
   public $_values;
   /**
+   * the values for the draft processing
+   *
+   * @var array
+   * @protected
+   */
+  public $_draftProcessing;
+  /**
    * the default values for the form
    *
    * @var array
@@ -226,7 +233,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
     $config = CRM_Core_Config::singleton();
  
     if (CRM_Utils_Array::value('default_amount_hidden', $this->_params)) {
-        $this->assign('default_amount_hidden', $this->_params['default_amount_hidden']);
+      $this->assign('default_amount_hidden', $this->_params['default_amount_hidden']);
     }
 
     // assign the address formatted up for display

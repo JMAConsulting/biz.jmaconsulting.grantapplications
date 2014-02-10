@@ -32,7 +32,11 @@
     {/if}
     
     <div id="help">
+    {if $isDraft}
+          <div>{ts}Your grant application has been saved as a draft. Please print this page for your records.{/ts}</div>
+    {else}
           <div>{ts}Your grant application has been sent for processing. Please print this page for your records.{/ts}</div>
+    {/if}
             {if $is_email_receipt}
                 <div>
         {if $onBehalfEmail AND ($onBehalfEmail neq $email)}
