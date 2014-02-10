@@ -47,11 +47,19 @@ class CRM_Grant_Form_Grant_ThankYou extends CRM_Grant_Form_GrantBase {
     parent::preProcess();
 
     $this->_params   = $this->get('params');
-    
-    $this->assign('thankyou_title', CRM_Utils_Array::value('thankyou_title', $this->_values));
-    $this->assign('thankyou_text', CRM_Utils_Array::value('thankyou_text', $this->_values));
-    $this->assign('thankyou_footer', CRM_Utils_Array::value('thankyou_footer', $this->_values));
-    CRM_Utils_System::setTitle(CRM_Utils_Array::value('thankyou_title', $this->_values));
+    if (CRM_Utils_Array::value('is_draft', $this->_params)) {
+      $this->assign('thankyou_title', CRM_Utils_Array::value('saved_title', $this->_values));
+      $this->assign('thankyou_text', CRM_Utils_Array::value('saved_text', $this->_values));
+      $this->assign('thankyou_footer', CRM_Utils_Array::value('saved_footer', $this->_values));
+      $this->assign('isDraft', 1);
+      CRM_Utils_System::setTitle(CRM_Utils_Array::value('saved_title', $this->_values));
+    }
+    else {
+      $this->assign('thankyou_title', CRM_Utils_Array::value('thankyou_title', $this->_values));
+      $this->assign('thankyou_text', CRM_Utils_Array::value('thankyou_text', $this->_values));
+      $this->assign('thankyou_footer', CRM_Utils_Array::value('thankyou_footer', $this->_values));
+      CRM_Utils_System::setTitle(CRM_Utils_Array::value('thankyou_title', $this->_values));
+    }
     // Make the grantPageID avilable to the template
     $this->assign('grantPageID', $this->_id);
   }

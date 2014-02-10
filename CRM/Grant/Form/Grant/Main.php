@@ -42,6 +42,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
   public $_relatedOrganizationFound;
   public $_onBehalfRequired = FALSE;
   public $_onbehalf = FALSE;
+  public $_isDraft = FALSE;
   protected $_defaults;
 
   /**
@@ -71,6 +72,11 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       $this->assign('mainDisplay', $mainDisplay);
     }
 
+    // Checking if is Saved without Submitting is enabled
+    if (!empty($this->_values['is_draft'])) {
+      $this->_isDraft = TRUE;
+    }
+
     // Possible values for 'is_for_organization':
     // * 0 - org profile disabled
     // * 1 - org profile optional
@@ -93,13 +99,6 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       }
     }
     $this->assign('onBehalfRequired', $this->_onBehalfRequired);
-
-    if (!empty($this->_pcpInfo['id']) && !empty($this->_pcpInfo['intro_text'])) {
-      $this->assign('intro_text', $this->_pcpInfo['intro_text']);
-    }
-    elseif (!empty($this->_values['intro_text'])) {
-      $this->assign('intro_text', $this->_values['intro_text']);
-    }
 
     $qParams = "reset=1&amp;id={$this->_id}";
     
@@ -254,6 +253,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
           '0.00', '', FALSE
         );
     }
+    $this->add('hidden', "is_draft", '0', '', FALSE);
     if ( CRM_Utils_Array::value('amount_total', $this->_fields) ) {
       $this->addRule('amount_total', ts('Please enter a valid amount (numbers and decimal point only).'), 'money');
     }
@@ -301,10 +301,20 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
         CRM_Core_BAO_CMSUser::buildForm($this, $profileID, TRUE);
       }
     }
+    $draft = array();
+    if ($this->_isDraft) {
+      $draft = array(
+        'type' => 'next',
+        'name' => ts('Save as Draft'),
+        'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+        'isDefault' => TRUE,
+      );
+    }
     $this->addButtons(array(
+      $draft,
       array(
         'type' => 'upload',
-        'name' => ts('Confirm Grant Application'),
+        'name' => ts('Submit'),
         'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
         'isDefault' => TRUE,
       ),
@@ -371,13 +381,21 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
    */
   public function postProcess() {
     $config = CRM_Core_Config::singleton();
-
+    $session = CRM_Core_Session::singleton();
     // we first reset the confirm page so it accepts new values
     $this->controller->resetPage('Confirm');
 
     // get the submitted form values.
     $params = $this->controller->exportValues($this->_name);
    
+    $buttonName = $this->controller->getButtonName();
+    if ($buttonName == $this->getButtonName('next')) {
+      $this->set('is_draft', 1);
+    }
+    else {
+      $this->set('is_draft', 0);
+    }
+    
     if (CRM_Utils_Array::value('default_amount_hidden', $params) > 0 && !CRM_Utils_Array::value('amount_total', $params)) {  
         $this->set('default_amount', $params['default_amount_hidden']);
     } elseif (CRM_Utils_Array::value('amount_requested', $params))  {

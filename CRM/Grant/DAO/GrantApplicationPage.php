@@ -272,6 +272,31 @@ class CRM_Grant_DAO_GrantApplicationPage extends CRM_Core_DAO
                     'type' => CRM_Utils_Type::T_MONEY,
                     'title' => ts('Default Amount') ,
                 ) ,
+                'is_draft' => array(
+                  'name' => 'is_draft',
+                  'type' => CRM_Utils_Type::T_BOOLEAN,
+                ) ,
+                'draft_title' => array(
+                    'name' => 'draft_title',
+                    'type' => CRM_Utils_Type::T_STRING,
+                    'title' => ts('Save as Draft Title') ,
+                    'maxlength' => 255,
+                    'size' => CRM_Utils_Type::HUGE,
+                ) ,
+                'draft_text' => array(
+                    'name' => 'draft_text',
+                    'type' => CRM_Utils_Type::T_TEXT,
+                    'title' => ts('Save as Draft Text') ,
+                    'rows' => 8,
+                    'cols' => 60,
+                ) ,
+                'draft_footer' => array(
+                    'name' => 'draft_footer',
+                    'type' => CRM_Utils_Type::T_TEXT,
+                    'title' => ts('Save as Draft Footer') ,
+                    'rows' => 8,
+                    'cols' => 60,
+                ) ,
                 'thankyou_title' => array(
                     'name' => 'thankyou_title',
                     'type' => CRM_Utils_Type::T_STRING,

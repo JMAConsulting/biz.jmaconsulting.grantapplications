@@ -57,6 +57,7 @@ class CRM_Grant_StateMachine_GrantPage extends CRM_Core_StateMachine {
 
     $this->_pages = array(
       'CRM_Grant_Form_GrantPage_Settings' => NULL,
+      'CRM_Grant_Form_GrantPage_Draft' => NULL,
       'CRM_Grant_Form_GrantPage_ThankYou' => NULL,
       'CRM_Grant_Form_GrantPage_Custom' => NULL,
     );

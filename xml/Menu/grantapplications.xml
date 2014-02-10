@@ -16,16 +16,22 @@
     <weight>400</weight>
   </item>
   <item>
+    <path>civicrm/admin/grant/draft</path>
+    <title>Save as Draft</title>
+    <page_callback>CRM_Grant_Form_GrantPage_Draft</page_callback>
+    <weight>410</weight>
+  </item>
+  <item>
     <path>civicrm/admin/grant/thankyou</path>
     <title>Thank-you and Receipting</title>
     <page_callback>CRM_Grant_Form_GrantPage_ThankYou</page_callback>
-    <weight>410</weight>
+    <weight>420</weight>
   </item>
   <item>
     <path>civicrm/admin/grant/custom</path>
     <title>Include Profiles</title>
     <page_callback>CRM_Grant_Form_GrantPage_Custom</page_callback>
-    <weight>420</weight>
+    <weight>430</weight>
   </item>
   <item>
     <path>civicrm/contact/print/grant</path>

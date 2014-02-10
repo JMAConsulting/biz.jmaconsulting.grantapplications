@@ -58,11 +58,11 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     parent::preProcess();
 
     $this->_params['amount'] = $this->get('default_amount_hidden');
-
     // we use this here to incorporate any changes made by folks in hooks
     $this->_params['currencyID'] = $config->defaultCurrency;
     $this->_params = $this->controller->exportValues('Main');
     
+    $this->_params['is_draft'] = $this->get('is_draft');
 
     $this->_params['ip_address'] = $_SERVER['REMOTE_ADDR'];
     // hack for safari
@@ -588,7 +588,6 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
       'grant_type_id' => $grantTypeId,
       'grant_page_id' => $grantPageId,
       'application_received_date' => (CRM_Utils_Array::value('receive_date', $params)) ? CRM_Utils_Date::processDate($params['receive_date']) : date('YmdHis'),
-      'status_id' => 1,
       'amount_level' => CRM_Utils_Array::value('amount_level', $params),
       'currency' => $params['currencyID'],
       'source' =>
@@ -600,6 +599,12 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
       CRM_Utils_Date::format($params['thankyou_date']) :
       NULL,
     );
+    if (CRM_Utils_Array::value('is_draft', $params)) {
+      $grantParams['status_id'] = key(CRM_Core_OptionGroup::values('grant_status',  FALSE, FALSE, FALSE, "AND v.name = 'Draft'"));
+    }
+    else {
+      $grantParams['status_id'] = key(CRM_Core_OptionGroup::values('grant_status',  FALSE, FALSE, FALSE, "AND v.name = 'Submitted'"));
+    }
  
     if (!$online && isset($params['thankyou_date'])) {
       $grantParams['thankyou_date'] = $params['thankyou_date'];
