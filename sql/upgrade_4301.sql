@@ -4,7 +4,7 @@ ALTER TABLE  `civicrm_grant_app_page` ADD `for_organization` TEXT CHARACTER SET 
 
 ALTER TABLE  `civicrm_grant_app_page` ADD `is_draft` TINYINT(4) DEFAULT NULL COMMENT 'Does this page have a Save as Draft button?' AFTER `default_amount`;
 
-ALTER TABLE  `civicrm_grant_app_page` ADD `draft_title` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Title for Saved without Submitting page (header title tag, and display at the top of the page).' AFTER `is_save_without_submitting`;
+ALTER TABLE  `civicrm_grant_app_page` ADD `draft_title` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Title for Save as Draft page (header title tag, and display at the top of the page).' AFTER `is_draft`;
 
 ALTER TABLE  `civicrm_grant_app_page` ADD `draft_text` text COLLATE utf8_unicode_ci COMMENT 'Text and html allowed. Displayed above application fields on Save as Draft page' AFTER `saved_title`;
 
