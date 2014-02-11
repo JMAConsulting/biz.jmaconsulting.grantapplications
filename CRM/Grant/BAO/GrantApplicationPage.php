@@ -345,11 +345,13 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
  
     $sections = array(
       'settings',
+      'draft',
       'custom',
       'thankyou',
     );
     $query = "SELECT  civicrm_grant_app_page.id as id,
-civicrm_grant_app_page.grant_type_id as settings, 
+civicrm_grant_app_page.grant_type_id as settings,
+civicrm_grant_app_page.is_draft as draft,  
 civicrm_uf_join.id as custom,
 civicrm_grant_app_page.thankyou_title as thankyou
 FROM  civicrm_grant_app_page
