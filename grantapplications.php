@@ -357,6 +357,13 @@ function &configureActionLinks() {
           'qs' => $urlParams,
           'uniqueName' => 'settings',
         ),
+        CRM_Core_Action::FOLLOWUP => array(
+          'name' => ts('Save as Draft'),
+          'title' => ts('Save as Draft'),
+          'url' => $urlString . 'draft',
+          'qs' => $urlParams,
+          'uniqueName' => 'draft',
+        ),
         CRM_Core_Action::EXPORT => array(
           'name' => ts('Receipt'),
           'title' => ts('Receipt'),
