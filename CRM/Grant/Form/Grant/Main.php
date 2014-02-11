@@ -72,7 +72,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       $this->assign('mainDisplay', $mainDisplay);
     }
 
-    // Checking if is Saved without Submitting is enabled
+    // Checking if is Save as Draft is enabled
     if (!empty($this->_values['is_draft'])) {
       $this->_isDraft = TRUE;
     }
