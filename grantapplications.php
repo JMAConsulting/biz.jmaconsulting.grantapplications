@@ -109,7 +109,12 @@ function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form
 }
 
 function grantapplications_civicrm_buildForm($formName, &$form) {
- 
+  if (($formName == 'CRM_Grant_Form_Grant_Main' ||  $formName == 'CRM_Grant_Form_Grant_Confirm') && $form->_values['is_draft'] == 1) {
+    foreach($form->_fields as $key => $value) {
+      $form->_fields[$key]['is_required'] = 0;
+    }                            
+    $form->_required = array();
+  }
   if ($formName == "CRM_Grant_Form_GrantPage_Settings" || 
     $formName == "CRM_Grant_Form_GrantPage_Custom" ||  
     $formName == "CRM_Grant_Form_GrantPage_Draft" || 
