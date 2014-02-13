@@ -560,6 +560,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     $online = TRUE
   ) {
     $transaction = new CRM_Core_Transaction();
+    $isDraft = FALSE;
   
     $className   = get_class($form);
 
@@ -568,7 +569,9 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     $config = CRM_Core_Config::singleton();
   
     $nonDeductibleAmount = isset($params['default_amount_hidden']) ? $params['default_amount_hidden'] : $params['amount_total'];
-   
+    if ($form->_values['is_draft']) {
+      $isDraft = TRUE;
+    }
     $now = date('YmdHis');
     $receiptDate = CRM_Utils_Array::value('receipt_date', $params);
     if (CRM_Utils_Array::value('is_email_receipt', $form->_values)) {
@@ -619,7 +622,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     $grantParams['amount_requested'] = trim(CRM_Utils_Money::format($nonDeductibleAmount, ' '));
     $grantParams['amount_total'] = trim(CRM_Utils_Money::format($nonDeductibleAmount, ' '));
 
-    if ($nonDeductibleAmount) {
+    if ($nonDeductibleAmount || $isDraft) {
         //add grant record
         $grant = &CRM_Grant_BAO_Grant::add($grantParams, $ids);
     }
