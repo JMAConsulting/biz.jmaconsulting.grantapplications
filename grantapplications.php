@@ -114,6 +114,13 @@ function grantapplications_civicrm_buildForm($formName, &$form) {
       $form->_fields[$key]['is_required'] = 0;
     }                            
     $form->_required = array();
+    foreach($form->_rules as $key => $value) {
+      foreach($value as $index => $info) {
+        if ($info['type'] == 'required') {
+          unset($form->_rules[$key][$index]);
+        }
+      }
+    } 
   }
   if ($formName == "CRM_Grant_Form_GrantPage_Settings" || 
     $formName == "CRM_Grant_Form_GrantPage_Custom" ||  
