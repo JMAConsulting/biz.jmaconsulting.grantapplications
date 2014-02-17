@@ -36,6 +36,12 @@
            <span class="description">{ts}This title will be displayed at the top of the thank-you / transaction confirmation page.{/ts}</span>
        </td>
     </tr>
+    <tr class="crm-grant-grantpage-thankyou-form-block-confirm_text">
+       <td class="label">{$form.confirm_text.label}{if $action == 2}{include file='CRM/Core/I18n/Dialog.tpl' table='civicrm_grant_app_page' field='confirm_text' id=$grantApplicationPageID}{/if}</td>
+       <td class="html-adjust">{$form.confirm_text.html}<br />
+           <span class="description">{ts}This title will be displayed at the top of the confirmation page.{/ts}</span>
+       </td>
+    </tr>
     <tr class="crm-grant-grantpage-thankyou-form-block-thankyou_text">
        <td class="label">{$form.thankyou_text.label}{if $action == 2}{include file='CRM/Core/I18n/Dialog.tpl' table='civicrm_grant_app_page' field='thankyou_text' id=$grantApplicationPageID}{/if}</td>
        <td class="html-adjust">{$form.thankyou_text.html}<br />
@@ -46,6 +52,12 @@
        <td class="label">{$form.thankyou_footer.label}{if $action == 2}{include file='CRM/Core/I18n/Dialog.tpl' table='civicrm_grant_app_page' field='thankyou_footer' id=$grantApplicationPageID}{/if}</td>
        <td class="html-adjust">{$form.thankyou_footer.html}<br />
        	   <span class="description">{ts}Enter link(s) and/or text that you want to appear at the bottom of the thank-you page.{/ts}</span>
+       </td>
+    </tr>
+    <tr class="crm-grant-grantpage-thankyou-form-block-confirm_footer">
+       <td class="label">{$form.confirm_footer.label}{if $action == 2}{include file='CRM/Core/I18n/Dialog.tpl' table='civicrm_grant_app_page' field='confirm_footer' id=$grantApplicationPageID}{/if}</td>
+       <td class="html-adjust">{$form.confirm_footer.html}<br />
+       	   <span class="description">{ts}Enter link(s) and/or text that you want to appear at the bottom of the confirmation page.{/ts}</span>
        </td>
     </tr>
     <tr class="crm-grant-grantpage-thankyou-form-block-is_email_receipt">

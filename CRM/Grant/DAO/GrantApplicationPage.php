@@ -318,6 +318,20 @@ class CRM_Grant_DAO_GrantApplicationPage extends CRM_Core_DAO
                     'rows' => 8,
                     'cols' => 60,
                 ) ,
+                'confirm_text' => array(
+                    'name' => 'confirm_text',
+                    'type' => CRM_Utils_Type::T_TEXT,
+                    'title' => ts('Confirm Text') ,
+                    'rows' => 8,
+                    'cols' => 60,
+                ) ,
+                'confirm_footer' => array(
+                    'name' => 'confirm_footer',
+                    'type' => CRM_Utils_Type::T_TEXT,
+                    'title' => ts('Confirm Footer') ,
+                    'rows' => 8,
+                    'cols' => 60,
+                ) ,
                 'is_email_receipt' => array(
                     'name' => 'is_email_receipt',
                     'type' => CRM_Utils_Type::T_BOOLEAN,

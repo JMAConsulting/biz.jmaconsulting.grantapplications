@@ -66,6 +66,9 @@ class CRM_Grant_Form_GrantPage_ThankYou extends CRM_Grant_Form_GrantPage {
     $this->addWysiwyg('thankyou_text', ts('Thank-you Message'), CRM_Core_DAO::getAttribute('CRM_Grant_DAO_GrantApplicationPage', 'thankyou_text'));
     $this->addWysiwyg('thankyou_footer', ts('Thank-you Page Footer'), CRM_Core_DAO::getAttribute('CRM_Grant_DAO_GrantApplicationPage', 'thankyou_footer'));
 
+    $this->add('text', 'confirm_text', ts('Confirm Page Message'), CRM_Core_DAO::getAttribute('CRM_Grant_DAO_GrantApplicationPage', 'confirm_text'));
+    $this->addWysiwyg('confirm_footer', ts('Confirm Page Footer'), CRM_Core_DAO::getAttribute('CRM_Grant_DAO_GrantApplicationPage', 'confirm_footer'));
+
     $this->addElement('checkbox', 'is_email_receipt', ts('Email Confirmation Receipt?'), NULL, array('onclick' => "showReceipt()"));
     $this->add('text', 'receipt_from_name', ts('Receipt From Name'), CRM_Core_DAO::getAttribute('CRM_Grant_DAO_GrantApplicationPage', 'receipt_from_name'));
     $this->add('text', 'receipt_from_email', ts('Receipt From Email'), CRM_Core_DAO::getAttribute('CRM_Grant_DAO_GrantApplicationPage', 'receipt_from_email'));
