@@ -1,5 +1,5 @@
 <?php
-
+define('DRAFT_STATUS_ID', 8);
 require_once 'grantapplications.civix.php';
 
 /**
@@ -189,11 +189,52 @@ function grantapplications_civicrm_buildForm($formName, &$form) {
 }
 
 function grantapplications_civicrm_pageRun( &$page ) {
+  if ($page->getVar('_name') == 'CRM_Contact_Page_View_UserDashBoard') {
+    $cid = $page->getVar('_contactId'); 
+    $smarty = CRM_Core_Smarty::singleton();
+    $rels = $smarty->get_template_vars('currentRelationships'); 
+    $permissions = array(CRM_Core_Permission::VIEW);
+    if (CRM_Core_Permission::check('edit grants')) {
+      $permissions[] = CRM_Core_Permission::EDIT;
+    }
+    if (CRM_Core_Permission::check('delete in CiviGrant')) {
+      $permissions[] = CRM_Core_Permission::DELETE;
+    }
+    $mask = CRM_Core_Action::mask($permissions);
+    foreach($rels as $id => $values) {
+      $query = "SELECT grant_type_id, application_received_date, amount_total, status_id, id FROM civicrm_grant WHERE contact_id = {$values['cid']}";
+      $dao = CRM_Core_DAO::executeQuery($query);
+      while ($dao->fetch()) {
+        $row = "";
+        if ($dao->status_id != DRAFT_STATUS_ID) {
+          continue;
+        }
+        $row['contact_id'] = $values['cid'];
+        $row['sort_name'] = $values['display_name'];
+        $row['grant_type'] = current(CRM_Core_OptionGroup::values('grant_type', FALSE, FALSE, FALSE, " AND v.value = {$dao->grant_type_id}"));
+        $row['grant_application_received_date'] = $dao->application_received_date;
+        $row['grant_amount_total'] = $dao->amount_total;
+        $row['grant_status'] = 'Draft';
+        $row['action'] = CRM_Core_Action::formLink(CRM_Grant_Selector_Search::links(),
+        $mask,
+        array(
+          'id' => $dao->id,
+          'cid' => $values['cid'],
+          'cxt' => 'user',
+        )
+      );
+        $rows[] = $row;
+      }
+    }
+    $grantRows = $smarty->get_template_vars('grant_rows');
+    $grants = array_merge($grantRows, $rows); 
+    $smarty->assign('grant_rows', $grants);
+  }
   if( $page->getVar('_name') == 'CRM_Grant_Page_DashBoard') {
     browse();
     CRM_Core_Region::instance('page-body')->add(array(
-      'template' => 'CRM/Grant/Page/GrantApplicationDashboard.tpl',
-    ));
+        'template' => 'CRM/Grant/Page/GrantApplicationDashboard.tpl',
+      ));
   }
 }
 
