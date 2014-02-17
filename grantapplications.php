@@ -215,8 +215,6 @@ function grantapplications_civicrm_pageRun( &$page ) {
         $row['grant_application_received_date'] = $dao->application_received_date;
         $row['grant_amount_total'] = $dao->amount_total;
         $row['grant_status'] = 'Draft';
-        $row['program_id'] = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_Grant', $dao->id, 'grant_program_id');
-        $row['program_name'] = current(CRM_Grant_BAO_GrantProgram::getGrantPrograms($row['program_id']));
         $row['action'] = CRM_Core_Action::formLink(CRM_Grant_Selector_Search::links(),
         $mask,
         array(
