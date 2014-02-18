@@ -24,7 +24,11 @@
  +--------------------------------------------------------------------+
 *}
 {include file="CRM/common/TrackingFields.tpl"}
-
+    {if $confirm_text}
+        <div id="confirm_text" class="crm-section confirm_text-section">
+            {$confirm_text}
+        </div>
+    {/if}
 <div class="crm-block crm-grant-confirm-form-block">
     <div id="help">
         <p>{ts}Please verify the information below carefully. Click <strong>Go Back</strong> if you need to make changes.{/ts}
@@ -79,5 +83,11 @@
 
     <div id="crm-submit-buttons" class="crm-submit-buttons">
         {include file="CRM/common/formButtons.tpl" location="bottom"}
+    </div>
+
+    <div id="confirm_footer" class="grant_confirm_footer-section">
+        <p>
+        {$confirm_footer}
+        </p>
     </div>
 </div>

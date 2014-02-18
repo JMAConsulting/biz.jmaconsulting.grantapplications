@@ -190,7 +190,6 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
     }
       
     $this->assign('is_email_receipt', $this->_values['is_email_receipt']);
-    $this->assign('bltID', $this->_bltID);
 
     //assign cancelSubscription URL to templates
     $this->assign('cancelSubscriptionUrl',
@@ -258,7 +257,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
       $this->assign('onBehalfEmail', $this->_params['onbehalf_location']['email'][$locTypeId[0]]['email']);
     }
     $this->assign('email',
-      $this->controller->exportValue('Main', "email-{$this->_bltID}")
+      $this->controller->exportValue('Main', "email-Primary")
     );
 
     // also assign the receipt_text

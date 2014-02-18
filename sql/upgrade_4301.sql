@@ -21,3 +21,4 @@ SELECT @activityTypeId := id FROM `civicrm_option_value` WHERE `name` = 'Grant';
 INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) VALUES
 (@activityTypeId, @optionGroupId, 'Grant', @maxValue, 'Grant', NULL, 1, NULL, @maxWeight, 'Online Grant Application', 0, 1, 1, 5, NULL, NULL);
 
+ALTER TABLE `civicrm_grant_app_page` ADD `confirm_text` TEXT NULL DEFAULT NULL AFTER `thankyou_footer`, ADD `confirm_footer` TEXT NULL DEFAULT NULL AFTER `confirm_text`;
