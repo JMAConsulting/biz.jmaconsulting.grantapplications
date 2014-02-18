@@ -1,5 +1,6 @@
 <?php
 define('DRAFT_STATUS_ID', 8);
+define('EMPLOYEE_OF_ID', 8);
 require_once 'grantapplications.civix.php';
 
 /**
@@ -192,7 +193,7 @@ function grantapplications_civicrm_pageRun( &$page ) {
   if ($page->getVar('_name') == 'CRM_Contact_Page_View_UserDashBoard') {
     $cid = $page->getVar('_contactId'); 
     $smarty = CRM_Core_Smarty::singleton();
-    $rels = $smarty->get_template_vars('currentRelationships'); 
+    $rels = $smarty->get_template_vars('currentRelationships');
     $permissions = array(CRM_Core_Permission::VIEW);
     if (CRM_Core_Permission::check('edit grants')) {
       $permissions[] = CRM_Core_Permission::EDIT;
@@ -202,19 +203,21 @@ function grantapplications_civicrm_pageRun( &$page ) {
     }
     $mask = CRM_Core_Action::mask($permissions);
     foreach($rels as $id => $values) {
-      $query = "SELECT grant_type_id, application_received_date, amount_total, status_id, id FROM civicrm_grant WHERE contact_id = {$values['cid']}";
+      if ($values['relationship_type_id'] != EMPLOYEE_OF_ID) {
+        continue;
+      }
+      $query = "SELECT grant_type_id, application_received_date, amount_total, status_id, id FROM civicrm_grant WHERE contact_id = {$values['cid']} AND status_id = ".DRAFT_STATUS_ID;
       $dao = CRM_Core_DAO::executeQuery($query);
       while ($dao->fetch()) {
         $row = "";
-        if ($dao->status_id != DRAFT_STATUS_ID) {
-          continue;
-        }
         $row['contact_id'] = $values['cid'];
         $row['sort_name'] = $values['display_name'];
         $row['grant_type'] = current(CRM_Core_OptionGroup::values('grant_type', FALSE, FALSE, FALSE, " AND v.value = {$dao->grant_type_id}"));
         $row['grant_application_received_date'] = $dao->application_received_date;
         $row['grant_amount_total'] = $dao->amount_total;
         $row['grant_status'] = 'Draft';
+        $row['program_id'] = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_Grant', $dao->id, 'grant_program_id');
+        $row['program_name'] = current(CRM_Grant_BAO_GrantProgram::getGrantPrograms($row['program_id']));
         $row['action'] = CRM_Core_Action::formLink(CRM_Grant_Selector_Search::links(),
         $mask,
         array(

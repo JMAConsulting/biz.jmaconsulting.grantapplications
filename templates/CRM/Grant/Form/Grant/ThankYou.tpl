@@ -23,7 +23,6 @@
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
 *}
-
 <div class="crm-block crm-grant-thankyou-form-block">
     {if $thankyou_text}
         <div id="thankyou_text" class="crm-section thankyou_text-section">

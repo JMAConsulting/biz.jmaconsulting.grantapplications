@@ -36,16 +36,16 @@
            <span class="description">{ts}This title will be displayed at the top of the thank-you / transaction confirmation page.{/ts}</span>
        </td>
     </tr>
-    <tr class="crm-grant-grantpage-thankyou-form-block-confirm_text">
+    <tr class="crm-grant-grantpage-confirm-form-block-confirm_text">
        <td class="label">{$form.confirm_text.label}{if $action == 2}{include file='CRM/Core/I18n/Dialog.tpl' table='civicrm_grant_app_page' field='confirm_text' id=$grantApplicationPageID}{/if}</td>
        <td class="html-adjust">{$form.confirm_text.html}<br />
-           <span class="description">{ts}This title will be displayed at the top of the confirmation page.{/ts}</span>
+           <span class="description">{ts}Enter text (and optional HTML layout tags) for the confirmation message that will appear at the top of the confirmation page.{/ts}</span>
        </td>
     </tr>
     <tr class="crm-grant-grantpage-thankyou-form-block-thankyou_text">
        <td class="label">{$form.thankyou_text.label}{if $action == 2}{include file='CRM/Core/I18n/Dialog.tpl' table='civicrm_grant_app_page' field='thankyou_text' id=$grantApplicationPageID}{/if}</td>
        <td class="html-adjust">{$form.thankyou_text.html}<br />
-       	   <span class="description">{ts}Enter text (and optional HTML layout tags) for the thank-you message that will appear at the top of the confirmation page.{/ts}</span>
+       	   <span class="description">{ts}Enter text (and optional HTML layout tags) for the thank-you message that will appear at the top of the thank-you page.{/ts}</span>
        </td>
     </tr>
     <tr class="crm-grant-grantpage-thankyou-form-block-thankyou_footer">

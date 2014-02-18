@@ -30,7 +30,7 @@
   <div id="intro_text" class="crm-section intro_text-section">
       {$intro_text}
   </div>
-      {assign var=n value=email-$bltID}
+      {assign var=n value=email-Primary}
       <div class="crm-section {$form.$n.name}-section">
         <div class="label">{$form.$n.label}</div>
         <div class="content">

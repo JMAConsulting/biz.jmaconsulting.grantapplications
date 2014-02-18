@@ -167,25 +167,18 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       }
 
       $names = array(
-        'first_name', 'middle_name', 'last_name', "street_address-{$this->_bltID}", "city-{$this->_bltID}",
-        "postal_code-{$this->_bltID}", "country_id-{$this->_bltID}", "state_province_id-{$this->_bltID}",
+        'first_name', 'middle_name', 'last_name', "street_address-Primary", "city-Primary",
+        "postal_code-Primary", "country_id-Primary", "state_province_id-Primary",
       );
       foreach ($names as $name) {
         $fields[$name] = 1;
       }
-      $fields["state_province-{$this->_bltID}"] = 1;
-      $fields["country-{$this->_bltID}"] = 1;
-      $fields["email-{$this->_bltID}"] = 1;
+      $fields["state_province-Primary"] = 1;
+      $fields["country-Primary"] = 1;
       $fields['email-Primary'] = 1;
      
        CRM_Core_BAO_UFGroup::setProfileDefaults($contactID, $fields, $this->_defaults);
 
-      // use primary email address if billing email address is empty
-      if (empty($this->_defaults["email-{$this->_bltID}"]) &&
-        !empty($this->_defaults['email-Primary'])
-      ) {
-        $this->_defaults["email-{$this->_bltID}"] = $this->_defaults['email-Primary'];
-      }
     }
 
     //set custom field defaults set by admin if value is not set
@@ -232,12 +225,12 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     }
 
     $this->applyFilter('__ALL__', 'trim');
-    $this->add('text', "email-{$this->_bltID}",
+    $this->add('text', "email-Primary",
       ts('Email Address'), array(
         'size' => 30, 'maxlength' => 60), TRUE
     );
  
-    $this->addRule("email-{$this->_bltID}", ts('Email is not valid.'), 'email');
+    $this->addRule("email-Primary", ts('Email is not valid.'), 'email');
  
     $this->buildCustom($this->_values['custom_pre_id'], 'customPre');
     $this->buildCustom($this->_values['custom_post_id'], 'customPost');

@@ -56,7 +56,8 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     $config = CRM_Core_Config::singleton();
    
     parent::preProcess();
-
+    $this->assign('confirm_text', CRM_Utils_Array::value('confirm_text', $this->_values));
+    $this->assign('confirm_footer', CRM_Utils_Array::value('confirm_footer', $this->_values));
     $this->_params['amount'] = $this->get('default_amount_hidden');
     // we use this here to incorporate any changes made by folks in hooks
     $this->_params['currencyID'] = $config->defaultCurrency;
@@ -387,8 +388,6 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
       }
     }
 
-    // billing email address
-    $fields["email-{$this->_bltID}"] = 1;
     // if onbehalf-of-organization contribution, take out
     // organization params in a separate variable, to make sure
     // normal behavior is continued. And use that variable to
@@ -514,9 +513,6 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
 
     //get email primary first if exist
     $subscribtionEmail = array('email' => CRM_Utils_Array::value('email-Primary', $params));
-    if (!$subscribtionEmail['email']) {
-      $subscribtionEmail['email'] = CRM_Utils_Array::value("email-{$this->_bltID}", $params);
-    }
     // subscribing contact to groups
     if (!empty($subscribeGroupIds) && $subscribtionEmail['email']) {
       CRM_Mailing_Event_BAO_Subscribe::commonSubscribe($subscribeGroupIds, $subscribtionEmail, $contactID);
@@ -561,7 +557,9 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
   ) {
     $transaction = new CRM_Core_Transaction();
     $isDraft = FALSE;
-  
+    if (CRM_Utils_Array::value('is_draft', $form->_values)) {
+	$isDraft = TRUE;
+    } 
     $className   = get_class($form);
 
     $params['is_email_receipt'] = CRM_Utils_Array::value('is_email_receipt', $form->_values);
@@ -569,9 +567,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     $config = CRM_Core_Config::singleton();
   
     $nonDeductibleAmount = isset($params['default_amount_hidden']) ? $params['default_amount_hidden'] : $params['amount_total'];
-    if ($form->_values['is_draft']) {
-      $isDraft = TRUE;
-    }
+   
     $now = date('YmdHis');
     $receiptDate = CRM_Utils_Array::value('receipt_date', $params);
     if (CRM_Utils_Array::value('is_email_receipt', $form->_values)) {
@@ -659,7 +655,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     // Re-using function defined in Contribution/Utils.php
     CRM_Contribute_BAO_Contribution_Utils::createCMSUser($params,
       $contactID,
-      'email-' . $form->_bltID
+      'email-Primary' 
     );
 
     return $grant;
