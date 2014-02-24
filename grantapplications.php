@@ -229,8 +229,8 @@ function grantapplications_civicrm_pageRun( &$page ) {
         $rows[] = $row;
       }
     }
-    $grantRows = $smarty->get_template_vars('grant_rows');
     if (!empty($rows)) {
+      $grantRows = $smarty->get_template_vars('grant_rows');
       $grants = array_merge($grantRows, $rows); 
       $smarty->assign('grant_rows', $grants);
     }
