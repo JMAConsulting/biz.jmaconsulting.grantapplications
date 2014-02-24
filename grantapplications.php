@@ -230,8 +230,10 @@ function grantapplications_civicrm_pageRun( &$page ) {
       }
     }
     $grantRows = $smarty->get_template_vars('grant_rows');
-    $grants = array_merge($grantRows, $rows); 
-    $smarty->assign('grant_rows', $grants);
+    if (!empty($rows)) {
+      $grants = array_merge($grantRows, $rows); 
+      $smarty->assign('grant_rows', $grants);
+    }
   }
   if( $page->getVar('_name') == 'CRM_Grant_Page_DashBoard') {
     browse();
