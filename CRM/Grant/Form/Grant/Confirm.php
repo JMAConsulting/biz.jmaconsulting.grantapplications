@@ -558,7 +558,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     $transaction = new CRM_Core_Transaction();
     $isDraft = FALSE;
     if (CRM_Utils_Array::value('is_draft', $form->_values)) {
-	$isDraft = TRUE;
+      $isDraft = TRUE;
     } 
     $className   = get_class($form);
 
@@ -641,7 +641,17 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
         CRM_Core_BAO_CustomValueTable::store($params['custom'], 'civicrm_grant', $grant->id);
       }
     }
-
+    if ($grant && $isDraft) {
+      $savedSearch = $formValues = $ssParams = array();
+      $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:{$grant->id}%"');
+      CRM_Contact_BAO_SavedSearch::retrieve($ssParams, $savedSearch);
+      if (CRM_Utils_Array::value('id', $savedSearch)) {
+        $formValues['id'] = $savedSearch['id'];
+      }
+      $params['grant_id'] = $grant->id;
+      $formValues['formValues'] = $params;
+      CRM_Contact_BAO_SavedSearch::create($formValues);
+    }
     $targetContactID = NULL;
     if (CRM_Utils_Array::value('hidden_onbehalf_profile', $params)) {
       $targetContactID = $grant->contact_id;
