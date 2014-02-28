@@ -1,6 +1,6 @@
 <?php
 define('DRAFT_STATUS_ID', 8);
-define('EMPLOYEE_OF_ID', 8);
+define('EMPLOYEE_OF_ID', 5);
 require_once 'grantapplications.civix.php';
 
 /**
@@ -218,12 +218,13 @@ function grantapplications_civicrm_pageRun( &$page ) {
         $row['grant_status'] = 'Draft';
         $row['program_id'] = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_Grant', $dao->id, 'grant_program_id');
         $row['program_name'] = current(CRM_Grant_BAO_GrantProgram::getGrantPrograms($row['program_id']));
-        $row['action'] = CRM_Core_Action::formLink(CRM_Grant_Selector_Search::links(),
+        $ssID = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$dao->id.'%"');
+        $formValues = CRM_Contact_BAO_SavedSearch::getFormValues($ssID);
+        $row['action'] = CRM_Core_Action::formLink(dashboardActionLinks(),
         $mask,
         array(
-          'id' => $dao->id,
-          'cid' => $values['cid'],
-          'cxt' => 'user',
+          'id' => $formValues['grantApplicationPageID'],
+          'gid' => $dao->id,
         )
       );
         $rows[] = $row;
@@ -439,6 +440,18 @@ function &configureActionLinks() {
       );
 
     return $configureActionLinks;
+  }
+
+function &dashboardActionLinks() {
+      $dashboardActionLinks = array(
+        CRM_Core_Action::UPDATE => array(
+          'name' => ts('Edit'),
+          'url' => 'civicrm/grant/transact',
+          'qs' => 'reset=1&id=%%id%%&gid=%%gid%%',
+          'title' => ts('Edit Grant Application'),
+        ),
+      );
+    return $dashboardActionLinks;
   }
 
 function &actionLinks() {

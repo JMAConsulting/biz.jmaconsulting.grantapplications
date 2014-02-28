@@ -582,7 +582,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     }
 
     // first create the grant record
-    $grantParams = array(
+    $grantParams = array(      
       'contact_id' => $contactID,
       'grant_type_id' => $grantTypeId,
       'grant_page_id' => $grantPageId,
@@ -604,7 +604,9 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     else {
       $grantParams['status_id'] = key(CRM_Core_OptionGroup::values('grant_status',  FALSE, FALSE, FALSE, "AND v.name = 'Submitted'"));
     }
- 
+    if (CRM_Utils_Array::value('grant_id', $params)) {
+      $grantParams['id'] = $params['grant_id'];
+    }
     if (!$online && isset($params['thankyou_date'])) {
       $grantParams['thankyou_date'] = $params['thankyou_date'];
     }
@@ -642,13 +644,15 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
       }
     }
     if ($grant && $isDraft) {
-      $savedSearch = $formValues = $ssParams = array();
-      $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:{$grant->id}%"');
-      CRM_Contact_BAO_SavedSearch::retrieve($ssParams, $savedSearch);
+      $savedSearch = $formValues = $ssParams = $savedSearch= array();
+      $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$grant->id.'%"');
+      if (!empty($ssParams['id'])) {
+        CRM_Contact_BAO_SavedSearch::retrieve($ssParams, $savedSearch);
+      }
       if (CRM_Utils_Array::value('id', $savedSearch)) {
         $formValues['id'] = $savedSearch['id'];
       }
-      $params['grant_id'] = $grant->id;
+      $params['grant_id'] = (int)$grant->id;
       $formValues['formValues'] = $params;
       CRM_Contact_BAO_SavedSearch::create($formValues);
     }

@@ -211,7 +211,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     //process drafts
     if ($gid = CRM_Utils_Request::retrieve('gid', 'Positive')) {
       $ssParams = array();
-      $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:{$gid}%"');
+      $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:.'.$gid.'%"');
       CRM_Contact_BAO_SavedSearch::retrieve($ssParams, $savedSearch);
       $this->_defaults = array_replace( $this->_defaults, unserialize($savedSearch['form_values']) );
       // contact id to be set here
@@ -255,6 +255,9 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
           '0.00', '', FALSE
         );
     }
+    $this->add('hidden', "grant_id",
+      NULL, '', FALSE
+    );
     $this->add('hidden', "is_draft", '0', '', FALSE);
     if ( CRM_Utils_Array::value('amount_total', $this->_fields) ) {
       $this->addRule('amount_total', ts('Please enter a valid amount (numbers and decimal point only).'), 'money');
