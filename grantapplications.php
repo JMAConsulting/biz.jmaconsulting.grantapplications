@@ -194,6 +194,7 @@ function grantapplications_civicrm_pageRun( &$page ) {
     $cid = $page->getVar('_contactId'); 
     $smarty = CRM_Core_Smarty::singleton();
     $rels = $smarty->get_template_vars('currentRelationships');
+    $actionLinks = $smarty->get_template_vars('grant_rows');
     $permissions = array(CRM_Core_Permission::VIEW);
     if (CRM_Core_Permission::check('edit grants')) {
       $permissions[] = CRM_Core_Permission::EDIT;
@@ -202,6 +203,18 @@ function grantapplications_civicrm_pageRun( &$page ) {
       $permissions[] = CRM_Core_Permission::DELETE;
     }
     $mask = CRM_Core_Action::mask($permissions);
+    foreach ($actionLinks as $key => $fields) {
+      $ssID = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$fields['grant_id'].'%"');
+      $formValues = CRM_Contact_BAO_SavedSearch::getFormValues($ssID);
+      $actionLinks[$key]['action'] = CRM_Core_Action::formLink(dashboardActionLinks(),
+       $mask,
+       array(
+         'id' => $formValues['grantApplicationPageID'],
+         'gid' => $fields['grant_id'],
+       )
+      );
+      $page->assign('grant_rows', $actionLinks);
+    } 
     foreach($rels as $id => $values) {
       if ($values['relationship_type_id'] != EMPLOYEE_OF_ID) {
         continue;
@@ -221,12 +234,12 @@ function grantapplications_civicrm_pageRun( &$page ) {
         $ssID = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$dao->id.'%"');
         $formValues = CRM_Contact_BAO_SavedSearch::getFormValues($ssID);
         $row['action'] = CRM_Core_Action::formLink(dashboardActionLinks(),
-        $mask,
-        array(
-          'id' => $formValues['grantApplicationPageID'],
-          'gid' => $dao->id,
-        )
-      );
+          $mask,
+          array(
+            'id' => $formValues['grantApplicationPageID'],
+            'gid' => $dao->id,
+          )
+        );
         $rows[] = $row;
       }
     }
