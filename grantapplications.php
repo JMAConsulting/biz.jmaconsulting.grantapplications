@@ -205,15 +205,17 @@ function grantapplications_civicrm_pageRun( &$page ) {
     $mask = CRM_Core_Action::mask($permissions);
     foreach ($actionLinks as $key => $fields) {
       $ssID = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$fields['grant_id'].'%"');
-      $formValues = CRM_Contact_BAO_SavedSearch::getFormValues($ssID);
-      $actionLinks[$key]['action'] = CRM_Core_Action::formLink(dashboardActionLinks(),
-       $mask,
-       array(
-         'id' => $formValues['grantApplicationPageID'],
-         'gid' => $fields['grant_id'],
-       )
-      );
-      $page->assign('grant_rows', $actionLinks);
+      if ($ssID) {
+        $formValues = CRM_Contact_BAO_SavedSearch::getFormValues($ssID);
+        $actionLinks[$key]['action'] = CRM_Core_Action::formLink(dashboardActionLinks(),
+          $mask,
+          array(
+            'id' => $formValues['grantApplicationPageID'],
+            'gid' => $fields['grant_id'],
+          )
+        );
+        $page->assign('grant_rows', $actionLinks);
+      }
     } 
     foreach($rels as $id => $values) {
       if ($values['relationship_type_id'] != EMPLOYEE_OF_ID) {
