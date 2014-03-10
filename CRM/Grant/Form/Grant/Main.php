@@ -309,7 +309,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     $draft = array();
     if ($this->_isDraft) {
       $draft = array(
-        'type' => 'next',
+        'type' => 'save',
         'name' => ts('Save as Draft'),
         'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
         'isDefault' => TRUE,
