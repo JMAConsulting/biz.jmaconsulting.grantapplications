@@ -214,7 +214,6 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$gid.'%"');
       CRM_Contact_BAO_SavedSearch::retrieve($ssParams, $savedSearch);
       $this->_defaults = array_replace( $this->_defaults, unserialize($savedSearch['form_values']) );
-      // contact id to be set here
     }
     return $this->_defaults;
   }
@@ -324,7 +323,27 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
         'isDefault' => TRUE,
       ),
      )
-    );
+    );  
+    // set up attachments
+    if ($gid = CRM_Utils_Request::retrieve('gid', 'Positive')) {
+      $grantType = CRM_Core_DAO::getFieldValue("CRM_Grant_DAO_Grant", $gid, "grant_type_id");
+      $groupTree = &CRM_Core_BAO_CustomGroup::getTree("Grant", $this, $gid, 0, $grantType);
+      foreach ($groupTree as $field => $value) {
+        if (isset($value['fields'])) {
+          foreach ($value['fields'] as $key => $fields) {
+            if (CRM_Utils_Array::value('html_type', $fields) == 'File' && isset($fields['customValue'][1]['fid'])) {
+              $files['custom_'.$key]['displayURL'] = $fields['customValue'][1]['displayURL'];
+              $files['custom_'.$key]['fileURL'] = $fields['customValue'][1]['fileURL'];
+              $files['custom_'.$key]['fileName'] = $fields['customValue'][1]['fileName'];
+              $files['custom_'.$key]['fid'] = $key;
+            }
+          }
+        }
+      }
+      if (isset($files)) {
+        $this->assign('fileFields', $files);
+      }
+    }
     $this->addFormRule(array('CRM_Grant_Form_Grant_Main', 'formRule'), $this);
   }
   
@@ -394,7 +413,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     $params = $this->controller->exportValues($this->_name);
    
     $buttonName = $this->controller->getButtonName();
-    if ($buttonName == $this->getButtonName('next')) {
+    if ($buttonName == $this->getButtonName('save')) {
       $this->set('is_draft', 1);
     }
     else {
