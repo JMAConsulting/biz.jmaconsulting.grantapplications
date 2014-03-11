@@ -86,6 +86,12 @@ function grantapplications_civicrm_managed(&$entities) {
 
 function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form) {
   $errors = array();
+  if (($formName == 'CRM_Grant_Form_Grant_Main' ||  $formName == 'CRM_Grant_Form_Grant_Confirm') 
+    && $form->_values['is_draft'] == 1 && (CRM_Utils_Array::value('_qf_Main_save', $fields) == 'Save as Draft' || $form->_params['is_draft'] == 1)) {
+    foreach($form->_fields as $name => $values) {
+      $form->setElementError($name, NULL);
+    }
+  }
   if ($formName == "CRM_UF_Form_Field" && CRM_Core_Permission::access('CiviGrant') 
     && ($form->getVar('_action') != CRM_Core_Action::DELETE)) {
     $fieldType = $fields['field_name'][0];
@@ -110,19 +116,6 @@ function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form
 }
 
 function grantapplications_civicrm_buildForm($formName, &$form) {
-  if (($formName == 'CRM_Grant_Form_Grant_Main' ||  $formName == 'CRM_Grant_Form_Grant_Confirm') && $form->_values['is_draft'] == 1) {
-    foreach($form->_fields as $key => $value) {
-      $form->_fields[$key]['is_required'] = 0;
-    }                            
-    $form->_required = array();
-    foreach($form->_rules as $key => $value) {
-      foreach($value as $index => $info) {
-        if ($info['type'] == 'required') {
-          unset($form->_rules[$key][$index]);
-        }
-      }
-    } 
-  }
   if ($formName == "CRM_Grant_Form_GrantPage_Settings" || 
     $formName == "CRM_Grant_Form_GrantPage_Custom" ||  
     $formName == "CRM_Grant_Form_GrantPage_Draft" || 
