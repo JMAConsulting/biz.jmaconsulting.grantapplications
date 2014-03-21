@@ -246,8 +246,8 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
 
       $this->buildCustom($profileId, 'onbehalfProfile', TRUE, TRUE, $fieldTypes);
     }
-    $grantButton = ts('Continue >>');
-    $this->assign('button', ts('Continue'));
+    $grantButton = ts('Save Now');
+    $this->assign('button', ts('Save Now'));
     
     $this->addButtons(array(
       array(
