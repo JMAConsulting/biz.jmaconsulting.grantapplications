@@ -441,6 +441,13 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
       if (CRM_Utils_Array::value('onbehalf[image_URL]', $params)) {
         $behalfOrganization['image_URL'] = $params['onbehalf[image_URL]'];
       }
+      // Process attachments for custom fields
+      foreach ($params as $fld => $values) {
+        if (stristr($fld, 'onbehalf[custom_')) {
+          preg_match_all('/\d+/', $fld, $matches);
+          $behalfOrganization['custom_'.current($matches[0])] = $values;
+        }
+      }
     }
     // check for profile double opt-in and get groups to be subscribed
     $subscribeGroupIds = CRM_Core_BAO_UFGroup::getDoubleOptInGroupIds($params, $contactID);

@@ -326,6 +326,27 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     );  
     // set up attachments
     if ($gid = CRM_Utils_Request::retrieve('gid', 'Positive')) {
+      $ssParams = array();
+      $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$gid.'%"');
+      CRM_Contact_BAO_SavedSearch::retrieve($ssParams, $savedSearch);
+      $grantParams = unserialize($savedSearch['form_values']);
+      $gTree = &CRM_Core_BAO_CustomGroup::getTree("Contact", $this, $grantParams['contactID']);
+      foreach ($gTree as $fld => $v) {
+        if (isset($v['fields'])) {
+          foreach ($v['fields'] as $k => $f) {
+            if (CRM_Utils_Array::value('html_type', $f) == 'File' && isset($f['customValue'][1]['fid'])) {
+              $oFiles['custom_'.$k]['displayURL'] = $f['customValue'][1]['displayURL'];
+              $oFiles['custom_'.$k]['fileURL'] = $f['customValue'][1]['fileURL'];
+              $oFiles['custom_'.$k]['fileName'] = $f['customValue'][1]['fileName'];
+              $oFiles['custom_'.$k]['fid'] = $k;
+            }
+          }
+        }
+      }
+      if (isset($oFiles)) {
+        $this->assign('oFileFields', $oFiles);
+      }
+      
       $grantType = CRM_Core_DAO::getFieldValue("CRM_Grant_DAO_Grant", $gid, "grant_type_id");
       $groupTree = &CRM_Core_BAO_CustomGroup::getTree("Grant", $this, $gid, 0, $grantType);
       foreach ($groupTree as $field => $value) {
