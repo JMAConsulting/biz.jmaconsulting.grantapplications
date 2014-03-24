@@ -90,6 +90,7 @@ function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form
     && $form->_values['is_draft'] == 1 && (CRM_Utils_Array::value('_qf_Main_save', $fields) == 'Save as Draft' || $form->_params['is_draft'] == 1)) {
     foreach($form->_fields as $name => $values) {
       $form->setElementError($name, NULL);
+      $form->_errors = array();
     }
   }
   if ($formName == "CRM_UF_Form_Field" && CRM_Core_Permission::access('CiviGrant') 
