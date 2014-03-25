@@ -117,6 +117,11 @@ function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form
 }
 
 function grantapplications_civicrm_buildForm($formName, &$form) {
+  if ($formName == "CRM_Grant_Form_Grant_Main") {
+    if (array_key_exists('amount_total', $form->_fields)) {
+      $form->assign('amountField', TRUE);
+    }
+  }
   if ($formName == "CRM_Grant_Form_GrantPage_Settings" || 
     $formName == "CRM_Grant_Form_GrantPage_Custom" ||  
     $formName == "CRM_Grant_Form_GrantPage_Draft" || 
