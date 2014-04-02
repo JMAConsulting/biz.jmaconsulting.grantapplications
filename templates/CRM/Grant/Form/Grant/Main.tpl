@@ -86,3 +86,29 @@
       </div>
     {/if}
 </div>
+	
+{literal}
+<script type="text/javascript">
+  cj(function(){
+    var numericFields = {/literal}{$numericFields}{literal};
+    var elementName = '';
+    var value = '';
+    cj('input').blur(function(){
+      elementName = cj(this).attr('id');
+      if (elementName in numericFields) {
+      	 value = cj(this).val();
+	 if (value) {
+	   if (numericFields[elementName] == 'Int') {
+      	     value = value.replace(/[^0-9]/g, '');	 
+           }
+           else {
+      	     value = value.match(/(\d+(\.\d+)?)/);  
+	     value = value[0];    
+           }
+	   cj(this).val(value);
+         }
+      }
+    });
+  });
+</script>
+{/literal}

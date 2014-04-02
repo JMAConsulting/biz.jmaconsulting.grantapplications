@@ -268,10 +268,19 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
 
     if ( !empty( $this->_fields ) ) {
       $profileAddressFields = array();
+      $numericFields['amount_total'] = 'Float';
       foreach( $this->_fields as $key => $value ) {
         CRM_Core_BAO_UFField::assignAddressField($key, $profileAddressFields);
-        $this->set('profileAddressFields', $profileAddressFields);
+        $dataType = CRM_Utils_Array::value('data_type', $value);
+        if (in_array($dataType, array('Float', 'Int', 'Money'))) {
+          if ($dataType == 'Money') {
+            $dataType = 'Float';
+          }          
+          $numericFields[$value['name']] = $dataType;
+        }
       }
+      $this->assign('numericFields', json_encode($numericFields));
+      $this->set('profileAddressFields', $profileAddressFields);
     }
 
     //to create an cms user
