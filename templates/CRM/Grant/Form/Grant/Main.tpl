@@ -102,8 +102,7 @@
       	     value = value.replace(/[^0-9]/g, '');	 
            }
            else {
-      	     value = value.match(/(\d+(\.\d+)?)/);  
-	     value = value[0];    
+	     value = value.replace(/[^\d|.]/g, '');
            }
 	   cj(this).val(value);
          }
