@@ -362,8 +362,8 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       if (isset($oFiles)) {
         $this->assign('oFileFields', $oFiles);
       }
-      
-      $groupTree = &CRM_Core_BAO_CustomGroup::getTree("Grant", $this, $gid);
+      $grantType = CRM_Core_DAO::getFieldValue("CRM_Grant_DAO_Grant", $gid, "grant_type_id");
+      $groupTree = &CRM_Core_BAO_CustomGroup::getTree("Grant", $this, $gid, 0, $grantType);
       foreach ($groupTree as $field => $value) {
         if (isset($value['fields'])) {
           foreach ($value['fields'] as $key => $fields) {
