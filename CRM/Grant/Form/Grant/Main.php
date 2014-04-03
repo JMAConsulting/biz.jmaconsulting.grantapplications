@@ -353,8 +353,6 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
                 $oFiles['custom_'.$k]['fileName'] = $f['customValue'][1]['fileName'];
                 $oFiles['custom_'.$k]['fid'] = $k;
               }
-              if (CRM_Utils_Array::value('html_type', $f) == 'Select') {
-              }
             }
           }
         }
