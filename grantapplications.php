@@ -150,6 +150,46 @@ function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form
 }
 
 function grantapplications_civicrm_buildForm($formName, &$form) {
+  if ($formName == 'CRM_Grant_Form_Grant_Confirm' || $formName == 'CRM_Grant_Form_Grant_ThankYou') {
+    
+    // fix attachment info
+    if (CRM_Utils_Array::value('fileFields', $form->_fields)) {
+      foreach ($form->_fields['fileFields'] as $key => $value) {
+        if (CRM_Utils_Array::value('fileID', $value)) {
+          $url = CRM_Utils_System::url('civicrm/file',
+            'reset=1&id='.$value['fileID'].'&eid='.$value['entityID'],
+            FALSE, NULL, TRUE, TRUE
+          );
+          $fileType = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File',
+            $value['fileID'],
+            'mime_type',
+            'id'
+          );  
+          $fileName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File',
+            $value['fileID'],
+            'uri',
+            'id'
+          );  
+          if ($fileType == 'image/jpeg' ||
+            $fileType == 'image/pjpeg' ||
+            $fileType == 'image/gif' ||
+            $fileType == 'image/x-png' ||
+            $fileType == 'image/png'
+          ) {
+            $files[$key]['displayURL'] = $url;
+          }
+          $files[$key]['fileURL'] = $url;
+          $files[$key]['id'] = $key;
+          $files[$key]['fileID'] = $value['fileID'];
+          $files[$key]['fileName'] = $fileName;
+        }
+        else {
+          $files[$key]['noDisplay'] = TRUE;
+        }
+      }
+    }
+    $form->assign('files', $files);
+  }
   if ($formName == "CRM_Grant_Form_GrantPage_Settings" || 
     $formName == "CRM_Grant_Form_GrantPage_Custom" ||  
     $formName == "CRM_Grant_Form_GrantPage_Draft" || 
@@ -258,8 +298,8 @@ function grantapplications_civicrm_pageRun( &$page ) {
         $row['grant_application_received_date'] = $dao->application_received_date;
         $row['grant_amount_total'] = $dao->amount_total;
         $row['grant_status'] = 'Draft';
-        $row['program_id'] = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_Grant', $dao->id, 'grant_program_id');
-        $row['program_name'] = current(CRM_Grant_BAO_GrantProgram::getGrantPrograms($row['program_id']));
+        /* $row['program_id'] = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_Grant', $dao->id, 'grant_program_id'); */
+        /* $row['program_name'] = current(CRM_Grant_BAO_GrantProgram::getGrantPrograms($row['program_id'])); */
         $ssID = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$dao->id.'%"');
         if ($ssID) {
           $formValues = CRM_Contact_BAO_SavedSearch::getFormValues($ssID);
