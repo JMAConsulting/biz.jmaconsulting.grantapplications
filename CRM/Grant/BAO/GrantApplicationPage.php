@@ -217,7 +217,11 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
         }
       }
     }
-
+    $onbehalfId = NULL;
+    if (CRM_Utils_Array::value('is_for_organization', $values)
+      && CRM_Utils_Array::value('grant_id', $values)) {
+      $onbehalfId = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_Grant', $values['grant_id'], 'contact_id' );
+    }
     if (CRM_Utils_Array::value('is_email_receipt', $values) ||
       CRM_Utils_Array::value('onbehalf_dupe_alert', $values) ||
       $returnMessageText
@@ -240,7 +244,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
             $userID = CRM_Utils_Array::value('related_contact', $values);
           }
         }
-        self::buildCustomProfile($preID, 'customPre', $userID, $template, $params['custom_pre_id']);
+        self::buildCustomProfile($preID, 'customPre', $userID, $template, $params['custom_pre_id'], $onbehalfId);
       }
       $userID = $contactID;
       if ($postID = CRM_Utils_Array::value('custom_post_id', $values)) {
@@ -251,9 +255,9 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
             $userID = CRM_Utils_Array::value('related_contact', $values);
           }
         }
-        self::buildCustomProfile($postID, 'customPost', $userID, $template, $params['custom_post_id']);
+        self::buildCustomProfile($postID, 'customPost', $userID, $template, $params['custom_post_id'], $onbehalfId);
       }
-
+      
       $title = isset($values['title']) ? $values['title'] : CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantApplicationPage', $values['id'], 'title');
 
       // set email in the template here
@@ -380,7 +384,7 @@ AND module = 'CiviGrant'  AND civicrm_uf_join.is_active = 1 ) $whereClause";
    * @access public
    * @static
    */
-  static function buildCustomProfile($gid, $name, $cid, &$template, &$params) {
+  static function buildCustomProfile($gid, $name, $cid, &$template, &$params, $onBehalfId = NULL) {
     //Ignore fields for mails
     $fieldsToIgnore = array(
       'amount_granted' => 1,
@@ -422,8 +426,29 @@ AND module = 'CiviGrant'  AND civicrm_uf_join.is_active = 1 ) $whereClause";
         if ($groupTitle) {
           $template->assign($name . "_grouptitle", $groupTitle);
         }
-
+        if ($onBehalfId) {
+          $allFields = $fields;
+          $grantParams = $params;
+          $grantFields = $grantValues = $params = array();
+          foreach($fields as $key => $value) {
+            if ($value['field_type'] == 'Grant') {
+              $grantFields[$key] = $value;
+              unset($fields[$key]);
+            }
+          }
+        }
+          
         CRM_Core_BAO_UFGroup::getValues($cid, $fields, $values, FALSE, $params);
+        if ($onBehalfId) {
+          CRM_Core_BAO_UFGroup::getValues($onBehalfId, $grantFields, $grantValues, FALSE, $grantParams);
+          $allValues = array_merge($values, $grantValues);
+          $values = array();
+          foreach($allFields as $key => $value) {
+            if (CRM_Utils_Array::value($value['title'], $allValues)) {
+              $values[$value['title']] = $allValues[$value['title']];
+            }
+          }
+        }
 
         if (count($values)) {
           $template->assign($name, $values);
