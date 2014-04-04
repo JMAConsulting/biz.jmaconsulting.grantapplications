@@ -99,10 +99,10 @@
       	 value = cj(this).val();
 	 if (value) {
 	   if (numericFields[elementName] == 'Int') {
-      	     value = value.replace(/[^0-9]/g, '');	 
+      	     value = value.replace(/[^0-9|,]/g, '');	 
            }
            else {
-	     value = value.replace(/[^\d|.]/g, '');
+	     value = value.replace(/[^\d|.|,]/g, '');
            }
 	   cj(this).val(value);
          }
