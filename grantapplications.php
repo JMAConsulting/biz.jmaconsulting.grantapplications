@@ -86,7 +86,7 @@ function grantapplications_civicrm_managed(&$entities) {
 
 function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form) {
   $errors = array();
-  if ($formName == 'CRM_Grant_Form_Grant_Main' && isset($fields['grant_id'])) {
+  if ($formName == 'CRM_Grant_Form_Grant_Main' && CRM_Utils_Array::value('grant_id', $fields)) {
     $grantType = CRM_Core_DAO::getFieldValue("CRM_Grant_DAO_Grant", $fields['grant_id'], "grant_type_id");
     $groupTree = &CRM_Core_BAO_CustomGroup::getTree("Grant", $this, $fields['grant_id'], 0, $grantType);
     foreach ($groupTree as $field => $value) {
