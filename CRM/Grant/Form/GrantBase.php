@@ -324,7 +324,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
         CRM_Core_BAO_Address::checkContactSharedAddressFields($fields, $contactID);
         $addCaptcha = FALSE;
         foreach ($fields as $key => $field) {
-          if ($viewOnly &&
+          if (CRM_Utils_Array::value('grant_id', $this->_params) && $viewOnly &&
             isset($field['data_type']) &&
             $field['data_type'] == 'File' || ($viewOnly && $field['name'] == 'image_URL')
           ) {
