@@ -324,12 +324,13 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
         CRM_Core_BAO_Address::checkContactSharedAddressFields($fields, $contactID);
         $addCaptcha = FALSE;
         foreach ($fields as $key => $field) {
-          if (CRM_Utils_Array::value('grant_id', $this->_params) && $viewOnly &&
+          if ($viewOnly &&
             isset($field['data_type']) &&
             $field['data_type'] == 'File' || ($viewOnly && $field['name'] == 'image_URL')
           ) {
             $cFid = substr($field['name'], strpos($field['name'], "_") + 1);
-            if ($field['field_type'] == 'Organization') {
+            $this->_fields['fileFields'][$key]['noDisplay'] = TRUE;
+            if ($field['field_type'] == 'Organization' && CRM_Utils_Array::value('grant_id', $this->_params)) {
               $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$this->_params['grant_id'].'%"');
               CRM_Contact_BAO_SavedSearch::retrieve($ssParams, $savedSearch);
               $grantParams = unserialize($savedSearch['form_values']);
@@ -338,13 +339,15 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
                 'entityID' => $grantParams['contactID'],
                 'cfID' => $cFid,
               );
+              unset($this->_fields['fileFields'][$key]['noDisplay']);
             }
-            elseif ($field['field_type'] == 'Grant') {
+            elseif ($field['field_type'] == 'Grant' && CRM_Utils_Array::value('grant_id', $this->_params)) {
               $this->_fields['fileFields'][$key] = array(
                 'fileID' => current(CRM_Core_BAO_CustomValueTable::getEntityValues($this->_params['grant_id'], NULL, array($cFid))),
                 'entityID' => $this->_params['grant_id'],
                 'cfID' => $cFid,
               );
+              unset($this->_fields['fileFields'][$key]['noDisplay']);
             }
           }
 
