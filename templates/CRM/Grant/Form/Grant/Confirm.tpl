@@ -49,10 +49,16 @@
     </div>
 {/if}
 
-    {if $customPre}
-       <fieldset class="label-left">
-           {include file="CRM/UF/Form/Block.tpl" fields=$customPre}
-       </fieldset>
+    {if $email}
+        <div class="crm-group grantee_email-group">
+            <div class="header-dark">
+                {ts}Your Email{/ts}
+            </div>
+            <div class="crm-section no-label grantee_email-section">
+             	<div class="content">{$email}</div>
+            	<div class="clear"></div>
+            </div>
+        </div>
     {/if}
     {if $onbehalfProfile}
       <div class="crm-group onBehalf_display-group label-left crm-profile-view">
@@ -64,16 +70,10 @@
          </div>
       </div>
     {/if}
-    {if $email}
-        <div class="crm-group grantee_email-group">
-            <div class="header-dark">
-                {ts}Your Email{/ts}
-            </div>
-            <div class="crm-section no-label grantee_email-section">
-             	<div class="content">{$email}</div>
-            	<div class="clear"></div>
-            </div>
-        </div>
+    {if $customPre}
+       <fieldset class="label-left">
+           {include file="CRM/UF/Form/Block.tpl" fields=$customPre}
+       </fieldset>
     {/if}
    	{if $customPost}
             <fieldset class="label-left">

@@ -62,11 +62,6 @@
             {ts}Date{/ts}: <strong>{$application_received_date|crmDate}</strong><br />
        </div>
       {/if} 
-    {if $customPre}
-            <fieldset class="label-left">
-                {include file="CRM/UF/Form/Block.tpl" fields=$customPre}
-            </fieldset>
-    {/if}
     {if $onbehalfProfile}
       <div class="crm-group onBehalf_display-group label-left crm-profile-view">
          {include file="CRM/UF/Form/Block.tpl" fields=$onbehalfProfile}
@@ -76,6 +71,11 @@
             <div class="clear"></div>
          </div>
       </div>
+    {/if}
+    {if $customPre}
+            <fieldset class="label-left">
+                {include file="CRM/UF/Form/Block.tpl" fields=$customPre}
+            </fieldset>
     {/if}
     {if $customPost}
             <fieldset class="label-left">

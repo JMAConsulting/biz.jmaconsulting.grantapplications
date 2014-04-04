@@ -328,8 +328,24 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
             isset($field['data_type']) &&
             $field['data_type'] == 'File' || ($viewOnly && $field['name'] == 'image_URL')
           ) {
-            // ignore file upload fields
-            continue;
+            $cFid = substr($field['name'], strpos($field['name'], "_") + 1);
+            if ($field['field_type'] == 'Organization') {
+              $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$this->_params['grant_id'].'%"');
+              CRM_Contact_BAO_SavedSearch::retrieve($ssParams, $savedSearch);
+              $grantParams = unserialize($savedSearch['form_values']);
+              $this->_fields['fileFields'][$key] = array(
+                'fileID' => current(CRM_Core_BAO_CustomValueTable::getEntityValues($grantParams['contactID'], NULL, array($cFid))),
+                'entityID' => $grantParams['contactID'],
+                'cfID' => $cFid,
+              );
+            }
+            elseif ($field['field_type'] == 'Grant') {
+              $this->_fields['fileFields'][$key] = array(
+                'fileID' => current(CRM_Core_BAO_CustomValueTable::getEntityValues($this->_params['grant_id'], NULL, array($cFid))),
+                'entityID' => $this->_params['grant_id'],
+                'cfID' => $cFid,
+              );
+            }
           }
 
           list($prefixName, $index) = CRM_Utils_System::explode('-', $key, 2);
