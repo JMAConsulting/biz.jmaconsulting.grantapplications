@@ -186,7 +186,6 @@ function grantapplications_civicrm_buildForm($formName, &$form) {
           }
           $files[$key]['fileName'] = $fileName;
           $files[$key]['id'] = $key;
-          CRM_Core_Error::debug( '$key', $key );
           $files[$key]['fileID'] = $value['fileID'];
           if (CRM_Utils_Array::value($key, $form->_params)) {
             if (in_array($form->_params[$key]['type'], array('image/jpeg', 'image/pjpeg', 'image/gif',  'image/x-png', 'image/png'))) {
