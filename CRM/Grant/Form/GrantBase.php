@@ -330,7 +330,8 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
           ) {
             $cFid = substr($field['name'], strpos($field['name'], "_") + 1);
             $this->_fields['fileFields'][$key]['noDisplay'] = TRUE;
-            if ($field['field_type'] == 'Organization' && CRM_Utils_Array::value('grant_id', $this->_params)) {
+            $subType = CRM_Contact_BAO_ContactType::subTypeInfo('Organization', TRUE);
+            if (in_array($field['field_type'], array_keys($subType)) && CRM_Utils_Array::value('grant_id', $this->_params)) {
               $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$this->_params['grant_id'].'%"');
               CRM_Contact_BAO_SavedSearch::retrieve($ssParams, $savedSearch);
               $grantParams = unserialize($savedSearch['form_values']);

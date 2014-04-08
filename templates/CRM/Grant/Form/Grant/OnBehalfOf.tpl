@@ -185,6 +185,9 @@ function resetValues( filter ) {
     });
   }
   else {
+    cj("#select_org div").find(".attachFile").each( function() {
+      cj(this).replaceWith('');
+    });
     cj("#select_org div").find( 'input[type=text], select, textarea' ).each(function( ) {
       cj(this).val( '' );
     });
@@ -230,6 +233,11 @@ function setLocationDetails(contactID) {
         if (data[ele].type == 'Radio') {
           if (data[ele].value) {
             cj("input[name='"+ ele +"']").filter("[value=" + data[ele].value + "]").attr('checked', 'checked');
+          }
+        }
+        else if (data[ele].type == 'File') {
+          if (data[ele].fileId) {
+            cj("#" + ele).parent().after("<div class='attachFile'><div class=clear></div><div class=label>Attached File:</div><div class=content>"+data[ele].fileId+"</div></div>");
           }
         }
         else if (data[ele].type == 'CheckBox') {

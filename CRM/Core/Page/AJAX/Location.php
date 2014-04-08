@@ -206,6 +206,9 @@ class CRM_Core_Page_AJAX_Location {
             elseif ($htmlType == 'File') {
               $elements["onbehalf_{$key}"]['type'] = $htmlType;
               $elements["onbehalf_{$key}"]['value'] = '';
+              $cFid = substr($key, strpos($key, "_") + 1);
+              $file = CRM_Core_BAO_CustomField::getFileURL($cid, $cFid, $defaults[$key]);
+              $elements["onbehalf_{$key}"]['fileId'] = $file['file_url'];
             }
             elseif ($htmlType == 'Select Date') {
               $elements["onbehalf_{$key}"]['type'] = $htmlType;

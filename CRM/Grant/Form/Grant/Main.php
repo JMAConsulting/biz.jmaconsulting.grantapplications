@@ -335,31 +335,6 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     );  
     // set up attachments
     if ($gid = CRM_Utils_Request::retrieve('gid', 'Positive')) {
-      $ssParams = array();
-      $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$gid.'%"');
-      CRM_Contact_BAO_SavedSearch::retrieve($ssParams, $savedSearch);
-      $grantParams = unserialize($savedSearch['form_values']);
-      $subType = CRM_Contact_BAO_ContactType::subTypeInfo('Organization', TRUE);
-      foreach ($subType as $key => $value) {
-        $gTree[] = &CRM_Core_BAO_CustomGroup::getTree("Organization", $this, $grantParams['contactID'], NULL, $key);
-      }
-      foreach ($gTree as $flds => $vs) {
-        foreach ($vs as $fld => $v) {
-          if (isset($v['fields'])) {
-            foreach ($v['fields'] as $k => $f) {
-              if (CRM_Utils_Array::value('html_type', $f) == 'File' && isset($f['customValue'][1]['fid'])) {
-                $oFiles['custom_'.$k]['displayURL'] = $f['customValue'][1]['displayURL'];
-                $oFiles['custom_'.$k]['fileURL'] = $f['customValue'][1]['fileURL'];
-                $oFiles['custom_'.$k]['fileName'] = $f['customValue'][1]['fileName'];
-                $oFiles['custom_'.$k]['fid'] = $k;
-              }
-            }
-          }
-        }
-      }
-      if (isset($oFiles)) {
-        $this->assign('oFileFields', $oFiles);
-      }
       $grantType = CRM_Core_DAO::getFieldValue("CRM_Grant_DAO_Grant", $gid, "grant_type_id");
       $groupTree = &CRM_Core_BAO_CustomGroup::getTree("Grant", $this, $gid, 0, $grantType);
       foreach ($groupTree as $field => $value) {
@@ -399,15 +374,6 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
         if ( !CRM_Utils_Array::value('grant_amount_requested', $fields) ||  CRM_Utils_Array::value('grant_amount_requested', $fields) < 0 ) {
             $errors['grant_amount_requested'] = ts('Requested amount has to be greater than zero.');
         }
-    }
-    $config = CRM_Core_Config::singleton();
-
-    foreach ($self->_fields as $name => $fld) {
-      if ($fld['is_required'] &&
-        CRM_Utils_System::isNull(CRM_Utils_Array::value($name, $fields))
-      ) {
-        $errors[$name] = ts('%1 is a required field.', array(1 => $fld['title']));
-      }
     }
     return empty($errors) ? TRUE : $errors;
   }
