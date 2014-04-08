@@ -31,6 +31,7 @@
             <tr class="columnheader">
 	        <th>{ts}Name{/ts}</th>
                 <th>{ts}Grant Type{/ts}</th>
+                <th>{ts}Program Name{/ts}</th>
                 <th>{ts}Grant Application Received date{/ts}</th>
                 <th>{ts}Amount Granted{/ts}</th>
                 <th>{ts}Status{/ts}</th>
@@ -41,6 +42,7 @@
                 <tr id='rowid{$row.grant_id}' class="{cycle values="odd-row,even-row"}">
 		    <td>{$row.sort_name}</td>
                     <td>{$row.grant_type}</td>
+                    <td>{$row.program_name}</td>
                     <td>{$row.grant_application_received_date|truncate:10:''|crmDate}</td>
                     <td>{$row.grant_amount_total|crmMoney}</td>
                     <td>{$row.grant_status}</td>

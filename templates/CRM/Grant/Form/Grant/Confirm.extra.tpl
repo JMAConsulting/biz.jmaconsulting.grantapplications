@@ -6,6 +6,7 @@
 	    {foreach from=$files item=values key=id}
 	    	{literal}
 			var noDisplay = '';
+			var displayURLnew = '';
 			var id = {/literal}'{$id}'{literal};
 			var displayURL = {/literal}'{$values.displayURL}'{literal};
 			var fileURL = {/literal}'{$values.fileURL}'{literal};
@@ -14,13 +15,22 @@
 			{/literal}{if $values.noDisplay}{literal}
 			var noDisplay = {/literal}'{$values.noDisplay}'{literal};
 			{/literal}{/if}{literal}
+			{/literal}{if $values.displayURLnew}{literal}
+			var displayURLnew = {/literal}'{$values.displayURLnew}'{literal};
+			{/literal}{/if}{literal}
 
 			if (displayURL != '') {
-		          cj('#'+id).replaceWith('<a href='+displayURL+' class=crm-image-popup><img src='+displayURL+' height="100" width="100"></a><a href='+fileURL+'&fid='+fid+'&action=delete onclick="if (confirm(\'Are you sure you want to delete attached file?\')) this.href+=\'&confirmed=1\';else return false;"><span class="icon red-icon delete-icon" style="margin:0px 0px -5px 20px" title="Delete this file"></span></a>');
+		          cj('#'+id).replaceWith('<a href='+displayURL+' class=crm-image-popup><img src='+displayURL+' height="100" width="100"></a>');
                 	}
 		        else if (noDisplay == '') {
-		          cj('#'+id).replaceWith('<a href='+fileURL+'>'+fileName+'</a><a href='+fileURL+'&fid='+fid+'&action=delete onclick="if (confirm(\'Are you sure you want to delete attached file?\')) this.href+=\'&confirmed=1\';else return false;"><span class="icon red-icon delete-icon" style="margin:0px 0px -5px 20px" title="Delete this file"></span></a>');
+		          cj('#'+id).replaceWith('<a href='+fileURL+'>'+fileName+'</a>');
                         }
+			if (displayURLnew != '') {
+		          cj('#'+id).replaceWith('<img src='+displayURLnew+'>'+fileName+'</img>');
+                	}
+			else if (noDisplay != '') {
+		          cj('#'+id).replaceWith(fileName);
+                	}
 			 if (noDisplay != '') {
 			  cj('#'+id).replaceWith('');
 			}
