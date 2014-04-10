@@ -605,9 +605,11 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
       CRM_Utils_Date::format($params['thankyou_date']) :
       NULL,
     );
-    if ($programId = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $grantTypeId, 'id', 'grant_type_id')) {
-      $grantParams['grant_program_id'] = $programId;
+
+    if (CRM_Utils_Array::value('grant_program_id', $form->_values)) {
+      $grantParams['grant_program_id'] = $form->_values['grant_program_id'];
     }
+
     if (CRM_Utils_Array::value('is_draft', $params)) {
       $grantParams['status_id'] = key(CRM_Core_OptionGroup::values('grant_status',  FALSE, FALSE, FALSE, "AND v.name = 'Draft'"));
     }

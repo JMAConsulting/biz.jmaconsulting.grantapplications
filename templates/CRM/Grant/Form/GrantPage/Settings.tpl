@@ -49,6 +49,9 @@
 	<tr class="crm-grant-grantpage-settings-form-block-grant_type_id"><td class="label">{$form.grant_type_id.label}</td><td>{$form.grant_type_id.html}<br />	
             <span class="description">{ts}Select the grant type to be assigned to grant applications made using this page.{/ts}</span></td>
 	</tr>
+	<tr class="crm-grant-grantpage-settings-form-block-grant_program_id"><td class="label">{$form.grant_program_id.label}</td><td>{$form.grant_program_id.html}<br />	
+            <span class="description">{ts}Select the grant program to be assigned to grant applications made using this page.{/ts}</span></td>
+	</tr>
 	
         <tr class="crm-contribution-contributionpage-settings-form-block-is_organization"><td>&nbsp;</td><td>{$form.is_organization.html} {$form.is_organization.label} {help id="id-is_organization"}</td></tr>
   	<tr id="for_org_option" class="crm-contribution-form-block-is_organization">
