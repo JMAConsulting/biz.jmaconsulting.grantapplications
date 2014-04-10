@@ -267,6 +267,11 @@ class CRM_Grant_DAO_GrantApplicationPage extends CRM_Core_DAO
                     'type' => CRM_Utils_Type::T_INT,
                     'required' => true,
                 ) ,
+                'grant_program_id' => array(
+                    'name' => 'grant_program_id',
+                    'type' => CRM_Utils_Type::T_INT,
+                    'required' => true,
+                ) ,
                 'default_amount' => array(
                     'name' => 'default_amount',
                     'type' => CRM_Utils_Type::T_MONEY,
