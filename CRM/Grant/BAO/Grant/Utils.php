@@ -72,8 +72,10 @@ class CRM_Grant_BAO_Grant_Utils {
     $form->_params['item_name'] = $form->_params['description'];
     $form->_params['application_received_date'] = $now;
     $form->set('params', $form->_params);
+    // check if grantprograms extension enabled
+    $isActive = CRM_Core_DAO::singleValueQuery('SELECT is_active FROM civicrm_extension WHERE full_name = "biz.jmaconsulting.grantprograms"');
     // finally send an email receipt
-    if ($grant) {   
+    if ($grant && !$isActive) {   
       $form->_values['grant_id'] = $grant->id;
       CRM_Grant_BAO_GrantApplicationPage::sendMail($contactID, 
         $form->_values,
