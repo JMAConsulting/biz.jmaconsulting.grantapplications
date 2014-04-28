@@ -6,6 +6,7 @@ This extension to CiviCRM allows members of the public to apply for Grants. Admi
 The 4.4 release of Grant Application Pages Extension (previously known as Grant Profiles Extension) adds support for:
 * An individual applying for a grant on behalf of an organization.
 * Short codes for WordPress.
+* Saving a draft grant application until it is ready to be submitted.
 
 Installation
 ------------
