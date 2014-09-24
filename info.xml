@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <extension key="biz.jmaconsulting.grantapplications" type="module">
-  <downloadUrl>https://github.com/JMAConsulting/biz.jmaconsulting.grantapplications/archive/v1.1.zip</downloadUrl>
+  <downloadUrl>https://github.com/JMAConsulting/biz.jmaconsulting.grantapplications/archive/v1.2.zip</downloadUrl>
   <file>grantapplications</file>
   <name>Grant Applications</name>
   <description>This extension enhances profile creation for Grants. Applicants can submit online grant applications after filling in fields that are configured through CIviProfile. Core and custom grant fields can be added to CIviProfiles to collect information about various applicants that will be applying online for grants. Online grant application pages can be created and managed from the grant dashboard.</description>
@@ -9,18 +9,19 @@
     <url desc="Main Extension Page">
       https://github.com/JMAConsulting/biz.jmaconsulting.grantapplications/wiki/About-grant-applications
     </url>
-    <url desc="Installation Instructions for 1.1">https://github.com/JMAConsulting/biz.jmaconsulting.grantapplications/blob/master/README.md</url>
+    <url desc="Installation Instructions for 1.2">https://github.com/JMAConsulting/biz.jmaconsulting.grantapplications/blob/master/README.md</url>
   </urls>
   <license>AGPL-3.0</license>
   <maintainer>
     <author>JMA Consulting</author>
     <email>joe.murray@jmaconsulting.biz</email>
   </maintainer>
-  <releaseDate>2014-01-08</releaseDate>
-  <version>1.1</version>
+  <releaseDate>2014-09-24</releaseDate>
+  <version>1.2</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>4.4</ver>
+    <ver>4.5</ver>
   </compatibility>
   <comments></comments>
   <civix>
