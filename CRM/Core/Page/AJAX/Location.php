@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.4                                                |
+ | CiviCRM version 4.5                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2013                                |
+ | Copyright CiviCRM LLC (c) 2004-2014                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -28,7 +28,7 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2013
+ * @copyright CiviCRM LLC (c) 2004-2014
  *
  */
 
@@ -46,12 +46,21 @@ class CRM_Core_Page_AJAX_Location {
    * location field values for selected permissioned contact.
    */
   static function getPermissionedLocation() {
-    $cid = CRM_Utils_Type::escape($_GET['cid'], 'Integer');
-    if ($_GET['ufId']) {
-      $ufId = CRM_Utils_Type::escape($_GET['ufId'], 'Integer');
+    $cid = CRM_Utils_Request::retrieve('cid', 'Integer', CRM_Core_DAO::$_nullObject, TRUE);
+    $ufId = CRM_Utils_Request::retrieve('ufId', 'Integer', CRM_Core_DAO::$_nullObject, TRUE);
+    $relContact = CRM_Utils_Type::escape($_GET['relContact'], 'Integer', CRM_Core_DAO::$_nullObject, TRUE);
+
+    // Verify user id
+    $user = CRM_Utils_Request::retrieve('uid', 'Integer', CRM_Core_DAO::$_nullObject, FALSE, CRM_Core_Session::singleton()->get('userID'));
+    if (empty($user) || (CRM_Utils_Request::retrieve('cs', 'String', $form, FALSE) && !CRM_Contact_BAO_Contact_Permission::validateChecksumContact($user, CRM_Core_DAO::$_nullObject, FALSE))
+    ) {
+      CRM_Utils_System::civiExit();
     }
-    elseif ($_GET['relContact']) {
-      $relContact = CRM_Utils_Type::escape($_GET['relContact'], 'Integer');
+
+    // Verify user permission on related contact
+    $employers = CRM_Contact_BAO_Relationship::getPermissionedEmployer($user);
+    if (!isset($employers[$cid])) {
+      CRM_Utils_System::civiExit();
     }
 
     $values      = array();
@@ -61,7 +70,6 @@ class CRM_Core_Page_AJAX_Location {
     $config = CRM_Core_Config::singleton();
     $addressSequence = array_flip($config->addressSequence());
 
-
     if (!empty($relContact)) {
       $elements = array(
         "phone_1_phone" =>
@@ -69,28 +77,25 @@ class CRM_Core_Page_AJAX_Location {
         "email_1_email" =>
         $location['email'][1]['email'],
       );
-
-      if (array_key_exists('street_address', $addressSequence)) {
-        $elements["address_1_street_address"] = $location['address'][1]['street_address'];
-      }
-      if (array_key_exists('supplemental_address_1', $addressSequence)) {
-        $elements['address_1_supplemental_address_1'] = $location['address'][1]['supplemental_address_1'];
-      }
-      if (array_key_exists('supplemental_address_2', $addressSequence)) {
-        $elements['address_1_supplemental_address_2'] = $location['address'][1]['supplemental_address_2'];
-      }
-      if (array_key_exists('city', $addressSequence)) {
-        $elements['address_1_city'] = $location['address'][1]['city'];
-      }
-      if (array_key_exists('postal_code', $addressSequence)) {
-        $elements['address_1_postal_code'] = $location['address'][1]['postal_code'];
-        $elements['address_1_postal_code_suffix'] = $location['address'][1]['postal_code_suffix'];
-      }
-      if (array_key_exists('country', $addressSequence)) {
-        $elements['address_1_country_id'] = $location['address'][1]['country_id'];
-      }
-      if (array_key_exists('state_province', $addressSequence)) {
-        $elements['address_1_state_province_id'] = $location['address'][1]['state_province_id'];
+      
+      $locationElements = array(
+        'street_address',
+        'supplemental_address_1',
+        'supplemental_address_2',
+        'city',
+        'postal_code',
+        'postal_code_suffix',
+        'country',
+        'state_province',
+      );
+      
+      foreach ($locationElements as $value) {
+        if (array_key_exists($value, $addressSequence)) {
+          if (in_array($value, array('country', 'state_province'))) {
+            $value .= '_id';
+          }
+          $elements["address_1_{$value}"] =  $location['address'][1][$value];
+        }
       }
     }
     else {
@@ -161,12 +166,16 @@ class CRM_Core_Page_AJAX_Location {
       foreach ($addressFields as $field) {
         if (array_key_exists($field, $addressSequence)) {
           $addField = $field;
+          $type = 'Text';
           if (in_array($field, array(
             'state_province', 'country'))) {
             $addField = "{$field}_id";
+            $type = 'Select2';
           }
           $elements["onbehalf_{$field}-{$locTypeId}"] = array(
-            'type' => 'Text',
+            'fld' => $field,
+            'locTypeId' => $locTypeId,
+            'type' => $type,
             'value' =>  isset($location['address'][1]) ? $location['address'][1][$addField] : null,
           );
           unset($profileFields["{$field}-{$locTypeId}"]);
@@ -202,7 +211,7 @@ class CRM_Core_Page_AJAX_Location {
               $elements["onbehalf_{$key}"]['type'] = $htmlType;
               $elements["onbehalf_{$key}"]['value'] = $defaults[$key];
               $elements["onbehalf_{$key}"]['id'] = $defaults["{$key}_id"];
-            }
+            }            
             elseif ($htmlType == 'File') {
               $elements["onbehalf_{$key}"]['type'] = $htmlType;
               $elements["onbehalf_{$key}"]['value'] = '';
@@ -226,73 +235,22 @@ class CRM_Core_Page_AJAX_Location {
         }
       }
     }
-
-    echo json_encode($elements);
-    CRM_Utils_System::civiExit();
+    CRM_Utils_JSON::output($elements);
   }
 
-  static function jqState($config) {
-    if (
-      !isset($_GET['_value']) ||
-      empty($_GET['_value'])
-    ) {
-      CRM_Utils_System::civiExit();
-    }
-
-    $result = CRM_Core_PseudoConstant::stateProvinceForCountry($_GET['_value']);
-
-    $elements = array(
-      array('name' => ts('- select a state -'),
-        'value' => '',
-      )
-    );
-    foreach ($result as $id => $name) {
-      $elements[] = array(
-        'name' => $name,
-        'value' => $id,
-      );
-    }
-
-    echo json_encode($elements);
-    CRM_Utils_System::civiExit();
+  static function jqState() {
+    CRM_Utils_JSON::output(CRM_Core_BAO_Location::getChainSelectValues($_GET['_value'], 'country'));
   }
 
-  static function jqCounty($config) {
-    if (CRM_Utils_System::isNull($_GET['_value'])) {
-      $elements = array(
-        array('name' => ts('- select state -'), 'value' => '')
-      );
-    }
-    else {
-      $result = CRM_Core_PseudoConstant::countyForState($_GET['_value']);
-
-      $elements = array(
-        array('name' => ts('- select -'), 'value' => '')
-      );
-      foreach ($result as $id => $name) {
-        $elements[] = array(
-          'name' => $name,
-          'value' => $id,
-        );
-      }
-
-      if ($elements == array(
-        array('name' => ts('- select -'), 'value' => ''))) {
-        $elements = array(
-          array('name' => ts('- no counties -'), 'value' => '')
-        );
-      }
-    }
-
-    echo json_encode($elements);
-    CRM_Utils_System::civiExit();
+  static function jqCounty() {
+    CRM_Utils_JSON::output(CRM_Core_BAO_Location::getChainSelectValues($_GET['_value'], 'stateProvince'));
   }
 
   static function getLocBlock() {
     // i wish i could retrieve loc block info based on loc_block_id,
     // Anyway, lets retrieve an event which has loc_block_id set to 'lbid'.
-    if ($_POST['lbid']) {
-      $params = array('1' => array($_POST['lbid'], 'Integer'));
+    if ($_REQUEST['lbid']) {
+      $params = array('1' => array($_REQUEST['lbid'], 'Integer'));
       $eventId = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_event WHERE loc_block_id=%1 LIMIT 1', $params);
     }
     // now lets use the event-id obtained above, to retrieve loc block information.
@@ -338,10 +296,8 @@ class CRM_Core_Page_AJAX_Location {
     }
 
     // set the message if loc block is being used by more than one event.
-    $result['count_loc_used'] = CRM_Event_BAO_Event::countEventsUsingLocBlockId($_POST['lbid']);
+    $result['count_loc_used'] = CRM_Event_BAO_Event::countEventsUsingLocBlockId($_REQUEST['lbid']);
 
-    echo json_encode($result);
-    CRM_Utils_System::civiExit();
+    CRM_Utils_JSON::output($result);
   }
 }
-
