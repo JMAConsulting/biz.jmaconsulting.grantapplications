@@ -89,3 +89,4 @@
     <p>{$confirm_footer}</p>
   </div>
 </div>
+{include file="CRM/Grant/Form/Grant/File.tpl"}
