@@ -1,6 +1,6 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.4                                                |
+ | CiviCRM version 4.5                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
@@ -32,107 +32,107 @@
  *}
 
 {if $buildOnBehalfForm or $onBehalfRequired}
-<fieldset id="for_organization" class="for_organization-group">
-<legend>{$fieldSetTitle}</legend>
-  {if ( $relatedOrganizationFound or $onBehalfRequired ) and !$organizationName}
-    <div id='orgOptions' class="section crm-section">
-      <div class="content">
-        {$form.org_option.html}
-      </div>
-    </div>
-  {/if}
-
-<div id="select_org" class="crm-section">
-  {foreach from=$onBehalfOfFields item=onBehaldField key=fieldName}
-    {if $onBehalfOfFields.$fieldName.skipDisplay}
-      {continue}
-    {/if}
-    {if $onBehalfOfFields.$fieldName.field_type eq "Formatting"}
-      {$onBehalfOfFields.$fieldName.help_pre}
-      {continue}
-    {/if}
-    <div class="crm-section {$onBehalfOfFields.$fieldName.name}-section">
-      {if $onBehalfOfFields.$fieldName.help_pre}
-        &nbsp;&nbsp;<span class='description'>{$onBehalfOfFields.$fieldName.help_pre}</span>
-      {/if}
-
-      {if ( $fieldName eq 'organization_name' ) and $organizationName}
-        <div id='org_name' class="label">{$form.onbehalf.$fieldName.label}</div>
+  <fieldset id="for_organization" class="for_organization-group">
+    <legend>{$fieldSetTitle}</legend>
+    {if ( $relatedOrganizationFound or $onBehalfRequired ) and !$organizationName}
+      <div id='orgOptions' class="section crm-section">
         <div class="content">
-          {$form.onbehalf.$fieldName.html|crmAddClass:big}
-          <span>
-              ( <a id='createNewOrg' href="#" onclick="createNew( ); return false;">{ts}Enter a new organization{/ts}</a> )
-          </span>
-          <div id="id-onbehalf-orgname-enter-help" class="description">
-            {ts}Organization details have been prefilled for you. If this is not the organization you want to use, click "Enter a new organization" above.{/ts}
-          </div>
-          {if $onBehalfOfFields.$fieldName.help_post}
-            <span class='description'>{$onBehalfOfFields.$fieldName.help_post}</span>
-          {/if}
+          {$form.org_option.html}
         </div>
-      {else}
-        {if $onBehalfOfFields.$fieldName.options_per_line}
-          <div class="label option-label">{$form.onbehalf.$fieldName.label}</div>
-          <div class="content">
-            {assign var="count" value="1"}
-            {strip}
-              <table class="form-layout-compressed">
-              <tr>
-              {* sort by fails for option per line. Added a variable to iterate through the element array*}
-                {assign var="index" value="1"}
-                {foreach name=outer key=key item=item from=$form.onbehalf.$fieldName}
-                  {if $index < 10}
-                    {assign var="index" value=`$index+1`}
-                  {else}
-                    <td class="labels font-light">{$form.onbehalf.$fieldName.$key.html}</td>
-                    {if $count == $onBehalfOfFields.$fieldName.options_per_line}
-                      </tr>
-                      <tr>
-                      {assign var="count" value="1"}
-                    {else}
-                      {assign var="count" value=`$count+1`}
-                    {/if}
-                  {/if}
-                {/foreach}
-              </tr>
-              </table>
-            {/strip}
-            {if $onBehalfOfFields.$fieldName.help_post}
-              <span class='description'>{$onBehalfOfFields.$fieldName.help_post}</span>
-            {/if}
-          </div>
-        {else}
-          <div class="label">{$form.onbehalf.$fieldName.label}</div>
-          <div class="content">
-            {$form.onbehalf.$fieldName.html}
-            {if $fieldName eq 'organization_name'}
-              <div id="id-onbehalf-orgname-help" class="description">{ts}Start typing the name of an organization that you have saved previously to use it again. Otherwise click "Enter a new organization" above.{/ts}</div>
-            {/if}
-            {if !empty($onBehalfOfFields.$fieldName.html_type)  && $onBehalfOfFields.$fieldName.html_type eq 'Autocomplete-Select'}
-              {assign var=elementName value=onbehalf[$fieldName]}
-            {include file="CRM/Custom/Form/AutoComplete.tpl" element_name=$elementName}
-            {/if}
-            {if $onBehalfOfFields.$fieldName.name|substr:0:5 eq 'phone'}
-              {assign var="phone_ext_field" value=$onBehalfOfFields.$fieldName.name|replace:'phone':'phone_ext'}
-              {if $form.onbehalf.$phone_ext_field.html}
-                &nbsp;{$form.onbehalf.$phone_ext_field.html}
-              {/if}
-            {/if} 
-	    {if $onBehalfOfFields.$fieldName.data_type eq 'Date'}
-            {assign var=elementName value=onbehalf[$fieldName]}
-	       {include file="CRM/common/jcalendar.tpl" elementName=$elementName elementId=onbehalf_$fieldName}
-            {/if} 
-            {if $onBehalfOfFields.$fieldName.help_post}
-              <br /><span class='description'>{$onBehalfOfFields.$fieldName.help_post}</span>
-            {/if}
-          </div>
+      </div>
+    {/if}
+
+    <div id="select_org" class="crm-section">
+      {foreach from=$onBehalfOfFields item=onBehaldField key=fieldName}
+        {if $onBehalfOfFields.$fieldName.skipDisplay}
+          {continue}
         {/if}
-      {/if}
-      <div class="clear"></div>
-    </div>
-  {/foreach}
-</div>
-<div>{$form.mode.html}</div>
+        {if $onBehalfOfFields.$fieldName.field_type eq "Formatting"}
+          {$onBehalfOfFields.$fieldName.help_pre}
+          {continue}
+        {/if}
+        <div class="crm-section {$onBehalfOfFields.$fieldName.name}-section">
+          {if $onBehalfOfFields.$fieldName.help_pre}
+            &nbsp;&nbsp;<span class='description'>{$onBehalfOfFields.$fieldName.help_pre}</span>
+          {/if}
+
+          {if ($fieldName eq 'organization_name') and $organizationName}
+            <div id='org_name' class="label">{$form.onbehalf.$fieldName.label}</div>
+            <div class="content">
+              {$form.onbehalf.$fieldName.html|crmAddClass:big}
+              <span>
+                ( <a id='createNewOrg' href="#" onclick="createNew( ); return false;">{ts}Enter a new organization{/ts}</a> )
+              </span>
+              <div id="id-onbehalf-orgname-enter-help" class="description">
+                {ts}Organization details have been prefilled for you. If this is not the organization you want to use, click "Enter a new organization" above.{/ts}
+              </div>
+              {if $onBehalfOfFields.$fieldName.help_post}
+                <span class='description'>{$onBehalfOfFields.$fieldName.help_post}</span>
+              {/if}
+            </div>
+          {else}
+          {if $onBehalfOfFields.$fieldName.options_per_line}
+            <div class="label option-label">{$form.onbehalf.$fieldName.label}</div>
+            <div class="content">
+              {assign var="count" value="1"}
+              {strip}
+                <table class="form-layout-compressed">
+                  <tr>
+                    {* sort by fails for option per line. Added a variable to iterate through the element array*}
+                    {assign var="index" value="1"}
+                    {foreach name=outer key=key item=item from=$form.onbehalf.$fieldName}
+                      {if $index < 10}
+                        {assign var="index" value=`$index+1`}
+                      {else}
+                        <td class="labels font-light">{$form.onbehalf.$fieldName.$key.html}</td>
+                        {if $count == $onBehalfOfFields.$fieldName.options_per_line}
+                          </tr>
+                          <tr>
+                            {assign var="count" value="1"}
+                        {else}
+                          {assign var="count" value=`$count+1`}
+                        {/if}
+                      {/if}
+                    {/foreach}
+                  </tr>
+                </table>
+              {/strip}
+              {if $onBehalfOfFields.$fieldName.help_post}
+                <span class='description'>{$onBehalfOfFields.$fieldName.help_post}</span>
+              {/if}
+            </div>
+          {else}
+            <div class="label">{$form.onbehalf.$fieldName.label}</div>
+            <div class="content">
+              {$form.onbehalf.$fieldName.html}
+              {if $fieldName eq 'organization_name'}
+                <div id="id-onbehalf-orgname-help" class="description">{ts}Start typing the name of an organization that you have saved previously to use it again. Otherwise click "Enter a new organization" above.{/ts}</div>
+              {/if}
+              {if !empty($onBehalfOfFields.$fieldName.html_type)  && $onBehalfOfFields.$fieldName.html_type eq 'Autocomplete-Select'}
+                {assign var=elementName value=onbehalf[$fieldName]}
+                {include file="CRM/Custom/Form/AutoComplete.tpl" element_name=$elementName}
+              {/if}
+              {if $onBehalfOfFields.$fieldName.name|substr:0:5 eq 'phone'}
+                {assign var="phone_ext_field" value=$onBehalfOfFields.$fieldName.name|replace:'phone':'phone_ext'}
+                {if $form.onbehalf.$phone_ext_field.html}
+                  &nbsp;{$form.onbehalf.$phone_ext_field.html}
+                {/if}
+              {/if} 
+	      {if $onBehalfOfFields.$fieldName.data_type eq 'Date'}
+                {assign var=elementName value=onbehalf[$fieldName]}
+	        {include file="CRM/common/jcalendar.tpl" elementName=$elementName elementId=onbehalf_$fieldName}
+              {/if} 
+              {if $onBehalfOfFields.$fieldName.help_post}
+                <br /><span class='description'>{$onBehalfOfFields.$fieldName.help_post}</span>
+              {/if}
+            </div>
+          {/if}
+        {/if}
+        <div class="clear"></div>
+      </div>
+    {/foreach}
+  </div>
+  <div>{$form.mode.html}</div>
 {/if}
 
 {literal}

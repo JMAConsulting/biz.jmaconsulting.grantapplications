@@ -1,6 +1,6 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.2                                                |
+ | CiviCRM version 4.5                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2012                                |
  +--------------------------------------------------------------------+
@@ -25,39 +25,39 @@
 *}
 {* TabHeader.tpl provides a tabbed interface well as title for current step *}
 <div class="crm-actions-ribbon crm-grantpage-tab-actions-ribbon">
-   <ul id="actions">
-    	<li><div id="crm-grantpage-links-wrapper">
-    	      <a id="crm-grantpage-links-link" class="button">
-                <span><div class="icon dropdown-icon"></div>{ts}Grant Application Links{/ts}</span>
-              </a>
-    	        <div class="ac_results" id="crm-grantpage-links-list">
-    	      	   <div class="crm-grantpage-links-list-inner">
-    	      	   	<ul>
-                            <li><a class="crm-grantpage-grant" href="{crmURL p='civicrm/grant/add' q="reset=1&action=add&context=standalone"}">{ts}New Grant{/ts}</a></li>
-                            <li><a class="crm-grant-live" href="{crmURL p='civicrm/grant/transact' q="reset=1&id=`$grantApplicationPageID`" fe='true'}" target="_blank">{ts}Grant Application Page (Live){/ts}</a></li>
-    		        </ul>
-    	           </div>
-    	      </div>
-        </div></li>
-        <div>
-              {help id="id-configure-grant-pages"}
-        </div>
+  <ul id="actions">
+    <li>
+      <div id="crm-grantpage-links-wrapper">
+    	<a id="crm-grantpage-links-link" class="button">
+          <span><div class="icon dropdown-icon"></div>{ts}Grant Application Links{/ts}</span>
+        </a>
+    	<div class="ac_results" id="crm-grantpage-links-list">
+    	  <div class="crm-grantpage-links-list-inner">
+    	    <ul>
+              <li><a class="crm-grantpage-grant" href="{crmURL p='civicrm/grant/add' q="reset=1&action=add&context=standalone"}">{ts}New Grant{/ts}</a></li>
+              <li><a class="crm-grant-live" href="{crmURL p='civicrm/grant/transact' q="reset=1&id=`$grantApplicationPageID`" fe='true'}" target="_blank">{ts}Grant Application Page (Live){/ts}</a></li>
+    	    </ul>
+    	  </div>
+    	</div>
+      </div>
+    </li>
+    <div>
+      {help id="id-configure-grant-pages"}
+    </div>
   </ul>
   <div class="clear"></div>
 </div>
 {include file="CRM/common/TabHeader.tpl"}
 
 {literal}
-<script>
+  <script>
+    cj('body').click(function() {
+      cj('#crm-grantpage-links-list').hide();
+    });
 
-cj('body').click(function() {
-	cj('#crm-grantpage-links-list').hide();
-	});
-
-cj('#crm-grantpage-links-link').click(function(event) {
-	cj('#crm-grantpage-links-list').toggle();
-	event.stopPropagation();
-	});
-
-</script>
+    cj('#crm-grantpage-links-link').click(function(event) {
+      cj('#crm-grantpage-links-list').toggle();
+      event.stopPropagation();
+    });
+  </script>
 {/literal}
