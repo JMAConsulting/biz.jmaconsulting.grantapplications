@@ -2,7 +2,7 @@
  +--------------------------------------------------------------------+
  | CiviCRM version 4.5                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2010                                |
+ | Copyright CiviCRM LLC (c) 2004-2011                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -23,30 +23,43 @@
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
 *}
-
-{htxt id="id-intro_msg-title"}
-  {ts}Intro Content{/ts}
-{/htxt}
-{htxt id="id-intro_msg"}
-  {ts}Enter content for the introductory message. This will be displayed below the page title. You can include images, as long as they are already uploaded to a server - click the "Image" button in the button bar.{/ts}
-{/htxt}
-
-{htxt id="id-footer_msg-title"}
-  {ts}Footer Content{/ts}
-{/htxt}
-{htxt id="id-footer_msg"}
-  {ts}If you want content displayed at the bottom of the grant application page, enter it here.{/ts}
-{/htxt}
-
-{htxt id="id-default_amount"}
-  {ts}Enter a default amount for this grant application page.{/ts}
-{/htxt}
-
-{htxt id="id-start_date-title"}
-  {ts}Date Range{/ts}
-{/htxt}
-{htxt id="id-start_date"}
-  {ts}You can optionally set an "active date range" for this grant application page.{/ts}
-{/htxt}
-
-
+{if $files}
+  {literal}
+    <script type='text/javascript'>
+  {/literal}
+    {foreach from=$files item=values key=id}
+      {literal}
+	var noDisplay = '';
+	var displayURLnew = '';
+	var id = {/literal}'{$id}'{literal};
+	var displayURL = {/literal}'{$values.displayURL}'{literal};
+	var fileURL = {/literal}'{$values.fileURL}'{literal};
+	var fileName = {/literal}'{$values.fileName}'{literal};
+	var fid = {/literal}'{$values.fileID}'{literal};
+      {/literal}{if $values.noDisplay}{literal}
+	var noDisplay = {/literal}'{$values.noDisplay}'{literal};
+      {/literal}{/if}{literal}
+      {/literal}{if $values.displayURLnew}{literal}
+	var displayURLnew = {/literal}'{$values.displayURLnew}'{literal};
+      {/literal}{/if}{literal}
+        if (displayURL != '') {
+	 cj('#'+id).replaceWith('<a href='+displayURL+' class=crm-image-popup><img src='+displayURL+' height="100" width="100"></a>');
+       	}
+	else if (noDisplay == '') {
+	  cj('#'+id).replaceWith('<a href='+fileURL+'>'+fileName+'</a>');
+        }
+	if (displayURLnew != '') {
+	  cj('#'+id).replaceWith('<img src='+displayURLnew+'>'+fileName+'</img>');
+        }
+	else if (noDisplay != '') {
+	  cj('#'+id).replaceWith(fileName);
+        }
+	if (noDisplay != '') {
+	  cj('#'+id).replaceWith('');
+	}
+      {/literal}
+    {/foreach}
+  {literal}
+    </script>
+  {/literal}
+{/if}
