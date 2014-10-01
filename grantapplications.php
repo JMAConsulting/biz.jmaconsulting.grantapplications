@@ -333,6 +333,8 @@ function grantapplications_civicrm_buildForm($formName, &$form) {
 function grantapplications_civicrm_pageRun( &$page ) {
   if ($page->getVar('_name') == 'CRM_Contact_Page_View_UserDashBoard') {
     $cid = $page->getVar('_contactId'); 
+    // Check if grant program extension is enabled
+    $enabled = CRM_Grant_BAO_GrantApplicationPage::checkExtensionEnabled('biz.jmaconsulting.grantprograms');
     $smarty = CRM_Core_Smarty::singleton();
     $rels = $smarty->get_template_vars('currentRelationships');
     $actionLinks = $smarty->get_template_vars('grant_rows');
@@ -372,8 +374,10 @@ function grantapplications_civicrm_pageRun( &$page ) {
         $row['grant_application_received_date'] = $dao->application_received_date;
         $row['grant_amount_total'] = $dao->amount_total;
         $row['grant_status'] = 'Draft';
-        $row['program_id'] = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_Grant', $dao->id, 'grant_program_id');
-        $row['program_name'] = current(CRM_Grant_BAO_GrantProgram::getGrantPrograms($row['program_id']));
+        if ($enabled) {
+          $row['program_id'] = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_Grant', $dao->id, 'grant_program_id');
+          $row['program_name'] = current(CRM_Grant_BAO_GrantProgram::getGrantPrograms($row['program_id']));
+        }
         $ssID = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$dao->id.'%"');
         if ($ssID) {
           $formValues = CRM_Contact_BAO_SavedSearch::getFormValues($ssID);
@@ -392,6 +396,7 @@ function grantapplications_civicrm_pageRun( &$page ) {
       $grantRows = $smarty->get_template_vars('grant_rows');
       $grants = array_merge($grantRows, $rows); 
       $smarty->assign('grant_rows', $grants);
+      $smarty->assign('enabled', $enabled);
     }
   }
   if( $page->getVar('_name') == 'CRM_Grant_Page_DashBoard') {
