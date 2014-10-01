@@ -125,12 +125,16 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
       TRUE
     );
 
-    $programs = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
-    $this->add('select', 'grant_program_id',
-      ts('Grant Program'),
-      $programs,
-      TRUE
-    );
+    // Check if grant program extension is enabled
+    $enabled = CRM_Grant_BAO_GrantApplicationPage::checkExtensionEnabled('biz.jmaconsulting.grantprograms');
+    if ($enabled) {
+      $programs = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
+      $this->add('select', 'grant_program_id',
+        ts('Grant Program'),
+        $programs,
+        TRUE
+      );
+    }
  
     $this->addWysiwyg('intro_text', ts('Introductory Message'), $attributes['intro_text']);
 
@@ -205,10 +209,14 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
   static
   function formRule($values) {
     $errors = array();
-    $grantType = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $values['grant_program_id'], 'grant_type_id');
-    if ($grantType != $values['grant_type_id']) {
-      $errors['grant_program_id'] = ts("Please select a Grant Program which uses the same grant type.");
-    } 
+    // Check if grant program extension is enabled
+    $enabled = CRM_Grant_BAO_GrantApplicationPage::checkExtensionEnabled('biz.jmaconsulting.grantprograms');
+    if ($enabled) {
+      $grantType = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $values['grant_program_id'], 'grant_type_id');
+      if ($grantType != $values['grant_type_id']) {
+        $errors['grant_program_id'] = ts("Please select a Grant Program which uses the same grant type.");
+      } 
+    }
 
     //CRM-4286
     if (strstr($values['title'], '/')) {
