@@ -47,36 +47,19 @@ class CRM_Grant_Form_GrantPage_Custom extends CRM_Grant_Form_GrantPage {
   public function buildQuickForm() {
     //GEP-11
     $this->_isLast = TRUE;
-    $types = array_merge(array('Contact', 'Individual', 'Grant'),
-      CRM_Contact_BAO_ContactType::subTypes('Individual')
-    );
 
-    $profiles = CRM_Core_BAO_UFGroup::getProfiles($types);
-  
-    $excludeTypes = array('Contribution', 'Membership',  'Participant', 'Activity');
+    // Register 'contact_1' model
+    $entities = array();
+    $entities[] = array('entity_name' => 'contact_1', 'entity_type' => 'IndividualModel');
+    $allowCoreTypes = array_merge(array('Contact', 'Individual'), CRM_Contact_BAO_ContactType::subTypes('Individual'));
+    $allowSubTypes = array();
 
-    $excludeProfiles = CRM_Core_BAO_UFGroup::getProfiles($excludeTypes);
-    
-    foreach ($excludeProfiles as $key => $value) {
-      if (array_key_exists( $key, $profiles)) {
-        unset($profiles[$key]);
-      }
-    }
+    // Register 'grant_1'
+    $allowCoreTypes[] = 'Grant';
+    $entities[] = array('entity_name' => 'grant_1', 'entity_type' => 'GrantModel');
 
-    // exclude batch profiles
-    $batchProfiles = CRM_Core_BAO_UFGroup::getBatchProfiles();
-    foreach ($batchProfiles as $key => $value) {
-      if (array_key_exists($key, $profiles)) {
-        unset($profiles[$key]);
-      }
-    }
-
-    if (empty($profiles)) {
-      $this->assign('noProfile', TRUE);
-    }
-
-    $this->add('select', 'custom_pre_id', ts('Include Profile') . '<br />' . ts('(top of page)'), array('' => ts('- select -')) + $profiles);
-    $this->add('select', 'custom_post_id', ts('Include Profile') . '<br />' . ts('(bottom of page)'), array('' => ts('- select -')) + $profiles);
+    $this->addProfileSelector('custom_pre_id', ts('Include Profile') . '<br />' . ts('(top of page)'), $allowCoreTypes, $allowSubTypes, $entities);
+    $this->addProfileSelector('custom_post_id', ts('Include Profile') . '<br />' . ts('(bottom of page)'), $allowCoreTypes, $allowSubTypes, $entities);
 
     $this->addFormRule(array('CRM_Grant_Form_GrantPage_Custom', 'formRule'), $this->_id);
 
@@ -105,9 +88,10 @@ class CRM_Grant_Form_GrantPage_Custom extends CRM_Grant_Form_GrantPage {
       'entity_table' => 'civicrm_grant_app_page',
       'entity_id' => $this->_id,
     );
+
     list($defaults['custom_pre_id'],
-      $defaults['custom_post_id']
-    ) = CRM_Core_BAO_UFJoin::getUFGroupIds($ufJoinParams);
+      $second) = CRM_Core_BAO_UFJoin::getUFGroupIds($ufJoinParams);
+    $defaults['custom_post_id'] = $second ? array_shift($second) : '';
 
     return $defaults;
   }

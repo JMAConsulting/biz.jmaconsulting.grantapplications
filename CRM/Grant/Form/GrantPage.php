@@ -122,6 +122,9 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
       }
       $this->set('values', $this->_values);
     }
+	$schemas = array('IndividualModel', 'OrganizationModel', 'GrantModel');
+    CRM_UF_Page_ProfileEditor::registerProfileScripts();
+    CRM_UF_Page_ProfileEditor::registerSchemas($schemas);
   }
 
   /**
@@ -320,14 +323,15 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
   }
 
   function getTemplateFileName() {
-    if ($this->controller->getPrint() == CRM_Core_Smarty::PRINT_NOFORM ||
-      $this->getVar('_id') <= 0 ||
+    if ($this->controller->getPrint() || $this->getVar('_id') <= 0 ||
       ($this->_action & CRM_Core_Action::DELETE) ||
       (CRM_Utils_String::getClassName($this->_name) == 'AddProduct')
     ) {
       return parent::getTemplateFileName();
     }
     else {
+      // hack lets suppress the form rendering for now
+      self::$_template->assign('isForm', FALSE);
       return 'CRM/Grant/Form/GrantPage/Tab.tpl';
     }
   }

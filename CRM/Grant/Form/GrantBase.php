@@ -93,14 +93,6 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
   public $_fields;
 
   /**
-   * The billing location id for this grant application page
-   *
-   * @var int
-   * @protected
-   */
-  public $_bltID;
-
-  /**
    * Cache the amount to make things easier
    *
    * @var float
@@ -159,7 +151,6 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
 
     $this->_values = $this->get('values');
     $this->_fields = $this->get('fields');
-    $this->_bltID = $this->get('bltID');
     $this->assign('title', $this->_values['title']);
     CRM_Utils_System::setTitle($this->_values['title']);
  if (!$this->_values) {
@@ -237,11 +228,11 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
 
     // assign the address formatted up for display
     $addressParts = array(
-      "street_address-{$this->_bltID}",
-      "city-{$this->_bltID}",
-      "postal_code-{$this->_bltID}",
-      "state_province-{$this->_bltID}",
-      "country-{$this->_bltID}",
+      "street_address-Primary",
+      "city-Primary",
+      "postal_code-Primary",
+      "state_province-Primary",
+      "country-Primary",
     );
 
     $addressFields = array();
