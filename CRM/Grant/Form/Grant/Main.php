@@ -80,6 +80,15 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       $this->assign('intro_text', $this->_values['intro_text']);
     }
 
+    if ($this->_snippet) {
+      $this->assign('isOnBehalfCallback', CRM_Utils_Array::value('onbehalf', $_GET, FALSE));
+      return;
+    }
+
+    if (!empty($this->_values['intro_text'])) {
+      $this->assign('intro_text', $this->_values['intro_text']);
+    }
+
     $qParams = "reset=1&amp;id={$this->_id}";
     
     $this->assign( 'qParams' , $qParams );
@@ -164,11 +173,14 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     }
 
     $config = CRM_Core_Config::singleton();
-    // set default country from config if no country set
- 
-    // now fix all state country selectors
-    CRM_Core_BAO_Address::fixAllStateSelects($this, $this->_defaults);
 
+    //process drafts
+    if ($gid = CRM_Utils_Request::retrieve('gid', 'Positive')) {
+      $ssParams = array();
+      $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$gid.'%"');
+      CRM_Contact_BAO_SavedSearch::retrieve($ssParams, $savedSearch);
+      $this->_defaults = array_replace( $this->_defaults, unserialize($savedSearch['form_values']) );
+    }
     return $this->_defaults;
   }
 
