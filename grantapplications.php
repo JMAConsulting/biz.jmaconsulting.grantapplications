@@ -626,18 +626,16 @@ function &actionLinks() {
          CRM_Core_Action::DISABLE => array(
           'name' => ts('Disable'),
           'title' => ts('Disable'),
-          'extra' => 'onclick = "enableDisable( %%id%%,\'' . 'CRM_Grant_BAO_GrantApplicationPage' . '\',\'' . 'enable-disable' . '\' );"',
-          'ref' => 'disable-action',
+          'ref' => 'crm-enable-disable',
         ),
         CRM_Core_Action::ENABLE => array(
           'name' => ts('Enable'),
-          'extra' => 'onclick = "enableDisable( %%id%%,\'' . 'CRM_Grant_BAO_GrantApplicationPage' . '\',\'' . 'disable-enable' . '\' );"',
-          'ref' => 'enable-action',
+          'ref' => 'crm-enable-disable',
           'title' => ts('Enable'),
         ),
         CRM_Core_Action::DELETE => array(
           'name' => ts('Delete'),
-          'url' => 'civicrm/admin/grant/settings',
+          'url' => CRM_Utils_System::currentPath(),
           'qs' => 'reset=1&action=delete&id=%%id%%',
           'title' => ts('Delete'),
           'extra' => 'onclick = "return confirm(\'' . $deleteExtra . '\');"',
