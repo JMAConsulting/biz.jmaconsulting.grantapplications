@@ -631,8 +631,8 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     $grantParams['amount_total'] = trim(CRM_Utils_Money::format($nonDeductibleAmount, ' '));
 
     if ($nonDeductibleAmount || $isDraft) {
-        //add grant record
-        $grant = &CRM_Grant_BAO_Grant::add($grantParams, $ids);
+      //add grant record
+      $grant = CRM_Grant_BAO_Grant::add($grantParams, $ids);
     }
     if ($online && $grant) {
         CRM_Core_BAO_CustomValueTable::postProcess($form->_params,
