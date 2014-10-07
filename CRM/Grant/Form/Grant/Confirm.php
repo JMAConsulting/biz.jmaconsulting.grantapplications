@@ -308,8 +308,6 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
         }
       }
     }
-     // now fix all state country selectors
-    CRM_Core_BAO_Address::fixAllStateSelects($this, $defaults);
 
     $this->setDefaults($defaults);
 
