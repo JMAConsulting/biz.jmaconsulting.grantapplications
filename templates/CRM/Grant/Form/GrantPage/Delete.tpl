@@ -23,43 +23,11 @@
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
 *}
-<div class='crm-container manage-grant-apps' id='crm-container'>
-  <h3>{ts}Manage Grant Application Pages{/ts}</h3>
-    {include file="CRM/common/enableDisableApi.tpl"}
-{include file="CRM/common/crmeditable.tpl"}
-    {include file="CRM/common/jsortable.tpl"}
-     <table id="options" class="display">
-       <thead>
-         <tr>
-	   <th id="sortable">{ts}Title{/ts}</th>
-             <th>{ts}ID{/ts}</th>
-             <th>{ts}Enabled?{/ts}</th>
- 	     <th></th>
-         </tr>
-       </thead>
-       {if $fields}
-         {foreach from=$fields keys=key item=grows}
-	   <tr id="grant_application_page-{$grows.id}" class="crm-entity {if NOT $grows.is_active} disabled{/if}">
-	     <td>{$grows.title}</td>	       
-	     <td>{$grows.id}</td>
-             <td id="row_{$grows.id}_status">{if $grows.is_active eq 1} {ts}Yes{/ts} {else} {ts}No{/ts} {/if}</td>
-             <td class="crm-grant-page-actions right nowrap">
-	       {if $grows.configureActionLinks}	
-	         <div class="crm-grant-page-configure-actions">
-		   {$grows.configureActionLinks|replace:'xx':$grows.id}
-		 </div>
-               {/if}
-               {if $grows.onlineGrantLinks}	
-	         <div class="crm-grant-online-application-actions">
-		   {$grows.onlineGrantLinks|replace:'xx':$grows.id}
-		 </div>
-	       {/if}
-	       <div class="crm-grant-page-more">
-                 {$grows.action|replace:'xx':$grows.id}
-               </div>
-	     </td>
-	   </tr>
-	 {/foreach}
-       {/if}
-     </table>
+{* this template is used for confirmation of delete for a group  *}
+    <div class="messages status no-popup">
+      <div class="icon inform-icon"></div>
+           WARNING: Are you sure you want to Delete the selected Grant Application Page? A Delete operation cannot be undone. Do you want to continue?
+      </div>
+<div class="form-item">
+    {include file="CRM/common/formButtons.tpl"}
 </div>
