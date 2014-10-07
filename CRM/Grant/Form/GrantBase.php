@@ -384,8 +384,6 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
 
         $this->assign($name, $fields);
 
-        CRM_Core_BAO_Address::addStateCountryMap($stateCountryMap);
-
         if ($addCaptcha &&
           !$viewOnly
         ) {
