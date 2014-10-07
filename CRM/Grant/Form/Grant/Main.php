@@ -100,11 +100,6 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     }
     $this->assign('onBehalfRequired', $this->_onBehalfRequired);
 
-    if ($this->_snippet) {
-      $this->assign('isOnBehalfCallback', CRM_Utils_Array::value('onbehalf', $_GET, FALSE));
-      return;
-    }
-
     if (!empty($this->_values['intro_text'])) {
       $this->assign('intro_text', $this->_values['intro_text']);
     }
@@ -274,7 +269,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       $profileAddressFields = array();
       $numericFields['amount_total'] = 'Float';
       foreach( $this->_fields as $key => $value ) {
-        CRM_Core_BAO_UFField::assignAddressField($key, $profileAddressFields);
+        CRM_Core_BAO_UFField::assignAddressField($key, $profileAddressFields, array('uf_group_id' => $this->_values['custom_pre_id']));
         $dataType = CRM_Utils_Array::value('data_type', $value);
         if (in_array($dataType, array('Float', 'Int', 'Money'))) {
           if ($dataType == 'Money') {
