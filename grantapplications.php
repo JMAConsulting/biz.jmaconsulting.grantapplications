@@ -27,7 +27,8 @@ function grantapplications_civicrm_install() {
 
   $smarty = CRM_Core_Smarty::singleton();
   $config = CRM_Core_Config::singleton();
-  $data = $smarty->fetch($config->extensionsDir . 'biz.jmaconsulting.grantapplications/sql/civicrm_msg_template.tpl');
+  $smarty->assign('currentDirectoryPath', __DIR__);
+  $data = $smarty->fetch(__DIR__ . '/sql/civicrm_msg_template.tpl');
   file_put_contents($config->uploadDir . "civicrm_data.sql", $data);
   CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->uploadDir . "civicrm_data.sql");
   grantapplications_addRemoveMenu(TRUE);
@@ -45,8 +46,7 @@ function grantapplications_civicrm_uninstall() {
  * Implementation of hook_civicrm_enable
  */
 function grantapplications_civicrm_enable() {
-  $config = CRM_Core_Config::singleton();
-  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->extensionsDir.'biz.jmaconsulting.grantapplications/sql/grantapplications_enable.sql');
+  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, __DIR__ . '/sql/grantapplications_enable.sql');
   grantapplications_addRemoveMenu(TRUE);
   return _grantapplications_civix_civicrm_enable();
 }
@@ -55,8 +55,7 @@ function grantapplications_civicrm_enable() {
  * Implementation of hook_civicrm_disable
  */
 function grantapplications_civicrm_disable() {
-  $config = CRM_Core_Config::singleton();
-  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->extensionsDir.'biz.jmaconsulting.grantapplications/sql/grantapplications_disable.sql');
+  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, __DIR__ . '/sql/grantapplications_disable.sql');
   grantapplications_addRemoveMenu(FALSE);
   return _grantapplications_civix_civicrm_disable();
 }
