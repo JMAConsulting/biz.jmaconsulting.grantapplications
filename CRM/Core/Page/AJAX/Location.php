@@ -159,18 +159,18 @@ class CRM_Core_Page_AJAX_Location {
         'supplemental_address_2',
         'city',
         'postal_code',
-        'country',
+        'county',
         'state_province',
+        'country',
       );
 
       foreach ($addressFields as $field) {
         if (array_key_exists($field, $addressSequence)) {
           $addField = $field;
           $type = 'Text';
-          if (in_array($field, array(
-            'state_province', 'country'))) {
+          if (in_array($field, array('state_province', 'country', 'county'))) {
             $addField = "{$field}_id";
-            $type = 'Select2';
+            $type = 'Select';
           }
           $elements["onbehalf_{$field}-{$locTypeId}"] = array(
             'fld' => $field,
