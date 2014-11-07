@@ -27,8 +27,6 @@
 
 DROP TABLE IF EXISTS civicrm_grant_app_page;
 
-DELETE FROM civicrm_navigation WHERE name = 'New Grant Application Page';
-
 DELETE  civicrm_option_value.*, civicrm_option_group.*, civicrm_msg_template.* 
 FROM civicrm_option_value 
 INNER JOIN civicrm_option_group ON  civicrm_option_value.option_group_id = civicrm_option_group.id

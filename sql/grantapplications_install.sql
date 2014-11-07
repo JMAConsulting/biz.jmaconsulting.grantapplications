@@ -69,7 +69,7 @@ ALTER TABLE `civicrm_grant_app_page`
 SELECT @parentId := id FROM `civicrm_navigation` WHERE `name` = 'Grants';
 
 INSERT INTO `civicrm_navigation` (`domain_id`, `label`, `name`, `url`, `permission`, `permission_operator`, `parent_id`, `is_active`, `has_separator`, `weight`) VALUES
-(1, 'New Grant Application Page', 'New Grant Application Page', 'civicrm/admin/grant/apply?reset=1&action=add', 'access CiviGrant', 'AND', @parentId, 1, 1, 4);
+({$domainID}, 'New Grant Application Page', 'New Grant Application Page', 'civicrm/admin/grant/apply?reset=1&action=add', 'access CiviGrant', 'AND', @parentId, 1, 1, 4);
 
 SELECT @optionGroupId := id FROM `civicrm_option_group` WHERE `name` = 'activity_type';
 
