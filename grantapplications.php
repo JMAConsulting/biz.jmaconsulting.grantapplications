@@ -39,6 +39,7 @@ function grantapplications_civicrm_install() {
  * Implementation of hook_civicrm_uninstall
  */
 function grantapplications_civicrm_uninstall() {
+  enableDisableNavigationMenu(2);
   return _grantapplications_civix_civicrm_uninstall();
 }
 
@@ -46,7 +47,7 @@ function grantapplications_civicrm_uninstall() {
  * Implementation of hook_civicrm_enable
  */
 function grantapplications_civicrm_enable() {
-  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, __DIR__ . '/sql/grantapplications_enable.sql');
+  enableDisableNavigationMenu(1);
   grantapplications_addRemoveMenu(TRUE);
   return _grantapplications_civix_civicrm_enable();
 }
@@ -55,8 +56,10 @@ function grantapplications_civicrm_enable() {
  * Implementation of hook_civicrm_disable
  */
 function grantapplications_civicrm_disable() {
-  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, __DIR__ . '/sql/grantapplications_disable.sql');
-  grantapplications_addRemoveMenu(FALSE);
+  enableDisableNavigationMenu(0);
+  if (!CRM_Core_DAO::singleValueQuery("SELECT id FROM civicrm_extension WHERE full_name IN ('biz.jmaconsulting.grantprograms', 'biz.jmaconsulting.bugp')")) {
+    grantapplications_addRemoveMenu(FALSE);
+  }
   return _grantapplications_civix_civicrm_disable();
 }
 
@@ -784,4 +787,54 @@ function grantapplications_civicrm_entityTypes(&$entityTypes) {
     'class' => 'CRM_Grant_DAO_GrantApplicationPage',
     'table' => 'civicrm_grant_app_page',
   );
+}
+
+
+/**
+ * function to disable/enable/delete navigation menu
+ *
+ * @param integer $action 
+ *
+ */
+
+function enableDisableNavigationMenu($action) {
+  $domainID = CRM_Core_Config::domainID();
+  
+  if ($action < 2) { 
+    CRM_Core_DAO::executeQuery(
+      "UPDATE civicrm_uf_group SET is_active = %1 WHERE group_type LIKE '%Grant%'", 
+      array(
+        1 => array($action, 'Integer'),
+      )
+    ); 
+    
+    CRM_Core_DAO::executeQuery(
+      "UPDATE civicrm_option_value 
+INNER JOIN civicrm_option_group ON  civicrm_option_value.option_group_id = civicrm_option_group.id
+INNER JOIN civicrm_msg_template ON civicrm_msg_template.workflow_id = civicrm_option_value.id
+SET civicrm_option_value.is_active = %1,
+  civicrm_option_group.is_active = %1,
+  civicrm_msg_template.is_active = %1
+WHERE civicrm_option_group.name LIKE 'msg_tpl_workflow_grant'", 
+      array(
+        1 => array($action, 'Integer')
+      )
+    ); 
+    
+    CRM_Core_DAO::executeQuery(
+      "UPDATE civicrm_navigation SET is_active = %2 WHERE name = 'New Grant Application Page' AND domain_id = %1", 
+      array(
+        1 => array($domainID, 'Integer'),
+        2 => array($action, 'Integer')
+      )
+    ); 
+  }
+  else {
+    CRM_Core_DAO::executeQuery(
+      "DELETE FROM civicrm_navigation  WHERE name = 'New Grant Application Page' AND domain_id = %1", 
+      array(
+        1 => array($domainID, 'Integer')
+      )
+    );
+  }
 }
