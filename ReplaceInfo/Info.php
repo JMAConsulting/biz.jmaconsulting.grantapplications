@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.4                                                |
+ | CiviCRM version 4.5                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2013                                |
+ | Copyright CiviCRM LLC (c) 2004-2014                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -31,7 +31,7 @@
  * abstract class.
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2013
+ * @copyright CiviCRM LLC (c) 2004-2014
  * $Id$
  *
  */
@@ -41,6 +41,9 @@ class CRM_Grant_Info extends CRM_Core_Component_Info {
   protected $keyword = 'grant';
 
   // docs inherited from interface
+  /**
+   * @return array
+   */
   public function getInfo() {
     return array(
       'name' => 'CiviGrant',
@@ -54,6 +57,11 @@ class CRM_Grant_Info extends CRM_Core_Component_Info {
 
 
   // docs inherited from interface
+  /**
+   * @param bool $getAllUnconditionally
+   *
+   * @return array
+   */
   public function getPermissions($getAllUnconditionally = FALSE) {
     return array(
       'access CiviGrant',
@@ -63,6 +71,9 @@ class CRM_Grant_Info extends CRM_Core_Component_Info {
   }
 
   // docs inherited from interface
+  /**
+   * @return null
+   */
   public function getUserDashboardElement() {
     return array('name' => ts('Grant'),
       'title' => ts('Your Grant(s)'),
@@ -71,8 +82,19 @@ class CRM_Grant_Info extends CRM_Core_Component_Info {
     );
   }
 
+  // docs inherited from interface
+  /**
+   * @return null
+   */
+  public function getUserDashboardObject() {
+    // no dashboard element for this component
+    return NULL;
+  }
 
   // docs inherited from interface
+  /**
+   * @return array
+   */
   public function registerTab() {
     return array('title' => ts('Grants'),
       'url' => 'grant',
@@ -81,6 +103,9 @@ class CRM_Grant_Info extends CRM_Core_Component_Info {
   }
 
   // docs inherited from interface
+  /**
+   * @return array
+   */
   public function registerAdvancedSearchPane() {
     return array('title' => ts('Grants'),
       'weight' => 50,
@@ -88,11 +113,17 @@ class CRM_Grant_Info extends CRM_Core_Component_Info {
   }
 
   // docs inherited from interface
+  /**
+   * @return null
+   */
   public function getActivityTypes() {
     return NULL;
   }
 
   // add shortcut to Create New
+  /**
+   * @param $shortCuts
+   */
   public function creatNewShortcut(&$shortCuts) {
     if (CRM_Core_Permission::check('access CiviGrant') &&
       CRM_Core_Permission::check('edit grants')
