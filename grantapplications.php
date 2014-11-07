@@ -276,11 +276,11 @@ function grantapplications_civicrm_buildForm($formName, &$form) {
   } 
   // Code to be done to avoid core editing
   if ($formName == "CRM_UF_Form_Field" && CRM_Core_Permission::access('CiviGrant')) {
-    $grantFields = getProfileFields();
+    $grantFields = CRM_BUGP_BAO_GrantApplicationProfile::getProfileFields();
     $fields['Grant'] = $grantFields;
     // Add the grant fields to the form
     $originalFields = $form->getVar('_fields');
-    $form->setVar('_fields', array_merge(exportableFields('Grant'), $originalFields));
+    $form->setVar('_fields', array_merge(CRM_BUGP_BAO_GrantApplicationProfile::exportableFields(), $originalFields));
     $originalSelect = $form->getVar('_selectFields');
 
     foreach ($fields as $key => $value) {
@@ -464,86 +464,6 @@ function grantapplications_civicrm_pageRun( &$page ) {
       
     }
   }
-}
-
-function &exportableFields() {
-  $grantFields = array(
-                       'grant_status' => array(
-                                               'title' => 'Grant Status',
-                                               'name' => 'grant_status',
-                                               'data_type' => CRM_Utils_Type::T_STRING,
-                                               ),
-                       'grant_type' => array(
-                                             'title' => 'Grant Type',
-                                             'name' => 'grant_type',
-                                             'data_type' => CRM_Utils_Type::T_STRING,
-                                             ),
-                       'grant_money_transfer_date' => array(
-                                                            'title' => 'Grant Money Transfer Date',
-                                                            'name' => 'grant_money_transfer_date',
-                                                            'data_type' => CRM_Utils_Type::T_DATE,
-                                                            ),
-                       'grant_amount_requested' => array(
-                                                         'title' => 'Grant Amount Requested',
-                                                         'name' => 'grant_amount_requested',
-                                                         'where' => 'civicrm_grant.amount_requested',
-                                                         'data_type' => CRM_Utils_Type::T_FLOAT,
-                                                         ),
-                       'grant_application_received_date' => array(
-                                                                  'title' => 'Grant Application Recieved Date',
-                                                                  'name' => 'grant_application_received_date',
-                                                                  'data_type' => CRM_Utils_Type::T_DATE,
-                                                                  ),
-                       );
-
-  $fields = CRM_Grant_DAO_Grant::export();
-  $grantNote = array('grant_note' => array('title' => ts('Grant Note'),
-                                           'name' => 'grant_note',
-                                           'data_type' => CRM_Utils_Type::T_TEXT,
-                                           ));
-  $fields = array_merge($fields, $grantFields, $grantNote,
-                        CRM_Core_BAO_CustomField::getFieldsForImport('Grant')
-                        );
-  return $fields;
-}
-  
-function getProfileFields() {
-  $exportableFields = exportableFields('Grant');
-      
-  $skipFields = array('grant_id', 'grant_contact_id', 'grant_type', 'grant_note', 'grant_status' );
-  foreach ($skipFields as $field) {
-    if (isset($exportableFields[$field])) {
-      unset($exportableFields[$field]);
-    }
-  }
-      
-  return $exportableFields;
-}
-
-/**
- * Function to get list of grant fields for profile
- * For now we only allow custom grant fields to be in
- * profile
- *
- * @param boolean $addExtraFields true if special fields needs to be added
- *
- * @return return the list of grant fields
- * @static
- * @access public
- */
-function getGrantFields() {
-  $grantFields = CRM_Grant_DAO_Grant::export();
-  $grantFields = array_merge($grantFields, CRM_Core_OptionValue::getFields($mode = 'grant'));
-       
-  $grantFields = array_merge($grantFields, CRM_Financial_DAO_FinancialType::export());
-    
-  foreach ($grantFields as $key => $var) {
-    $fields[$key] = $var;
-  }
-
-  $fields = array_merge($fields, CRM_Core_BAO_CustomField::getFieldsForImport('Grant'));
-   
-  return $fields;
 }
 
 function browse($action = NULL) {
