@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.4                                                |
+ | CiviCRM version 4.5                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2013                                |
+ | Copyright CiviCRM LLC (c) 2004-2014                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -28,7 +28,7 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2013
+ * @copyright CiviCRM LLC (c) 2004-2014
  * $Id$
  *
  */
@@ -36,6 +36,8 @@ class CRM_Grant_Form_Grant_OnBehalfOf {
 
   /**
    * Function to set variables up before form is built
+   *
+   * @param $form
    *
    * @return void
    * @access public
@@ -74,13 +76,26 @@ class CRM_Grant_Form_Grant_OnBehalfOf {
         // _employers list is not empty
         $form->_relatedOrganizationFound = TRUE;
       }
-      
+
       if ($form->_relatedOrganizationFound) {
-        $locDataURL = CRM_Utils_System::url('civicrm/ajax/permlocation', 'cid=', FALSE, NULL, FALSE);
+        // Related org url - pass checksum if needed
+        $args = array('cid' => '');
+        if (!empty($_GET['cs'])) {
+          $args = array(
+            'uid' => $form->_contactID,
+            'cs' => $_GET['cs'],
+            'cid' => '',
+          );
+        }
+        $locDataURL = CRM_Utils_System::url('civicrm/ajax/permlocation', $args, FALSE, NULL, FALSE);
         $form->assign('locDataURL', $locDataURL);
 
-        $dataURL = CRM_Utils_System::url('civicrm/ajax/employer', 'cid=' . $contactID, FALSE, NULL, FALSE);
-        $form->assign('employerDataURL', $dataURL);
+        if (!empty($form->_submitValues['onbehalf'])) {
+          if (!empty($form->_submitValues['onbehalfof_id'])) {
+            $form->assign('submittedOnBehalf', $form->_submitValues['onbehalfof_id']);
+          }
+          $form->assign('submittedOnBehalfInfo', json_encode($form->_submitValues['onbehalf']));
+        }
       }
 
       if ($form->_values['is_for_organization'] != 2) {
@@ -105,8 +120,9 @@ class CRM_Grant_Form_Grant_OnBehalfOf {
    * Function to build form for related contacts / on behalf of organization.
    *
    * @param $form              object  invoking Object
-   * @param $contactType       string  contact type
-   * @param $title             string  fieldset title
+   *
+   * @internal param string $contactType contact type
+   * @internal param string $title fieldset title
    *
    * @static
    */
@@ -119,9 +135,12 @@ class CRM_Grant_Form_Grant_OnBehalfOf {
 
     if ($contactID && count($form->_employers) >= 1) {
       $form->add('text', 'organization_id', ts('Select an existing related Organization OR enter a new one'));
-      $form->add('hidden', 'onbehalfof_id', '', array('id' => 'onbehalfof_id'));
+      //$form->add('hidden', 'onbehalfof_id', '', array('id' => 'onbehalfof_id'));
 
-      $orgOptions = array(0 => ts('Select an existing organization'),
+      $form->add('select', 'onbehalfof_id', '', CRM_Utils_Array::collect('name', $form->_employers));
+
+      $orgOptions = array(
+        0 => ts('Select an existing organization'),
         1 => ts('Enter a new organization'),
       );
 
@@ -140,22 +159,10 @@ class CRM_Grant_Form_Grant_OnBehalfOf {
 
     $fieldTypes = array_merge($fieldTypes, array('Grant'));
 
-    $stateCountryMap = array();
     foreach ($profileFields as $name => $field) {
       if (in_array($field['field_type'], $fieldTypes)) {
         list($prefixName, $index) = CRM_Utils_System::explode('-', $name, 2);
-        if (in_array($prefixName, array(
-          'state_province', 'country', 'county'))) {
-          if (!array_key_exists($index, $stateCountryMap)) {
-            $stateCountryMap[$index] = array();
-          }
-
-          $stateCountryMap[$index][$prefixName] = 'onbehalf[' . $name . ']';
-        }
-        elseif (in_array($prefixName, array(
-          'organization_name', 'email')) &&
-          !CRM_Utils_Array::value('is_required', $field)
-        ) {
+        if (in_array($prefixName, array('organization_name', 'email')) && empty($field['is_required'])) {
           $field['is_required'] = 1;
         }
 
@@ -163,15 +170,7 @@ class CRM_Grant_Form_Grant_OnBehalfOf {
       }
     }
 
-    if (!empty($stateCountryMap)) {
-      CRM_Core_BAO_Address::addStateCountryMap($stateCountryMap);
-
-      // now fix all state country selectors
-      CRM_Core_BAO_Address::fixAllStateSelects($form, CRM_Core_DAO::$_nullArray);
-    }
-
     $form->assign('onBehalfOfFields', $profileFields);
     $form->addElement('hidden', 'hidden_onbehalf_profile', 1);
   }
 }
-
