@@ -273,11 +273,11 @@ function grantapplications_civicrm_buildForm($formName, &$form) {
   } 
   // Code to be done to avoid core editing
   if ($formName == "CRM_UF_Form_Field" && CRM_Core_Permission::access('CiviGrant')) {
-    $grantFields = CRM_BUGP_BAO_GrantApplicationProfile::getProfileFields();
+    $grantFields = CRM_Grantapplications_BAO_GrantApplicationProfile::getProfileFields();
     $fields['Grant'] = $grantFields;
     // Add the grant fields to the form
     $originalFields = $form->getVar('_fields');
-    $form->setVar('_fields', array_merge(CRM_BUGP_BAO_GrantApplicationProfile::exportableFields(), $originalFields));
+    $form->setVar('_fields', array_merge(CRM_Grantapplications_BAO_GrantApplicationProfile::exportableFields(), $originalFields));
     $originalSelect = $form->getVar('_selectFields');
 
     foreach ($fields as $key => $value) {
