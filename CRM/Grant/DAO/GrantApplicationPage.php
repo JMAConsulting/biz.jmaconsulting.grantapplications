@@ -125,6 +125,31 @@ class CRM_Grant_DAO_GrantApplicationPage extends CRM_Core_DAO
    */
   public $default_amount;
   /**
+   * If the application page supports saving as drafts.
+   *
+   * @var boolean
+   */
+  public $is_draft;
+  /**
+   * Title for Save as Draft page.
+   *
+   * @var text
+   */
+  public $draft_title;
+  /**
+   * Text and Html allowed. displayed above result on Save as Draft success page
+   *
+   * @var text
+   */
+  public $draft_text;
+  /**
+   * Text and html allowed. displayed at the bottom of the Save as Draft success page. Common usage is to include link(s) to other pages such as tell-a-friend, etc.
+   *
+   * @var text
+   */
+  public $draft_footer;
+  
+  /**
    * Title for Thank-you page (header title tag, and display at the top of the page).
    *
    * @var string
@@ -292,6 +317,31 @@ class CRM_Grant_DAO_GrantApplicationPage extends CRM_Core_DAO
             2
           ) ,
         ) ,
+        'is_draft' => array(
+          'name' => 'is_draft',
+          'type' => CRM_Utils_Type::T_BOOLEAN,
+        ) ,
+        'draft_title' => array(
+          'name' => 'draft_title',
+          'type' => CRM_Utils_Type::T_STRING,
+          'title' => ts('Save as Draft Title') ,
+          'maxlength' => 255,
+          'size' => CRM_Utils_Type::HUGE,
+        ) ,
+        'draft_text' => array(
+          'name' => 'draft_text',
+          'type' => CRM_Utils_Type::T_TEXT,
+          'title' => ts('Save as Draft Text') ,
+          'rows' => 8,
+          'cols' => 60,
+        ) ,
+        'draft_footer' => array(
+          'name' => 'draft_footer',
+          'type' => CRM_Utils_Type::T_TEXT,
+          'title' => ts('Save as Draft Footer') ,
+          'rows' => 8,
+          'cols' => 60,
+        ) ,
         'thankyou_title' => array(
           'name' => 'thankyou_title',
           'type' => CRM_Utils_Type::T_STRING,
@@ -405,6 +455,10 @@ class CRM_Grant_DAO_GrantApplicationPage extends CRM_Core_DAO
         'footer_text' => 'footer_text',
         'grant_type_id' => 'grant_type_id',
         'default_amount' => 'default_amount',
+        'is_draft' => 'is_draft',
+        'draft_title' => 'draft_title',
+        'draft_text' => 'draft_text',
+        'draft_footer' => 'draft_footer',
         'thankyou_title' => 'thankyou_title',
         'thankyou_text' => 'thankyou_text',
         'thankyou_footer' => 'thankyou_footer',

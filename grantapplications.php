@@ -346,7 +346,7 @@ function grantapplications_civicrm_pageRun( &$page ) {
     }
     $mask = CRM_Core_Action::mask($permissions);
     foreach ($actionLinks as $key => $fields) {
-      if ($fields['grant_status'] != 'Draft') {
+      if (CRM_Utils_Array::value('grant_status', $fields) != 'Draft') {
         unset($actionLinks[$key]);
         continue;
       }
