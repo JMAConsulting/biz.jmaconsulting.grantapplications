@@ -34,10 +34,10 @@
  */
 
 /**
- * This class contains function for BUGP
+ * This class contains function for Grant Applications
  *
  */
-class CRM_BUGP_BAO_GrantApplicationProfile extends CRM_Core_DAO {
+class CRM_Grantapplications_BAO_GrantApplicationProfile extends CRM_Core_DAO {
 
   static function getProfileFields() {
     $exportableFields = self::exportableFields();
