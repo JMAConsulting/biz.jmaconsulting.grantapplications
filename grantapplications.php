@@ -26,11 +26,8 @@ function grantapplications_civicrm_install() {
   _grantapplications_civix_civicrm_install();
 
   $smarty = CRM_Core_Smarty::singleton();
-  $config = CRM_Core_Config::singleton();
   $smarty->assign('currentDirectoryPath', __DIR__);
-  $data = $smarty->fetch(__DIR__ . '/sql/civicrm_msg_template.tpl');
-  file_put_contents($config->uploadDir . "civicrm_data.sql", $data);
-  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $config->uploadDir . "civicrm_data.sql");
+  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $smarty->fetch(__DIR__ . '/sql/civicrm_msg_template.tpl'), NULL, TRUE);
   grantapplications_addRemoveMenu(TRUE);
   return TRUE;
 }
@@ -93,12 +90,12 @@ function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form
   }
   if ($formName == 'CRM_Grant_Form_Grant_Main' && CRM_Utils_Array::value('grant_id', $fields)) {
     $grantType = CRM_Core_DAO::getFieldValue("CRM_Grant_DAO_Grant", $fields['grant_id'], "grant_type_id");
-    $groupTree = &CRM_Core_BAO_CustomGroup::getTree("Grant", $this, $fields['grant_id'], 0, $grantType);
+    $groupTree = CRM_Core_BAO_CustomGroup::getTree("Grant", $this, $fields['grant_id'], 0, $grantType);
     foreach ($groupTree as $field => $value) {
       if (isset($value['fields'])) {
         foreach ($value['fields'] as $key => $f) {
           if (CRM_Utils_Array::value('html_type', $f) == 'File' && isset($f['customValue'][1]['fid'])) {
-            $form->setElementError('custom_'.$key, NULL);
+            $form->setElementError('custom_' . $key, NULL);
           }
         }
       }
@@ -109,7 +106,7 @@ function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form
     $grantParams = unserialize($savedSearch['form_values']);
     $subType = CRM_Contact_BAO_ContactType::subTypeInfo('Organization', TRUE);
     foreach ($subType as $key => $value) {
-      $gTree[] = &CRM_Core_BAO_CustomGroup::getTree("Organization", $this, $grantParams['contactID'], NULL, $key);
+      $gTree[] = CRM_Core_BAO_CustomGroup::getTree("Organization", $this, $grantParams['contactID'], NULL, $key);
     }
     foreach ($gTree as $flds => $vs) {
       foreach ($vs as $fld => $v) {
@@ -389,12 +386,12 @@ function grantapplications_civicrm_pageRun( &$page ) {
           if ($ssID) {
             $formValues = CRM_Contact_BAO_SavedSearch::getFormValues($ssID);
             $row['action'] = CRM_Core_Action::formLink(dashboardActionLinks(),
-                                                       $mask,
-                                                       array(
-                                                             'id' => $formValues['grantApplicationPageID'],
-                                                             'gid' => $dao->id,
-                                                             )
-                                                       );
+              $mask,
+              array(
+                'id' => $formValues['grantApplicationPageID'],
+                'gid' => $dao->id,
+              )
+            );
           }
           $rows[] = $row;
         }
@@ -513,125 +510,124 @@ function browse($action = NULL) {
     $sectionsInfo = CRM_Utils_Array::value($grantPage->id, $grantAppPageSectionInfo, array());
 
     $rows[$grantPage->id]['configureActionLinks'] = CRM_Core_Action::formLink(formatConfigureLinks($sectionsInfo),
-                                                                              $action,
-                                                                              array('id' => $grantPage->id),
-                                                                              ts('Configure'),
-                                                                              TRUE,
-                                                                              'grantapppage.configure.actions',
-                                                                              'GrantAppPage',
-                                                                              $grantPage->id
-                                                                              );
+       $action,
+       array('id' => $grantPage->id),
+       ts('Configure'),
+       TRUE,
+       'grantapppage.configure.actions',
+       'GrantAppPage',
+       $grantPage->id
+    );
     //build the online grant application links.
     $rows[$grantPage->id]['onlineGrantLinks'] = CRM_Core_Action::formLink(onlineGrantLinks(),
-                                                                          $action,
-                                                                          array('id' => $grantPage->id),
-                                                                          ts('Grant Application (Live)'),
-                                                                          FALSE,
-                                                                          'grantapppage.online.links',
-                                                                          'GrantAppPage',
-                                                                          $grantPage->id
-                                                                          );
+      $action,
+      array('id' => $grantPage->id),
+      ts('Grant Application (Live)'),
+      FALSE,
+      'grantapppage.online.links',
+      'GrantAppPage',
+      $grantPage->id
+    );
     
     //build the normal action links.
     $rows[$grantPage->id]['action'] = CRM_Core_Action::formLink(actionLinks(),
-                                                                $action,
-                                                                array('id' => $grantPage->id),
-                                                                ts('more'),
-                                                                TRUE,
-                                                                'grantapppage.action.links',
-                                                                'GrantAppPage',
-                                                                $grantPage->id
-                                                                );
+      $action,
+      array('id' => $grantPage->id),
+      ts('more'),
+      TRUE,
+      'grantapppage.action.links',
+      'GrantAppPage',
+      $grantPage->id
+    );
     
     $rows[$grantPage->id]['title'] = $grantPage->title;
     $rows[$grantPage->id]['is_active'] = $grantPage->is_active;
     $rows[$grantPage->id]['id'] = $grantPage->id;
       
   }
-  $smarty =  CRM_Core_Smarty::singleton( );
+  $smarty = CRM_Core_Smarty::singleton( );
   $smarty->assign('fields', $rows);
 }
 
 
-function &configureActionLinks() {
-    // check if variable _actionsLinks is populated
-      $urlString = 'civicrm/admin/grant/';
-      $urlParams = 'reset=1&action=update&id=%%id%%';
+function configureActionLinks() {
+  // check if variable _actionsLinks is populated
+  $urlString = 'civicrm/admin/grant/';
+  $urlParams = 'reset=1&action=update&id=%%id%%';
 
-      $configureActionLinks = array(
-        CRM_Core_Action::ADD => array(
-          'name' => ts('Info and Settings'),
-          'title' => ts('Info and Settings'),
-          'url' => $urlString . 'settings',
-          'qs' => $urlParams,
-          'uniqueName' => 'settings',
-        ),
-        CRM_Core_Action::FOLLOWUP => array(
-          'name' => ts('Save as Draft'),
-          'title' => ts('Save as Draft'),
-          'url' => $urlString . 'draft',
-          'qs' => $urlParams,
-          'uniqueName' => 'draft',
-        ),
-        CRM_Core_Action::EXPORT => array(
-          'name' => ts('Receipt'),
-          'title' => ts('Receipt'),
-          'url' => $urlString . 'thankyou',
-          'qs' => $urlParams,
-          'uniqueName' => 'thankyou',
-        ),
-        CRM_Core_Action::PROFILE => array(
-          'name' => ts('Profiles'),
-          'title' => ts('Profiles'),
-          'url' => $urlString . 'custom',
-          'qs' => $urlParams,
-          'uniqueName' => 'custom',
-        ),
-      );
+  $configureActionLinks = array(
+    CRM_Core_Action::ADD => array(
+      'name' => ts('Info and Settings'),
+      'title' => ts('Info and Settings'),
+      'url' => $urlString . 'settings',
+      'qs' => $urlParams,
+      'uniqueName' => 'settings',
+    ),
+    CRM_Core_Action::FOLLOWUP => array(
+      'name' => ts('Save as Draft'),
+      'title' => ts('Save as Draft'),
+      'url' => $urlString . 'draft',
+      'qs' => $urlParams,
+      'uniqueName' => 'draft',
+    ),
+    CRM_Core_Action::EXPORT => array(
+      'name' => ts('Receipt'),
+      'title' => ts('Receipt'),
+      'url' => $urlString . 'thankyou',
+      'qs' => $urlParams,
+      'uniqueName' => 'thankyou',
+    ),
+    CRM_Core_Action::PROFILE => array(
+      'name' => ts('Profiles'),
+      'title' => ts('Profiles'),
+      'url' => $urlString . 'custom',
+      'qs' => $urlParams,
+      'uniqueName' => 'custom',
+                                      ),
+    );  
+  return $configureActionLinks;
+}
 
-    return $configureActionLinks;
-  }
+function dashboardActionLinks() {
+  $dashboardActionLinks = array(
+    CRM_Core_Action::UPDATE => array(
+      'name' => ts('Edit'),
+      'url' => 'civicrm/grant/transact',
+      'qs' => 'reset=1&id=%%id%%&gid=%%gid%%',
+      'title' => ts('Edit Grant Application'),
+    ),
+  );
+  return $dashboardActionLinks;
+}
 
-function &dashboardActionLinks() {
-      $dashboardActionLinks = array(
-        CRM_Core_Action::UPDATE => array(
-          'name' => ts('Edit'),
-          'url' => 'civicrm/grant/transact',
-          'qs' => 'reset=1&id=%%id%%&gid=%%gid%%',
-          'title' => ts('Edit Grant Application'),
-        ),
-      );
-    return $dashboardActionLinks;
-  }
+function actionLinks() {
+  // check if variable _actionsLinks is populated
+  // helper variable for nicer formatting
+  $deleteExtra = ts('Are you sure you want to delete this Grant application page?');
+  
+  $actionLinks = array(
+    CRM_Core_Action::DISABLE => array(
+      'name' => ts('Disable'),
+      'title' => ts('Disable'),
+      'ref' => 'crm-enable-disable',
+    ),
+    CRM_Core_Action::ENABLE => array(
+      'name' => ts('Enable'),
+      'ref' => 'crm-enable-disable',
+      'title' => ts('Enable'),
+    ),
+    CRM_Core_Action::DELETE => array(
+      'name' => ts('Delete'),
+      'url' => CRM_Utils_System::currentPath(),
+      'qs' => 'reset=1&action=delete&id=%%id%%',
+      'title' => ts('Delete'),
+      'extra' => 'onclick = "return confirm(\'' . $deleteExtra . '\');"',
+    ),
+  );
+  return $actionLinks;
+}
 
-function &actionLinks() {
-    // check if variable _actionsLinks is populated
-      // helper variable for nicer formatting
-      $deleteExtra = ts('Are you sure you want to delete this Grant application page?');
-
-      $actionLinks = array(
-         CRM_Core_Action::DISABLE => array(
-          'name' => ts('Disable'),
-          'title' => ts('Disable'),
-          'ref' => 'crm-enable-disable',
-        ),
-        CRM_Core_Action::ENABLE => array(
-          'name' => ts('Enable'),
-          'ref' => 'crm-enable-disable',
-          'title' => ts('Enable'),
-        ),
-        CRM_Core_Action::DELETE => array(
-          'name' => ts('Delete'),
-          'url' => CRM_Utils_System::currentPath(),
-          'qs' => 'reset=1&action=delete&id=%%id%%',
-          'title' => ts('Delete'),
-          'extra' => 'onclick = "return confirm(\'' . $deleteExtra . '\');"',
-        ),
-      );
-    return $actionLinks;
-  }
-
-function &onlineGrantLinks() {
+function onlineGrantLinks() {
   $urlString = 'civicrm/grant/transact';
   $urlParams = 'reset=1&id=%%id%%';
   $onlineGrantLinks = array(
