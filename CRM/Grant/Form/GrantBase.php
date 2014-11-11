@@ -320,6 +320,20 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
             $field['data_type'] == 'File' || ($viewOnly && $field['name'] == 'image_URL')
           ) {
             $cFid = substr($field['name'], strpos($field['name'], "_") + 1);
+            $cfParams = array('id' => $cFid);
+            $cfDefaults = array();
+            CRM_Core_DAO::commonRetrieve('CRM_Core_DAO_CustomField', $cfParams, $cfDefaults);
+            $columnName = $cfDefaults['column_name'];
+            
+            //table name of custom data
+            $tableName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomGroup',
+                                                     $cfDefaults['custom_group_id'],
+                                                     'table_name', 'id'
+                                                     );
+            
+            //query to fetch id from civicrm_file
+            $query = "SELECT {$columnName} FROM {$tableName} where entity_id = {$this->_params['grant_id']}";
+            $fileID = CRM_Core_DAO::singleValueQuery($query);
             $this->_fields['fileFields'][$key]['noDisplay'] = TRUE;
             $subType = CRM_Contact_BAO_ContactType::subTypeInfo('Organization', TRUE);
             if (in_array($field['field_type'], array_keys($subType)) && CRM_Utils_Array::value('grant_id', $this->_params)) {
@@ -327,7 +341,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
               CRM_Contact_BAO_SavedSearch::retrieve($ssParams, $savedSearch);
               $grantParams = unserialize($savedSearch['form_values']);
               $this->_fields['fileFields'][$key] = array(
-                'fileID' => current(CRM_Core_BAO_CustomValueTable::getEntityValues($grantParams['contactID'], NULL, array($cFid))),
+                'fileID' => $fileID,
                 'entityID' => $grantParams['contactID'],
                 'cfID' => $cFid,
               );
@@ -335,7 +349,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
             }
             elseif ($field['field_type'] == 'Grant' && CRM_Utils_Array::value('grant_id', $this->_params)) {
               $this->_fields['fileFields'][$key] = array(
-                'fileID' => current(CRM_Core_BAO_CustomValueTable::getEntityValues($this->_params['grant_id'], NULL, array($cFid))),
+                'fileID' => $fileID,
                 'entityID' => $this->_params['grant_id'],
                 'cfID' => $cFid,
               );
