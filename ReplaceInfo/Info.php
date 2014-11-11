@@ -84,15 +84,6 @@ class CRM_Grant_Info extends CRM_Core_Component_Info {
 
   // docs inherited from interface
   /**
-   * @return null
-   */
-  public function getUserDashboardObject() {
-    // no dashboard element for this component
-    return NULL;
-  }
-
-  // docs inherited from interface
-  /**
    * @return array
    */
   public function registerTab() {
