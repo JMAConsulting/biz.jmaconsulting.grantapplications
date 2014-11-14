@@ -339,7 +339,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     elseif (CRM_Utils_Array::value('grant_id', $this->_submitValues)) {
       $gid = $this->_submitValues['grant_id'];
     }
-    if ($gid) {
+    if (!empty($gid)) {
       $grantType = CRM_Core_DAO::getFieldValue("CRM_Grant_DAO_Grant", $gid, "grant_type_id");
       $groupTree = &CRM_Core_BAO_CustomGroup::getTree("Grant", $this, $gid, 0, $grantType);
       foreach ($groupTree as $field => $value) {
