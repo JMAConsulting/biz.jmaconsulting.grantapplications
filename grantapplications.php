@@ -269,54 +269,25 @@ function grantapplications_civicrm_buildForm($formName, &$form) {
   } 
   // Code to be done to avoid core editing
   if ($formName == "CRM_UF_Form_Field" && CRM_Core_Permission::access('CiviGrant')) {
-    $grantFields = CRM_Grantapplications_BAO_GrantApplicationProfile::getProfileFields();
-    $fields['Grant'] = $grantFields;
-    // Add the grant fields to the form
-    $originalFields = $form->getVar('_fields');
-    $form->setVar('_fields', array_merge(CRM_Grantapplications_BAO_GrantApplicationProfile::exportableFields(), $originalFields));
-    $originalSelect = $form->getVar('_selectFields');
-
-    foreach ($fields as $key => $value) {
-      foreach ($value as $key1 => $value1) {
-        //CRM-2676, replacing the conflict for same custom field name from different custom group.
-        if ($customFieldId = CRM_Core_BAO_CustomField::getKeyID($key1)) {
-          $customGroupId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomField', $customFieldId, 'custom_group_id');
-          $customGroupName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomGroup', $customGroupId, 'title');
-          $mapperFields[$key][$key1] = $value1['title'] . ' :: ' . $customGroupName;
-          $selectFields[$key][$key1] = $value1['title'];
-        }
-        else {
-          $mapperFields[$key][$key1] = $value1['title'];
-          $selectFields[$key][$key1] = $value1['title'];
-        }
-        $hasLocationTypes[$key][$key1] = CRM_Utils_Array::value('hasLocationType', $value1);
-      }
+    if (!$form->elementExists('field_name')) {
+      return NULL;
     }
-    if (!empty($selectFields['Grant'])) {
-      $form->setVar('_selectFields', array_merge($selectFields['Grant'], $originalSelect));
+    
+    $elements = & $form->getElement('field_name');
+    
+    if ($elements && !array_key_exists('Grant', $elements->_options[0])) {
+      $elements->_options[0]['Grant'] = 'Grant';
+      $elements->_options[1]['Grant'] = $form->_mapperFields['Grant'];
+          
+      $elements->_elements[0]->_options[] = array(
+        'text' => 'Grant',
+        'attr' => array('value' => 'Grant')
+      );
+      
+      $elements->_js .= 'hs_field_name_Grant = ' . json_encode($form->_mapperFields['Grant']) . ';';
     }
-    if(!empty($noSearchable)) {
-      $form->assign('noSearchable', $noSearchable);
-    }
-    $grantArray = array(
-      'text' => 'Grant',
-      'attr' => array('value' => 'Grant')
-    );
-
-    foreach ($form->_elements as $eleKey => $eleVal) {
-      foreach ($eleVal as $optionKey => $optionVal) {
-        if ($optionKey == '_options') {
-          $form->_elements[$eleKey]->_options[0]['Grant'] = 'Grant';
-          $form->_elements[$eleKey]->_options[1]['Grant'] = $mapperFields['Grant'];
-        }
-        if ($optionKey == '_elements') {
-          $form->_elements[$eleKey]->_elements[0]->_options[] = $grantArray;
-        } 
-        if ($optionKey == '_js') {
-          $form->_elements[$eleKey]->_js .= 'hs_field_name_Grant = '. json_encode($mapperFields['Grant']) . ';';
-        }
-      }
-    } 
+    
+    // set default mapper when updating profile fields
     if ($form->_defaultValues && array_key_exists('field_name', $form->_defaultValues) 
       && $form->_defaultValues['field_name'][0] == 'Grant') {
       $defaults['field_name'] = $form->_defaultValues['field_name'];

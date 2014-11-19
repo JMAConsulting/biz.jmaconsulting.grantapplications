@@ -38,11 +38,10 @@
  *
  */
 class CRM_Grantapplications_BAO_GrantApplicationProfile extends CRM_Core_DAO {
-
-  static function getProfileFields() {
-    $exportableFields = self::exportableFields();
-    //TODO:check if we need to ignore all these fields
-    $skipFields = array('grant_id', 'grant_contact_id', 'grant_type', 'grant_note', 'grant_status');
+  static function getGrantFields() {
+    $exportableFields = self::exportableFields('Grant');
+    
+    $skipFields = array('grant_id', 'grant_contact_id');
     foreach ($skipFields as $field) {
       if (isset($exportableFields[$field])) {
         unset($exportableFields[$field]);
@@ -73,36 +72,14 @@ class CRM_Grantapplications_BAO_GrantApplicationProfile extends CRM_Core_DAO {
       'title' => ts('Grant Note'),
       'name' => 'grant_note',
       'data_type' => CRM_Utils_Type::T_TEXT,
-    ),
-  );
-
-  $fields = CRM_Grant_DAO_Grant::export();
-  $fields = array_merge($fields, $grantFields,
-    CRM_Core_BAO_CustomField::getFieldsForImport('Grant')
-  );
-  return $fields;
-  }
-
-/**
- * Function to get list of grant fields for profile
- * For now we only allow custom grant fields to be in
- * profile
- *
- * @return return the list of grant fields
- * @static
- * @access public
- */
-  static function getGrantFields() {
-    $grantFields = CRM_Grant_DAO_Grant::export();
-    $grantFields = array_merge($grantFields, CRM_Core_OptionValue::getFields($mode = 'grant'));
-       
-    $grantFields = array_merge($grantFields, CRM_Financial_DAO_FinancialType::export());
+    ));
     
-    foreach ($grantFields as $key => $var) {
-      $fields[$key] = $var;
-    }
-
-    return array_merge($fields, CRM_Core_BAO_CustomField::getFieldsForImport('Grant'));
+    $fields = CRM_Grant_DAO_Grant::export();
+    $fields = array_merge($fields, $grantFields,
+      CRM_Core_BAO_CustomField::getFieldsForImport('Grant'),
+      CRM_Financial_DAO_FinancialType::export()
+    );
+    return $fields;
   }
   
   /**
