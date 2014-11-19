@@ -36,7 +36,7 @@ function grantapplications_civicrm_install() {
  * Implementation of hook_civicrm_uninstall
  */
 function grantapplications_civicrm_uninstall() {
-  enableDisableNavigationMenu(2);
+  grantapplications_enableDisableNavigationMenu(2);
   return _grantapplications_civix_civicrm_uninstall();
 }
 
@@ -44,8 +44,7 @@ function grantapplications_civicrm_uninstall() {
  * Implementation of hook_civicrm_enable
  */
 function grantapplications_civicrm_enable() {
-  enableDisableNavigationMenu(1);
-  grantapplications_addRemoveMenu(TRUE);
+  grantapplications_enableDisableNavigationMenu(1);
   return _grantapplications_civix_civicrm_enable();
 }
 
@@ -53,10 +52,7 @@ function grantapplications_civicrm_enable() {
  * Implementation of hook_civicrm_disable
  */
 function grantapplications_civicrm_disable() {
-  enableDisableNavigationMenu(0);
-  if (!CRM_Core_DAO::singleValueQuery("SELECT id FROM civicrm_extension WHERE full_name IN ('biz.jmaconsulting.grantprograms', 'biz.jmaconsulting.bugp')")) {
-    grantapplications_addRemoveMenu(FALSE);
-  }
+  grantapplications_enableDisableNavigationMenu(0);
   return _grantapplications_civix_civicrm_disable();
 }
 
@@ -671,30 +667,23 @@ function formatConfigureLinks($sectionsInfo) {
 
 function grantapplications_addRemoveMenu($enable) {
   $config = CRM_Core_Config::singleton();
-
+  
   $params['enableComponents'] = $config->enableComponents;
-  $params['enableComponentIDs'] = $config->enableComponentIDs;
-  $grantComponentID = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_component WHERE name = "CiviGrant"');
   if ($enable) {
+    if (array_search('CiviGrant', $config->enableComponents)) {
+      return NULL;
+    }
     $params['enableComponents'][] = 'CiviGrant';
-    $params['enableComponentIDs'][] = $grantComponentID;
   }
   else {
-    $params['enableComponents'] = array_unique($params['enableComponents']);
-    $params['enableComponentIDs'] = array_unique($params['enableComponentIDs']);
     $key = array_search('CiviGrant', $params['enableComponents']);
     if ($key) {
       unset($params['enableComponents'][$key]);
     }
-    $key = array_search($grantComponentID, $params['enableComponentIDs']);
-    if ($key) {
-      unset($params['enableComponentIDs'][$key]);
-    }
   }
+  
   CRM_Core_BAO_Setting::setItem($params['enableComponents'],
     CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,'enable_components');
-  CRM_Core_BAO_ConfigSetting::create($params);
-  return;
 }
 
 function grantapplications_civicrm_entityTypes(&$entityTypes) {
@@ -713,25 +702,34 @@ function grantapplications_civicrm_entityTypes(&$entityTypes) {
  *
  */
 
-function enableDisableNavigationMenu($action) {
+function grantapplications_enableDisableNavigationMenu($action) {
   $domainID = CRM_Core_Config::domainID();
   
+  $enableDisableDeleteData = NULL;
+  if ($action != 1) {
+    $enableDisableDeleteData = CRM_Grantapplications_BAO_GrantApplicationProfile::checkRelatedExtensions();   
+  }
+
+
   if ($action < 2) { 
-    CRM_Core_DAO::executeQuery(
-      "UPDATE civicrm_uf_group SET is_active = %1 WHERE group_type LIKE '%Grant%'", 
-      array(
-        1 => array($action, 'Integer'),
-      )
-    ); 
+    
+    if (!$enableDisableDeleteData) {
+      CRM_Core_DAO::executeQuery(
+        "UPDATE civicrm_uf_group SET is_active = %1 WHERE group_type LIKE '%Grant%'", 
+        array(
+          1 => array($action, 'Integer'),
+        )
+      ); 
+    }
     
     CRM_Core_DAO::executeQuery(
       "UPDATE civicrm_option_value 
-INNER JOIN civicrm_option_group ON  civicrm_option_value.option_group_id = civicrm_option_group.id
-INNER JOIN civicrm_msg_template ON civicrm_msg_template.workflow_id = civicrm_option_value.id
-SET civicrm_option_value.is_active = %1,
-  civicrm_option_group.is_active = %1,
-  civicrm_msg_template.is_active = %1
-WHERE civicrm_option_group.name LIKE 'msg_tpl_workflow_grant'", 
+       INNER JOIN civicrm_option_group ON  civicrm_option_value.option_group_id = civicrm_option_group.id
+       INNER JOIN civicrm_msg_template ON civicrm_msg_template.workflow_id = civicrm_option_value.id
+         SET civicrm_option_value.is_active = %1,
+           civicrm_option_group.is_active = %1,
+           civicrm_msg_template.is_active = %1
+       WHERE civicrm_option_group.name LIKE 'msg_tpl_workflow_grant'", 
       array(
         1 => array($action, 'Integer')
       )
@@ -752,5 +750,21 @@ WHERE civicrm_option_group.name LIKE 'msg_tpl_workflow_grant'",
         1 => array($domainID, 'Integer')
       )
     );
+    
+    if ($enableDisableDeleteData === NULL) {
+      CRM_Core_DAO::executeQuery(
+        "DELETE uj.*, uf.*, g.* FROM civicrm_uf_group g
+         LEFT JOIN civicrm_uf_join uj ON uj.uf_group_id = g.id
+         LEFT JOIN civicrm_uf_field uf ON uf.uf_group_id = g.id
+         WHERE g.group_type LIKE '%Grant%';"
+      );
+    }
+    $action = 0;
   }
+  
+  if ($enableDisableDeleteData) {
+    return FALSE;
+  }
+  
+  grantapplications_addRemoveMenu($action);
 }

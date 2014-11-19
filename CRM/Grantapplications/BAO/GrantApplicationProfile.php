@@ -104,4 +104,23 @@ class CRM_Grantapplications_BAO_GrantApplicationProfile extends CRM_Core_DAO {
 
     return array_merge($fields, CRM_Core_BAO_CustomField::getFieldsForImport('Grant'));
   }
+  
+  /**
+   * Function to check if related Grant extension is enabled/disabled
+   *
+   * return array of enabled extensions 
+   */
+  function checkRelatedExtensions() {
+    $relatedExtensions = array("'biz.jmaconsulting.bugp', 'biz.jmaconsulting.grantprograms'");
+    $enableDisable = NULL;
+    $sql = 'SELECT is_active FROM civicrm_extension WHERE full_name IN (' . implode(',', $relatedExtensions) . ')';
+    $dao = CRM_Core_DAO::excuteQuery($sql);
+    while ($dao->fetch()) {
+      if ($dao->is_active) {
+        return $dao->is_active;
+      }
+      $enableDisable = $dao->is_active;
+    }
+    return $enableDisable;
+  }
 }
