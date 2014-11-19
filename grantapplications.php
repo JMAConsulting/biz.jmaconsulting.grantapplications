@@ -300,7 +300,7 @@ function grantapplications_civicrm_pageRun( &$page ) {
   if ($page->getVar('_name') == 'CRM_Contact_Page_View_UserDashBoard') {
     $cid = $page->getVar('_contactId'); 
     // Check if grant program extension is enabled
-    $enabled = CRM_Grant_BAO_GrantApplicationPage::checkExtensionEnabled('biz.jmaconsulting.grantprograms');
+    $enabled = CRM_Grantapplications_BAO_GrantApplicationProfile::checkRelatedExtensions('biz.jmaconsulting.grantprograms');
     $smarty = CRM_Core_Smarty::singleton();
     $rels = $smarty->get_template_vars('currentRelationships');
     $actionLinks = $smarty->get_template_vars('grant_rows');

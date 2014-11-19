@@ -456,21 +456,5 @@ AND module = 'CiviGrant'  AND civicrm_uf_join.is_active = 1 ) $whereClause";
       }
     }
   }
-
-  /**
-   * takes the extension key to check if the extension is enabled
-   *
-   * @param string extension key
-   *
-   * @return boolean
-   * @access public
-   *
-   */
-  static function checkExtensionEnabled($extensionKey) {
-    $sql = "SELECT is_active FROM civicrm_extension WHERE full_name = %1";
-    $params = array( 1 => array($extensionKey, 'String'));
-    $flag = CRM_Core_DAO::singleValueQuery($sql, $params);
-    return (!empty($flag) || $flag == 1) ? TRUE : FALSE;
-  }
 }
 
