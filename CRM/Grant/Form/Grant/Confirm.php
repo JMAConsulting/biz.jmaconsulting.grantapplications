@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.4                                                |
+ | CiviCRM version 4.5                                               |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
@@ -674,7 +674,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
 
     // create an activity record
     if ($grant) {
-      CRM_Grant_BAO_GrantApplicationPage::addActivity($grant, 'Grant', $targetContactID);
+      CRM_Grant_BAO_GrantApplicationPage::addActivity($grant, $targetContactID);
     }
     // Re-using function defined in Contribution/Utils.php
     CRM_Contribute_BAO_Contribution_Utils::createCMSUser($params,

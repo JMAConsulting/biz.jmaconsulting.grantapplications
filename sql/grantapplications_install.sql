@@ -96,5 +96,5 @@ SELECT @maxValue := MAX( CAST( `value` AS UNSIGNED ) ) + 1 FROM  `civicrm_option
 
 SELECT @maxWeight := MAX( CAST( `weight` AS UNSIGNED ) ) + 1 FROM  `civicrm_option_value` WHERE `option_group_id` = @statusId;
 
-INSERT IGNORE INTO `civicrm_option_value` (`option_group_id`, {localize field='label'}`label`{/localize}, `value`, `name`, `weight`, `is_active`) VALUES (statusId, {localize}'{ts escape="sql"}Draft{/ts}'{/localize}, @maxValue, 'Draft', @maxWeight, 1);
+INSERT IGNORE INTO `civicrm_option_value` (`option_group_id`, {localize field='label'}`label`{/localize}, `value`, `name`, `weight`, `is_active`) VALUES (@statusId, {localize}'{ts escape="sql"}Draft{/ts}'{/localize}, @maxValue, 'Draft', @maxWeight, 1);
 

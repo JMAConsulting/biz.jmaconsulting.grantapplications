@@ -33,13 +33,6 @@ INNER JOIN civicrm_option_group ON  civicrm_option_value.option_group_id = civic
 INNER JOIN civicrm_msg_template ON civicrm_msg_template.workflow_id = civicrm_option_value.id
 WHERE civicrm_option_group.name LIKE 'msg_tpl_workflow_grant';
 
-DELETE uj.*, uf.* FROM civicrm_uf_group g
-LEFT JOIN civicrm_uf_join uj ON uj.uf_group_id = g.id
-LEFT JOIN civicrm_uf_field uf ON uf.uf_group_id = g.id
-WHERE g.group_type LIKE '%Grant%';
-
-DELETE FROM civicrm_uf_group WHERE group_type LIKE '%Grant%';
-
 DELETE ca.*, cv.* FROM `civicrm_activity` ca
 INNER JOIN civicrm_option_value cv ON cv.value = ca.activity_type_id
 INNER JOIN civicrm_option_group cg ON cg.id = cv.option_group_id

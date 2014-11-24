@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.1                                                |
+ | CiviCRM version 4.4                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2011                                |
  +--------------------------------------------------------------------+
@@ -33,7 +33,6 @@
  *
  */
 
-require_once 'CRM/Contact/Page/View/UserDashBoard.php';
 class CRM_Grant_Page_UserDashboard extends CRM_Contact_Page_View_UserDashBoard {
 
   /**
@@ -47,7 +46,7 @@ class CRM_Grant_Page_UserDashboard extends CRM_Contact_Page_View_UserDashBoard {
     $controller->setEmbedded(TRUE);
     $controller->reset();
     $controller->set('limit', 12);
-    $controller->set('status', '8');
+    $controller->set('status', '2');
     $controller->set('cid', $this->_contactId);
     $controller->set('context', 'user');
     $controller->set('force', 1);

@@ -129,9 +129,6 @@
    <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="bottom"}</div>
  </div>
 
-{* include jscript to warn if unsaved form field changes *}
-{include file="CRM/common/formNavigate.tpl"}
-
 {include file="CRM/common/showHideByFieldValue.tpl"
     trigger_field_id    ="is_organization"
     trigger_value       = 1
