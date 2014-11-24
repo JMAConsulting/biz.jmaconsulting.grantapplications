@@ -53,10 +53,6 @@
             <span class="description">{ts}Include additional fields in this online grant page by configuring and selecting a CiviCRM Profile to be included at the bottom of the page.{/ts}</span>
           </td>
         </tr>
-        <tr class='crm-grant-grantpage-custom-form--block-create-new-profile'>
-          <td class="label"></td>
-          <td><a href="{crmURL p='civicrm/admin/uf/group/add' q='reset=1&action=add'}" target="_blank">{ts}Click here for new profile{/ts}</td>
-        </tr>
     </table>
   {/if}
   <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="bottom"}</div>

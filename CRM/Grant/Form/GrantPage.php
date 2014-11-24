@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.4                                                |
+ | CiviCRM version 4.5                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
@@ -284,13 +284,13 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
           
       if ($className) {
       
-          $subPage     = strtolower($className);
-          $subPageName = $className;
-          $nextPage    = strtolower($nextPage);
+        $subPage     = strtolower($className);
+        $subPageName = $className;
+        $nextPage    = strtolower($nextPage);
         
-          if ( $subPage == "custom" ) {
-              $nextPage = "settings";
-          }
+        if ( $subPage == "custom" ) {
+          $nextPage = "settings";
+        }
       }
 
       CRM_Core_Session::setStatus(ts("'%1' information has been saved.",

@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.4                                                |
+ | CiviCRM version 4.5                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
@@ -116,14 +116,7 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
 
     // name
     $this->add('text', 'title', ts('Title'), $attributes['title'], TRUE);
-
-    $grant = CRM_Core_OptionGroup::values('grant_type');
-
-    $this->add('select', 'grant_type_id',
-      ts('Grant Type'),
-      $grant,
-      TRUE
-    );
+    $this->addSelect('grant_type_id', array(), TRUE);
 
     // Check if grant program extension is enabled
     $enabled = CRM_Grantapplications_BAO_GrantApplicationProfile::checkRelatedExtensions('biz.jmaconsulting.grantprograms');
@@ -149,40 +142,16 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
     
     $this->addElement('checkbox', 'is_organization', ts('Allow individuals to apply for grants on behalf of an organization?'), NULL, array('onclick' => "showHideByValue('is_organization',true,'for_org_text','table-row','radio',false);showHideByValue('is_organization',true,'for_org_option','table-row','radio',false);"));
 
-    $required = array('Contact', 'Organization');
-    $optional = array('Grant');
-
-    $profiles = CRM_Core_BAO_UFGroup::getValidProfiles($required, $optional);
-    //Check profiles for Organization subtypes
-    $contactSubType = CRM_Contact_BAO_ContactType::subTypes('Organization');
-    foreach ($contactSubType as $type) {
-      $required = array('Contact', $type);
-      $subTypeProfiles = CRM_Core_BAO_UFGroup::getValidProfiles($required, $optional);
-      foreach ($subTypeProfiles as $profileId => $profileName) {
-        $profiles[$profileId] = $profileName;
-      }
-    }
-    
-    $requiredProfileFields = array('organization_name', 'email');
-
-    if (!empty($profiles)) {
-      foreach ($profiles as $id => $dontCare) {
-        $validProfile = CRM_Core_BAO_UFGroup::checkValidProfile($id, $requiredProfileFields);
-        if (!$validProfile) {
-          unset($profiles[$id]);
-        }
-      }
-    }
-
-    if (empty($profiles)) {
-      $invalidProfiles = TRUE;
-      $this->assign('invalidProfiles', $invalidProfiles);
-    }
-
-    $this->add('select', 'onbehalf_profile_id', ts('Organization Profile'),
+    $allowCoreTypes = array_merge(array('Contact', 'Organization'), CRM_Contact_BAO_ContactType::subTypes('Organization'));
+    $allowSubTypes = array();
+    $entities = array(
       array(
-        '' => ts('- select -')) + $profiles
+        'entity_name' => 'contact_1',
+        'entity_type' => 'OrganizationModel',
+      ),
     );
+    $this->addProfileSelector('onbehalf_profile_id', ts('Organization Profile'), $allowCoreTypes, $allowSubTypes, $entities);
+
     $options   = array();
     $options[] = $this->createElement('radio', NULL, NULL, ts('Optional'), 1);
     $options[] = $this->createElement('radio', NULL, NULL, ts('Required'), 2);
