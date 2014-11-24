@@ -296,7 +296,7 @@ function grantapplications_civicrm_buildForm($formName, &$form) {
   }
 }
 
-function grantapplications_civicrm_pageRun( &$page ) {
+function grantapplications_civicrm_pageRun(&$page) {
   if ($page->getVar('_name') == 'CRM_Contact_Page_View_UserDashBoard') {
     $cid = $page->getVar('_contactId'); 
     // Check if grant program extension is enabled
@@ -313,6 +313,7 @@ function grantapplications_civicrm_pageRun( &$page ) {
     }
     $mask = CRM_Core_Action::mask($permissions);
     foreach ($actionLinks as $key => $fields) {
+      //FIXME:Replace it with option value name
       if (CRM_Utils_Array::value('grant_status', $fields) != 'Draft') {
         unset($actionLinks[$key]);
         continue;
@@ -320,7 +321,7 @@ function grantapplications_civicrm_pageRun( &$page ) {
       $ssID = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$fields['grant_id'].'%"');
       if ($ssID) {
         $formValues = CRM_Contact_BAO_SavedSearch::getFormValues($ssID);
-        $actionLinks[$key]['action'] = CRM_Core_Action::formLink(dashboardActionLinks(),
+        $actionLinks[$key]['action'] = CRM_Core_Action::formLink(grantapplications_dashboardActionLinks(),
           $mask,
           array(
             'id' => $formValues['grantApplicationPageID'],
@@ -329,30 +330,43 @@ function grantapplications_civicrm_pageRun( &$page ) {
         );
       }
     } 
-    $page->assign('grant_rows', $actionLinks);
+    $rows = array();
     if (!empty($rels)) {
+      $extraSelect = '';
+      $relationshipType = CRM_Core_PseudoConstant::relationshipType('name');
+      $grantType = CRM_Core_PseudoConstant::get('CRM_Grant_DAO_Grant', 'grant_type_id');
+      $grantStatus = CRM_Core_PseudoConstant::get('CRM_Grant_DAO_Grant', 'status_id');
+      $grantStatusByName = CRM_Core_PseudoConstant::get('CRM_Grant_DAO_Grant', 'status_id');
+      
+      if ($enabled) {
+        $extraSelect = ', grant_program_id ';
+        $grantProgram = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
+      }
       foreach($rels as $id => $values) {
-        if ($values['relationship_type_id'] != EMPLOYEE_OF_ID) {
+        if ($relationshipType[$values['relationship_type_id']]['name_a_b'] != 'Employee of') {
           continue;
         }
-        $query = "SELECT grant_type_id, application_received_date, amount_total, status_id, id FROM civicrm_grant WHERE contact_id = {$values['cid']} AND status_id = ".DRAFT_STATUS_ID;
+        $query = "SELECT grant_type_id, application_received_date, amount_total, status_id, id, currency {$extraSelect} FROM civicrm_grant WHERE contact_id = {$values['cid']} AND status_id = " . array_search('Draft', $grantStatusByName);
         $dao = CRM_Core_DAO::executeQuery($query);
         while ($dao->fetch()) {
-          $row = "";
+          $row = array();
           $row['contact_id'] = $values['cid'];
           $row['sort_name'] = $values['display_name'];
-          $row['grant_type'] = current(CRM_Core_OptionGroup::values('grant_type', FALSE, FALSE, FALSE, " AND v.value = {$dao->grant_type_id}"));
+          $row['grant_type'] = CRM_Utils_Array::value($dao->grant_type_id, $grantType);
           $row['grant_application_received_date'] = $dao->application_received_date;
-          $row['grant_amount_total'] = $dao->amount_total;
-          $row['grant_status'] = 'Draft';
+          $row['grant_amount_total'] = CRM_Utils_Money::format($dao->amount_total, $dao->currency);
+          $row['grant_status'] = CRM_Utils_Array::value($dao->status_id, $grantStatus);
+          
           if ($enabled) {
-            $row['program_id'] = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_Grant', $dao->id, 'grant_program_id');
+            $row['program_id'] = $dao->grant_program_id;
             $row['program_name'] = current(CRM_Grant_BAO_GrantProgram::getGrantPrograms($row['program_id']));
           }
+          
+          // FIXME:Calling multiple times
           $ssID = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$dao->id.'%"');
           if ($ssID) {
             $formValues = CRM_Contact_BAO_SavedSearch::getFormValues($ssID);
-            $row['action'] = CRM_Core_Action::formLink(dashboardActionLinks(),
+            $row['action'] = CRM_Core_Action::formLink(grantapplications_dashboardActionLinks(),
               $mask,
               array(
                 'id' => $formValues['grantApplicationPageID'],
@@ -364,13 +378,10 @@ function grantapplications_civicrm_pageRun( &$page ) {
         }
       }
     }
-    if (!empty($rows)) {
-      $grantRows = $smarty->get_template_vars('grant_rows');
-      $grants = array_merge($grantRows, $rows);
-      $smarty->assign('grant_rows', $grants);
-      $smarty->assign('enabled', $enabled);
-    }
+    $page->assign('grant_rows', array_merge($actionLinks, $rows));
+    $page->assign('enabled', $enabled);    
   }
+
   if( $page->getVar('_name') == 'CRM_Grant_Page_DashBoard') {
     //FIXME: Avoid overwriting core
       CRM_Core_Region::instance('page-body')->add(array(
@@ -555,8 +566,8 @@ function configureActionLinks() {
   return $configureActionLinks;
 }
 
-function dashboardActionLinks() {
-  $dashboardActionLinks = array(
+function grantapplications_dashboardActionLinks() {
+  return array(
     CRM_Core_Action::UPDATE => array(
       'name' => ts('Edit'),
       'url' => 'civicrm/grant/transact',
@@ -564,7 +575,6 @@ function dashboardActionLinks() {
       'title' => ts('Edit Grant Application'),
     ),
   );
-  return $dashboardActionLinks;
 }
 
 function actionLinks() {
@@ -572,7 +582,7 @@ function actionLinks() {
   // helper variable for nicer formatting
   $deleteExtra = ts('Are you sure you want to delete this Grant application page?');
   
-  $actionLinks = array(
+  return array(
     CRM_Core_Action::DISABLE => array(
       'name' => ts('Disable'),
       'title' => ts('Disable'),
@@ -591,7 +601,6 @@ function actionLinks() {
       'extra' => 'onclick = "return confirm(\'' . $deleteExtra . '\');"',
     ),
   );
-  return $actionLinks;
 }
 
 function onlineGrantLinks() {

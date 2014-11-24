@@ -89,8 +89,8 @@ class CRM_Grantapplications_BAO_GrantApplicationProfile extends CRM_Core_DAO {
    */
   function checkRelatedExtensions($name = 'biz.jmaconsulting.bugp') {
     $enableDisable = NULL;
-    $sql = "SELECT is_active FROM civicrm_extension WHERE full_name IN ('{name}')";
-    $enableDisable = CRM_Core_DAO::excuteQuery($sql);
+    $sql = "SELECT is_active FROM civicrm_extension WHERE full_name = '{name}'";
+    $enableDisable = CRM_Core_DAO::singleValueQuery($sql);
     return $enableDisable;
   }
 }

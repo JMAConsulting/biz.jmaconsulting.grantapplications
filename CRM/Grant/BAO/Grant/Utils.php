@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.4                                                |
+ | CiviCRM version 4.5                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
@@ -67,13 +67,13 @@ class CRM_Grant_BAO_Grant_Utils {
     if ($grant) {
       $form->_params['grantID'] = $grant->id;
     }
-    $now = date('YmdHis');
+    
     $form->_params['grantTypeID'] = $grantTypeId;
     $form->_params['item_name'] = $form->_params['description'];
-    $form->_params['application_received_date'] = $now;
+    $form->_params['application_received_date'] = date('YmdHis');
     $form->set('params', $form->_params);
     // check if grantprograms extension enabled
-    $isActive = CRM_Core_DAO::singleValueQuery('SELECT is_active FROM civicrm_extension WHERE full_name = "biz.jmaconsulting.grantprograms"');
+    $isActive = CRM_Grantapplications_BAO_GrantApplicationProfile::checkRelatedExtensions('biz.jmaconsulting.grantprograms');
     // finally send an email receipt
     if ($grant && !$isActive) {   
       $form->_values['grant_id'] = $grant->id;
@@ -84,6 +84,6 @@ class CRM_Grant_BAO_Grant_Utils {
       );
     }
   }
- }
+}
 
 

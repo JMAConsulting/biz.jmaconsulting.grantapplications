@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.4                                                |
+ | CiviCRM version 4.5                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
@@ -47,7 +47,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
    * @access public
    * @static
    */
-  public static function &create(&$params) {
+  public static function create(&$params) {
     $dao = new CRM_Grant_DAO_GrantApplicationPage();
     $dao->copyValues($params);
     $dao->save();
@@ -126,50 +126,48 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
    * @static
    * @access public
    */
-  static function addActivity(&$activity,
-    $activityType = 'Grant',
-    $targetContactID = NULL
+  static function addActivity(&$grant,
+    $targetContactID = NULL,
+    $activityType = 'Grant'
   ) {
-      $subject = NULL;
+    
+    $subject = CRM_Utils_Money::format($grant->amount_total, $grant->currency);
+    if (!empty($grant->source) && $grant->source != 'null') {
+      $subject .= " - {$grant->source}";
+    }
+    $date = CRM_Utils_Date::isoToMysql($grant->application_received_date);
+    $component = 'Grant';
+    $activityParams = array(
+      'source_contact_id' => $grant->contact_id,
+      'source_record_id' => $grant->id,
+      'activity_type_id' => CRM_Core_OptionGroup::getValue('activity_type',
+        $activityType,
+        'name'
+      ),
+      'subject' => $subject,
+      'activity_date_time' => $date,
+      'status_id' => CRM_Core_OptionGroup::getValue('activity_status',
+        'Completed',
+        'name'
+      ),
+      'skipRecentView' => TRUE,
+    );
 
-      $subject .= CRM_Utils_Money::format($activity->amount_total, $activity->currency);
-      if (!empty($activity->source) && $activity->source != 'null') {
-        $subject .= " - {$activity->source}";
-      }
-      $date = CRM_Utils_Date::isoToMysql($activity->application_received_date);
-      $component = 'Grant';
-      $activityParams = array(
-        'source_contact_id' => $activity->contact_id,
-        'source_record_id' => $activity->id,
-        'activity_type_id' => CRM_Core_OptionGroup::getValue('activity_type',
-          $activityType,
-          'name'
-        ),
-        'subject' => $subject,
-        'activity_date_time' => $date,
-        'status_id' => CRM_Core_OptionGroup::getValue('activity_status',
-          'Completed',
-          'name'
-        ),
-        'skipRecentView' => TRUE,
-      );
-
-      // create activity with target contacts
-      $session = CRM_Core_Session::singleton();
-      $id = $session->get('userID');
-      if ($id) {
-        $activityParams['source_contact_id'] = $id;
-        $activityParams['target_contact_id'][] = $activity->contact_id;
-      }
-      
-      //CRM-4027
-      if ($targetContactID) {
-        $activityParams['target_contact_id'][] = $targetContactID;
-      }
-      if (is_a(CRM_Activity_BAO_Activity::create($activityParams), 'CRM_Core_Error')) {
-        CRM_Core_Error::fatal("Failed creating Activity for $component of id {$activity->id}");
-        return FALSE;
-      }
+    // create activity with target contacts
+    $session = CRM_Core_Session::singleton();
+    $id = $session->get('userID');
+    if ($id) {
+      $activityParams['source_contact_id'] = $id;
+      $activityParams['target_contact_id'][] = $grant->contact_id;
+    }
+    
+    if ($targetContactID) {
+      $activityParams['target_contact_id'][] = $targetContactID;
+    }
+    if (is_a(CRM_Activity_BAO_Activity::create($activityParams), 'CRM_Core_Error')) {
+      CRM_Core_Error::fatal("Failed creating Activity for $component of id {$activity->id}");
+      return FALSE;
+    }
   }
   
   /**
