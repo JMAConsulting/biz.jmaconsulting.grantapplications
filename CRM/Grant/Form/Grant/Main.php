@@ -381,40 +381,41 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       }
     }
 
-    // GEP-53
-    if (CRM_Utils_Array::value('grant_id', $fields) && 0) {
-      $grantType = CRM_Core_DAO::getFieldValue("CRM_Grant_DAO_Grant", $fields['grant_id'], "grant_type_id");
-      $groupTree = CRM_Core_BAO_CustomGroup::getTree("Grant", $this, $fields['grant_id'], 0, $grantType);
-      foreach ($groupTree as $field => $value) {
-        if (isset($value['fields'])) {
-          foreach ($value['fields'] as $key => $f) {
-            if (CRM_Utils_Array::value('html_type', $f) == 'File' && isset($f['customValue'][1]['fid'])) {
-              $form->setElementError('custom_' . $key, NULL);
-            }
-          }
-        }
-      }
-      // On Behalf
-      $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$fields['grant_id'].'%"');
-      CRM_Contact_BAO_SavedSearch::retrieve($ssParams, $savedSearch);
-      $grantParams = unserialize($savedSearch['form_values']);
-      $subType = CRM_Contact_BAO_ContactType::subTypeInfo('Organization', TRUE);
-      foreach ($subType as $key => $value) {
-        $gTree[] = CRM_Core_BAO_CustomGroup::getTree("Organization", $this, $grantParams['contactID'], NULL, $key);
-      }
-      foreach ($gTree as $flds => $vs) {
-        foreach ($vs as $fld => $v) {
-          if (isset($v['fields'])) {
-            foreach ($v['fields'] as $k => $f) {
-              if (CRM_Utils_Array::value('html_type', $f) == 'File' && isset($f['customValue'][1]['fid'])) {
-                $form->_errors['onbehalf[custom_'.$k.']'] = '';
-                $form->setElementError('onbehalf[custom_'.$k.']', NULL);
-              }
-            }
-          }
-        }
-      }
-    }
+    /* // GEP-53 */
+    /* if (CRM_Utils_Array::value('grant_id', $fields)) { */
+    /*   $grantType = CRM_Core_DAO::getFieldValue("CRM_Grant_DAO_Grant", $fields['grant_id'], "grant_type_id"); */
+    /*   $groupTree = CRM_Core_BAO_CustomGroup::getTree("Grant", $fields, $fields['grant_id'], 0, $grantType); */
+    /*   CRM_Core_Error::debug( '$groupTree', $groupTree ); */
+    /*   foreach ($groupTree as $field => $value) { */
+    /*     if (isset($value['fields'])) { */
+    /*       foreach ($value['fields'] as $key => $f) { */
+    /*         if (CRM_Utils_Array::value('html_type', $f) == 'File' && isset($f['customValue'][1]['fid'])) { */
+    /*           //  $this->setElementError('custom_' . $key, NULL); */
+    /*         } */
+    /*       } */
+    /*     } */
+    /*   } */
+    /*   // On Behalf */
+    /*   $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$fields['grant_id'].'%"'); */
+    /*   CRM_Contact_BAO_SavedSearch::retrieve($ssParams, $savedSearch); */
+    /*   $grantParams = unserialize($savedSearch['form_values']); */
+    /*   $subType = CRM_Contact_BAO_ContactType::subTypeInfo('Organization', TRUE); */
+    /*   foreach ($subType as $key => $value) { */
+    /*     $gTree[] = CRM_Core_BAO_CustomGroup::getTree("Organization", $fields, $grantParams['contactID'], NULL, $key); */
+    /*   } */
+    /*   foreach ($gTree as $flds => $vs) { */
+    /*     foreach ($vs as $fld => $v) { */
+    /*       if (isset($v['fields'])) { */
+    /*         foreach ($v['fields'] as $k => $f) { */
+    /*           if (CRM_Utils_Array::value('html_type', $f) == 'File' && isset($f['customValue'][1]['fid'])) { */
+    /*             // $this->_errors['onbehalf[custom_'.$k.']'] = ''; */
+    /*             // $this->setElementError('onbehalf[custom_'.$k.']', NULL); */
+    /*           } */
+    /*         } */
+    /*       } */
+    /*     } */
+    /*   } */
+    /* } */
     return empty($errors) ? TRUE : $errors;
   }
 

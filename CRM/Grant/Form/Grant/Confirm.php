@@ -309,6 +309,76 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
       }
     }
 
+
+    // fix attachment info
+    if (CRM_Utils_Array::value('fileFields', $this->_fields)) {
+      foreach ($this->_fields['fileFields'] as $key => $value) {
+        if (CRM_Utils_Array::value('fileID', $value)) {
+          $url = CRM_Utils_System::url('civicrm/file',
+                                       'reset=1&id='.$value['fileID'].'&eid='.$value['entityID'],
+                                       FALSE, NULL, TRUE, TRUE
+                                       );
+          $fileType = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File',
+                                                  $value['fileID'],
+                                                  'mime_type',
+                                                  'id'
+                                                  );  
+          $fileName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File',
+                                                  $value['fileID'],
+                                                  'uri',
+                                                  'id'
+                                                  );  
+          if ($fileType == 'image/jpeg' ||
+              $fileType == 'image/pjpeg' ||
+              $fileType == 'image/gif' ||
+              $fileType == 'image/x-png' ||
+              $fileType == 'image/png'
+              ) {
+            $files[$key]['displayURL'] = $url;
+          }
+          else {
+            $files[$key]['fileURL'] = $url;
+          }
+          $files[$key]['fileName'] = $fileName;
+          $files[$key]['id'] = $key;
+          $files[$key]['fileID'] = $value['fileID'];
+          if (CRM_Utils_Array::value($key, $this->_params)) {
+            if (in_array($form->_params[$key]['type'], array('image/jpeg', 'image/pjpeg', 'image/gif',  'image/x-png', 'image/png'))) {
+              unset($files[$key]);
+              $files[$key]['displayURLnew'] = $this->_params[$key]['name'];
+              preg_match("/[^\/]+$/", $this->_params[$key]['name'], $matches);
+              $files[$key]['fileName'] = $matches[0];
+            }
+            else {
+              unset($files[$key]);
+              $files[$key]['fileURLnew'] = $this->_params[$key]['name'];
+              preg_match("/[^\/]+$/", $this->_params[$key]['name'], $matches);
+              $files[$key]['fileName'] = $matches[0];
+            }
+          }
+        }
+        else {
+          $files[$key]['noDisplay'] = TRUE;
+          if (CRM_Utils_Array::value($key, $this->_params)) {
+            if (in_array($this->_params[$key]['type'], array('image/jpeg', 'image/pjpeg', 'image/gif',  'image/x-png', 'image/png'))) {
+              unset($files[$key]);
+              $files[$key]['displayURLnew'] = $this->_params[$key]['name'];
+              preg_match("/[^\/]+$/", $this->_params[$key]['name'], $matches);
+              $files[$key]['fileName'] = $matches[0];
+            }
+            else {
+              unset($files[$key]);
+              $files[$key]['fileURLnew'] = $this->_params[$key]['name'];
+              preg_match("/[^\/]+$/", $this->_params[$key]['name'], $matches);
+              $files[$key]['fileName'] = $matches[0];
+            }
+          }
+        }
+      }
+      $this->assign('files', $files);
+    }
+    
+
     $this->setDefaults($defaults);
 
     $this->freeze();

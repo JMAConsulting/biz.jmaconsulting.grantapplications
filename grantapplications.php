@@ -84,7 +84,7 @@ function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form
   if ($formName == 'CRM_Grant_Form_Grant_Confirm') {
     $form->_errors = array();
   }
-  if ($formName == 'CRM_Grant_Form_Grant_Main' && CRM_Utils_Array::value('grant_id', $fields)) {
+  if ($formName == 'CRM_Grant_Form_Grant_Main' && CRM_Utils_Array::value('grant_id', $fields) && 0) {
     $grantType = CRM_Core_DAO::getFieldValue("CRM_Grant_DAO_Grant", $fields['grant_id'], "grant_type_id");
     $groupTree = CRM_Core_BAO_CustomGroup::getTree("Grant", $this, $fields['grant_id'], 0, $grantType);
     foreach ($groupTree as $field => $value) {
@@ -117,6 +117,7 @@ function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form
       }
     }
   }
+  // Keeping this in validate hook to prevent re-use of same functionality
   if (($formName == 'CRM_Grant_Form_Grant_Main' ||  $formName == 'CRM_Grant_Form_Grant_Confirm') 
     && $form->_values['is_draft'] == 1 && (CRM_Utils_Array::value('_qf_Main_save', $fields) == 'Save as Draft' || $form->_params['is_draft'] == 1)) {
     foreach($form->_fields as $name => $values) {
@@ -148,76 +149,6 @@ function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form
 }
 
 function grantapplications_civicrm_buildForm($formName, &$form) {
-  if ($formName == 'CRM_Grant_Form_Grant_Confirm') {
-    
-    // fix attachment info
-    if (CRM_Utils_Array::value('fileFields', $form->_fields)) {
-      foreach ($form->_fields['fileFields'] as $key => $value) {
-        if (CRM_Utils_Array::value('fileID', $value)) {
-          $url = CRM_Utils_System::url('civicrm/file',
-            'reset=1&id='.$value['fileID'].'&eid='.$value['entityID'],
-            FALSE, NULL, TRUE, TRUE
-          );
-          $fileType = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File',
-            $value['fileID'],
-            'mime_type',
-            'id'
-          );  
-          $fileName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File',
-            $value['fileID'],
-            'uri',
-            'id'
-          );  
-          if ($fileType == 'image/jpeg' ||
-            $fileType == 'image/pjpeg' ||
-            $fileType == 'image/gif' ||
-            $fileType == 'image/x-png' ||
-            $fileType == 'image/png'
-          ) {
-            $files[$key]['displayURL'] = $url;
-          }
-          else {
-            $files[$key]['fileURL'] = $url;
-          }
-          $files[$key]['fileName'] = $fileName;
-          $files[$key]['id'] = $key;
-          $files[$key]['fileID'] = $value['fileID'];
-          if (CRM_Utils_Array::value($key, $form->_params)) {
-            if (in_array($form->_params[$key]['type'], array('image/jpeg', 'image/pjpeg', 'image/gif',  'image/x-png', 'image/png'))) {
-              unset($files[$key]);
-              $files[$key]['displayURLnew'] = $form->_params[$key]['name'];
-              preg_match("/[^\/]+$/", $form->_params[$key]['name'], $matches);
-              $files[$key]['fileName'] = $matches[0];
-            }
-            else {
-              unset($files[$key]);
-              $files[$key]['fileURLnew'] = $form->_params[$key]['name'];
-              preg_match("/[^\/]+$/", $form->_params[$key]['name'], $matches);
-              $files[$key]['fileName'] = $matches[0];
-            }
-          }
-        }
-        else {
-          $files[$key]['noDisplay'] = TRUE;
-          if (CRM_Utils_Array::value($key, $form->_params)) {
-            if (in_array($form->_params[$key]['type'], array('image/jpeg', 'image/pjpeg', 'image/gif',  'image/x-png', 'image/png'))) {
-              unset($files[$key]);
-              $files[$key]['displayURLnew'] = $form->_params[$key]['name'];
-              preg_match("/[^\/]+$/", $form->_params[$key]['name'], $matches);
-              $files[$key]['fileName'] = $matches[0];
-            }
-            else {
-              unset($files[$key]);
-              $files[$key]['fileURLnew'] = $form->_params[$key]['name'];
-              preg_match("/[^\/]+$/", $form->_params[$key]['name'], $matches);
-              $files[$key]['fileName'] = $matches[0];
-            }
-          }
-        }
-      }
-      $form->assign('files', $files);
-    }
-  }
   if ($formName == 'CRM_Grant_Form_Grant_ThankYou') { 
     // fix attachment info
     if (CRM_Utils_Array::value('fileFields', $form->_fields)) {

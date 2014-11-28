@@ -319,21 +319,22 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
             isset($field['data_type']) &&
             $field['data_type'] == 'File' || ($viewOnly && $field['name'] == 'image_URL')
           ) {
-            $cFid = substr($field['name'], strpos($field['name'], "_") + 1);
-            $cfParams = array('id' => $cFid);
-            $cfDefaults = array();
-            CRM_Core_DAO::commonRetrieve('CRM_Core_DAO_CustomField', $cfParams, $cfDefaults);
-            $columnName = $cfDefaults['column_name'];
+            if (CRM_Utils_Array::value('grant_id', $this->_params)) {
+              $cFid = substr($field['name'], strpos($field['name'], "_") + 1);
+              $cfParams = array('id' => $cFid);
+              $cfDefaults = array();
+              CRM_Core_DAO::commonRetrieve('CRM_Core_DAO_CustomField', $cfParams, $cfDefaults);
+              $columnName = $cfDefaults['column_name'];
             
-            //table name of custom data
-            $tableName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomGroup',
-                                                     $cfDefaults['custom_group_id'],
-                                                     'table_name', 'id'
-                                                     );
+              //table name of custom data
+              $tableName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomGroup',
+                $cfDefaults['custom_group_id'],
+                'table_name', 'id');
             
-            //query to fetch id from civicrm_file
-            $query = "SELECT {$columnName} FROM {$tableName} where entity_id = {$this->_params['grant_id']}";
-            $fileID = CRM_Core_DAO::singleValueQuery($query);
+              //query to fetch id from civicrm_file
+              $query = "SELECT {$columnName} FROM {$tableName} where entity_id = {$this->_params['grant_id']}";
+              $fileID = CRM_Core_DAO::singleValueQuery($query);
+            }
             $this->_fields['fileFields'][$key]['noDisplay'] = TRUE;
             $subType = CRM_Contact_BAO_ContactType::subTypeInfo('Organization', TRUE);
             if (in_array($field['field_type'], array_keys($subType)) && CRM_Utils_Array::value('grant_id', $this->_params)) {
