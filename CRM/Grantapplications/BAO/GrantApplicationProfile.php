@@ -87,7 +87,7 @@ class CRM_Grantapplications_BAO_GrantApplicationProfile extends CRM_Core_DAO {
    *
    * return array of enabled extensions 
    */
-  function checkRelatedExtensions($name = 'biz.jmaconsulting.bugp') {
+ static function checkRelatedExtensions($name = 'biz.jmaconsulting.bugp') {
     $enableDisable = NULL;
     $sql = "SELECT is_active FROM civicrm_extension WHERE full_name = '{name}'";
     $enableDisable = CRM_Core_DAO::singleValueQuery($sql);
