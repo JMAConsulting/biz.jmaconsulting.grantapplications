@@ -135,7 +135,44 @@ class CRM_Grant_Form_Grant_ThankYou extends CRM_Grant_Form_GrantBase {
     }
     $fields['state_province'] = $fields['country'] = $fields['email'] = 1;
     $contact = $this->_params = $this->controller->exportValues('Main');
-
+    if (CRM_Utils_Array::value('fileFields', $this->_fields)) {
+      foreach ($this->_fields['fileFields'] as $key => $value) {
+        if (CRM_Utils_Array::value('fileID', $value)) {
+          $url = CRM_Utils_System::url('civicrm/file',
+            'reset=1&id='.$value['fileID'].'&eid='.$value['entityID'],
+            FALSE, NULL, TRUE, TRUE
+          );
+          $fileType = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File',
+            $value['fileID'],
+            'mime_type',
+            'id'
+          );  
+          $fileName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File',
+            $value['fileID'],
+            'uri',
+            'id'
+          );  
+          if ($fileType == 'image/jpeg' ||
+            $fileType == 'image/pjpeg' ||
+            $fileType == 'image/gif' ||
+            $fileType == 'image/x-png' ||
+            $fileType == 'image/png'
+          ) {
+            $files[$key]['displayURL'] = $url;
+          }
+          else {
+            $files[$key]['fileURL'] = $url;
+          }
+          $files[$key]['id'] = $key;
+          $files[$key]['fileID'] = $value['fileID'];
+          $files[$key]['fileName'] = $fileName;
+        }
+        else {
+          $files[$key]['noDisplay'] = TRUE;
+        }
+      }
+      $this->assign('files', $files);
+    }
     foreach ($fields as $name => $dontCare) {
       if ($name == 'onbehalf') {
         foreach ($dontCare as $key => $value) {
