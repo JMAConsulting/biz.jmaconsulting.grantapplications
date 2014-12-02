@@ -82,40 +82,7 @@ function grantapplications_civicrm_managed(&$entities) {
 function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form) {
   $errors = array();
   if ($formName == 'CRM_Grant_Form_Grant_Confirm') {
-    $form->_errors = array();
-  }
-  if ($formName == 'CRM_Grant_Form_Grant_Main' && CRM_Utils_Array::value('grant_id', $fields) && 0) {
-    $grantType = CRM_Core_DAO::getFieldValue("CRM_Grant_DAO_Grant", $fields['grant_id'], "grant_type_id");
-    $groupTree = CRM_Core_BAO_CustomGroup::getTree("Grant", $this, $fields['grant_id'], 0, $grantType);
-    foreach ($groupTree as $field => $value) {
-      if (isset($value['fields'])) {
-        foreach ($value['fields'] as $key => $f) {
-          if (CRM_Utils_Array::value('html_type', $f) == 'File' && isset($f['customValue'][1]['fid'])) {
-            $form->setElementError('custom_' . $key, NULL);
-          }
-        }
-      }
-    }
-    // On Behalf
-    $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$fields['grant_id'].'%"');
-    CRM_Contact_BAO_SavedSearch::retrieve($ssParams, $savedSearch);
-    $grantParams = unserialize($savedSearch['form_values']);
-    $subType = CRM_Contact_BAO_ContactType::subTypeInfo('Organization', TRUE);
-    foreach ($subType as $key => $value) {
-      $gTree[] = CRM_Core_BAO_CustomGroup::getTree("Organization", $this, $grantParams['contactID'], NULL, $key);
-    }
-    foreach ($gTree as $flds => $vs) {
-      foreach ($vs as $fld => $v) {
-        if (isset($v['fields'])) {
-          foreach ($v['fields'] as $k => $f) {
-            if (CRM_Utils_Array::value('html_type', $f) == 'File' && isset($f['customValue'][1]['fid'])) {
-              $form->_errors['onbehalf[custom_'.$k.']'] = '';
-              $form->setElementError('onbehalf[custom_'.$k.']', NULL);
-            }
-          }
-        }
-      }
-    }
+    $form->_errors = array(); // hack to prevent fields from throwing an error in case they are required, generally in the case of save as draft.
   }
   // Keeping this in validate hook to prevent re-use of same functionality
   if (($formName == 'CRM_Grant_Form_Grant_Main' ||  $formName == 'CRM_Grant_Form_Grant_Confirm') 
@@ -149,47 +116,7 @@ function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form
 }
 
 function grantapplications_civicrm_buildForm($formName, &$form) {
-  if ($formName == 'CRM_Grant_Form_Grant_ThankYou') { 
-    // fix attachment info
-    if (CRM_Utils_Array::value('fileFields', $form->_fields)) {
-      foreach ($form->_fields['fileFields'] as $key => $value) {
-        if (CRM_Utils_Array::value('fileID', $value)) {
-          $url = CRM_Utils_System::url('civicrm/file',
-            'reset=1&id='.$value['fileID'].'&eid='.$value['entityID'],
-            FALSE, NULL, TRUE, TRUE
-          );
-          $fileType = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File',
-            $value['fileID'],
-            'mime_type',
-            'id'
-          );  
-          $fileName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File',
-            $value['fileID'],
-            'uri',
-            'id'
-          );  
-          if ($fileType == 'image/jpeg' ||
-            $fileType == 'image/pjpeg' ||
-            $fileType == 'image/gif' ||
-            $fileType == 'image/x-png' ||
-            $fileType == 'image/png'
-          ) {
-            $files[$key]['displayURL'] = $url;
-          }
-          else {
-            $files[$key]['fileURL'] = $url;
-          }
-          $files[$key]['id'] = $key;
-          $files[$key]['fileID'] = $value['fileID'];
-          $files[$key]['fileName'] = $fileName;
-        }
-        else {
-          $files[$key]['noDisplay'] = TRUE;
-        }
-      }
-      $form->assign('files', $files);
-    }
-  }
+  // Keeping this in buildform hook to prevent re-use of same functionality
   if ($formName == "CRM_Grant_Form_GrantPage_Settings" || 
     $formName == "CRM_Grant_Form_GrantPage_Custom" ||  
     $formName == "CRM_Grant_Form_GrantPage_Draft" || 
@@ -233,7 +160,7 @@ function grantapplications_civicrm_pageRun(&$page) {
     // Check if grant program extension is enabled
     $enabled = CRM_Grantapplications_BAO_GrantApplicationProfile::checkRelatedExtensions('biz.jmaconsulting.grantprograms');
     $smarty = CRM_Core_Smarty::singleton();
-    $rels = $smarty->get_template_vars('currentRelationships');
+    $rels = CRM_Contact_BAO_Relationship::getRelationship($cid, 3, 0, 0, 0, NULL, NULL, TRUE);
     $actionLinks = $smarty->get_template_vars('grant_rows');
     $permissions = array(CRM_Core_Permission::VIEW);
     if (CRM_Core_Permission::check('edit grants')) {
@@ -285,7 +212,7 @@ function grantapplications_civicrm_pageRun(&$page) {
           $row['sort_name'] = $values['display_name'];
           $row['grant_type'] = CRM_Utils_Array::value($dao->grant_type_id, $grantType);
           $row['grant_application_received_date'] = $dao->application_received_date;
-          $row['grant_amount_total'] = CRM_Utils_Money::format($dao->amount_total, $dao->currency);
+          $row['grant_amount_total'] = $dao->amount_total;
           $row['grant_status'] = CRM_Utils_Array::value($dao->status_id, $grantStatus);
           
           if ($enabled) {
