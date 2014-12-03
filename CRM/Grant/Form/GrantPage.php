@@ -193,6 +193,9 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
       $this->freeze();
       $this->addElement('button', 'done', ts('Done'), array('onclick' => "location.href='civicrm/admin/custom/group?reset=1&action=browse'"));
     }
+    CRM_Core_Region::instance('page-body')->add(array(
+       'template' => 'CRM/css/grantapplications.tpl',
+    ));
   }
 
   /**
