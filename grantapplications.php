@@ -82,7 +82,7 @@ function grantapplications_civicrm_managed(&$entities) {
 function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form) {
   $errors = array();
   if ($formName == 'CRM_Grant_Form_Grant_Confirm') {
-    $form->_errors = array(); // hack to prevent fields from throwing an error in case they are required, generally in the case of save as draft.
+    $form->_errors = array(); // hack to prevent file fields from throwing an error in case they are required.
   }
   // Keeping this in validate hook to prevent re-use of same functionality
   if (($formName == 'CRM_Grant_Form_Grant_Main' ||  $formName == 'CRM_Grant_Form_Grant_Confirm') 
@@ -116,15 +116,6 @@ function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form
 }
 
 function grantapplications_civicrm_buildForm($formName, &$form) {
-  // Keeping this in buildform hook to prevent re-use of same functionality
-  if ($formName == "CRM_Grant_Form_GrantPage_Settings" || 
-    $formName == "CRM_Grant_Form_GrantPage_Custom" ||  
-    $formName == "CRM_Grant_Form_GrantPage_Draft" || 
-    $formName == "CRM_Grant_Form_GrantPage_ThankYou") {
-    CRM_Core_Region::instance('page-body')->add(array(
-       'template' => 'CRM/css/grantapplications.tpl',
-    ));
-  } 
   // Code to be done to avoid core editing
   if ($formName == "CRM_UF_Form_Field" && CRM_Core_Permission::access('CiviGrant')) {
     if (!$form->elementExists('field_name')) {
