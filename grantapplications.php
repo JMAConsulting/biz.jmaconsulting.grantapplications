@@ -1,6 +1,4 @@
 <?php
-define('DRAFT_STATUS_ID', 8);
-define('EMPLOYEE_OF_ID', 5);
 require_once 'grantapplications.civix.php';
 
 /**
