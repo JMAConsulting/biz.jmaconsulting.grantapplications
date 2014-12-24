@@ -84,7 +84,7 @@ function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form
   }
   // Keeping this in validate hook to prevent re-use of same functionality
   if (($formName == 'CRM_Grant_Form_Grant_Main' ||  $formName == 'CRM_Grant_Form_Grant_Confirm') 
-    && $form->_values['is_draft'] == 1 && (CRM_Utils_Array::value('_qf_Main_save', $fields) == 'Save as Draft' || $form->_params['is_draft'] == 1)) {
+    && CRM_Utils_Array::value('is_draft', $form->_values) == 1 && (CRM_Utils_Array::value('_qf_Main_save', $fields) == 'Save as Draft' || $form->_params['is_draft'] == 1)) {
     foreach($form->_fields as $name => $values) {
       $form->setElementError($name, NULL);
       $form->_errors = array();
@@ -144,6 +144,12 @@ function grantapplications_civicrm_buildForm($formName, &$form) {
 }
 
 function grantapplications_civicrm_pageRun(&$page) {
+  if( $page->getVar('_name') == 'CRM_Grant_Page_DashBoard') {
+    //FIXME: Avoid overwriting core
+    CRM_Core_Region::instance('page-body')->add(array(
+      'template' => 'CRM/Grant/Page/GrantApplicationDashboard.tpl',
+    ));
+  }
   if ($page->getVar('_name') == 'CRM_Contact_Page_View_UserDashBoard') {
     $cid = $page->getVar('_contactId'); 
     // Check if grant program extension is enabled
@@ -151,6 +157,9 @@ function grantapplications_civicrm_pageRun(&$page) {
     $smarty = CRM_Core_Smarty::singleton();
     $rels = CRM_Contact_BAO_Relationship::getRelationship($cid, 3, 0, 0, 0, NULL, NULL, TRUE);
     $actionLinks = $smarty->get_template_vars('grant_rows');
+    if (empty($actionLinks)) {
+      $actionLinks = array();
+    }
     $permissions = array(CRM_Core_Permission::VIEW);
     if (CRM_Core_Permission::check('edit grants')) {
       $permissions[] = CRM_Core_Permission::EDIT;
