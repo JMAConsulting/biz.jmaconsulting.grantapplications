@@ -192,13 +192,13 @@ class CRM_Core_Page_AJAX_Location {
           if (array_key_exists($key, $defaults)) {
             $htmlType = CRM_Utils_Array::value('html_type', $val);
             if ($htmlType == 'Radio') {
-              $elements["onbehalf[{$key}]"]['type'] = $htmlType;
-              $elements["onbehalf[{$key}]"]['value'] = $defaults[$key];
+              $elements["onbehalf_{$key}"]['type'] = $htmlType;
+              $elements["onbehalf_{$key}"]['value'] = $defaults[$key];
             }
             elseif ($htmlType == 'CheckBox') {
+              $elements["onbehalf_{$key}"]['type'] = $htmlType;
               foreach ($defaults[$key] as $k => $v) {
-                $elements["onbehalf[{$key}][{$k}]"]['type'] = $htmlType;
-                $elements["onbehalf[{$key}][{$k}]"]['value'] = $v;
+                $elements["onbehalf_{$key}"]['value'][$k] = $v;
               }
             }
             elseif ($htmlType == 'Multi-Select') {
