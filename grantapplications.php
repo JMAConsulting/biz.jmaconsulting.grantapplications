@@ -300,6 +300,27 @@ function grantapplications_enableDisableNavigationMenu($action) {
       )
     ); 
     
+    $optionGroup = array(
+      'activity_type' => 'Grant',
+      'grant_status' => 'Draft',
+      'user_dashboard_options' => 'CiviGrant',                         
+    );
+
+    foreach ($optionGroup as $ogName => $ovName) {
+      CRM_Core_DAO::executeQuery(
+        "UPDATE `civicrm_activity` ca
+          INNER JOIN civicrm_option_value cv ON cv.value = ca.activity_type_id
+          INNER JOIN civicrm_option_group cg ON cg.id = cv.option_group_id
+          SET cv.is_active = %1
+          WHERE cg.name = %2 AND cv.name = %3", 
+        array(
+          1 => array($action, 'Integer'),
+          2 => array($ogName, 'String'),
+          3 => array($ovName, 'String'),
+        )
+      );
+    }
+    
     CRM_Core_DAO::executeQuery(
       "UPDATE civicrm_navigation SET is_active = %2 WHERE name = 'New Grant Application Page' AND domain_id = %1", 
       array(

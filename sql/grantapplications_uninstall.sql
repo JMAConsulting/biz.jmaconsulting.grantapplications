@@ -37,3 +37,15 @@ DELETE ca.*, cv.* FROM `civicrm_activity` ca
 INNER JOIN civicrm_option_value cv ON cv.value = ca.activity_type_id
 INNER JOIN civicrm_option_group cg ON cg.id = cv.option_group_id
 WHERE cg.name = 'activity_type' AND cv.name = 'Grant';
+
+
+DELETE ca.*, cv.* FROM `civicrm_activity` ca
+INNER JOIN civicrm_option_value cv ON cv.value = ca.activity_type_id
+INNER JOIN civicrm_option_group cg ON cg.id = cv.option_group_id
+WHERE cg.name = 'grant_status' AND cv.name = 'Draft';
+
+
+DELETE ca.*, cv.* FROM `civicrm_activity` ca
+INNER JOIN civicrm_option_value cv ON cv.value = ca.activity_type_id
+INNER JOIN civicrm_option_group cg ON cg.id = cv.option_group_id
+WHERE cg.name = 'user_dashboard_options' AND cv.name = 'CiviGrant';

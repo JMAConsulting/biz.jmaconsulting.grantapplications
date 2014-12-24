@@ -10,15 +10,21 @@ ALTER TABLE  `civicrm_grant_app_page` ADD `draft_text` text COLLATE utf8_unicode
 
 ALTER TABLE  `civicrm_grant_app_page` ADD `draft_footer` text COLLATE utf8_unicode_ci COMMENT 'Text and html allowed. Displayed at the bottom of the Save as Draft page.' AFTER `draft_text`;
 
-SELECT @optionGroupId := id FROM `civicrm_option_group` WHERE `name` = 'activity_type';
+ALTER TABLE `civicrm_grant_app_page` ADD `confirm_text` text COLLATE utf8_unicode_ci COMMENT 'Text and html allowed. displayed at the bottom of the confirmation page.' AFTER `thankyou_footer`, ADD `confirm_footer` text COLLATE utf8_unicode_ci COMMENT 'Text and html allowed. displayed at the bottom of the confirmation page.' AFTER `confirm_text`;
 
-SELECT @maxValue := MAX( CAST( `value` AS UNSIGNED ) ) + 1 FROM  `civicrm_option_value` WHERE `option_group_id` = @optionGroupId;
+SELECT @dashId := id FROM `civicrm_option_group` WHERE `name` = 'user_dashboard_options';
 
-SELECT @maxWeight := MAX( CAST( `weight` AS UNSIGNED ) ) + 1 FROM  `civicrm_option_value` WHERE `option_group_id` = @optionGroupId;
+SELECT @maxValue := MAX( CAST( `value` AS UNSIGNED ) ) + 1 FROM  `civicrm_option_value` WHERE `option_group_id` = @dashId;
 
-SELECT @activityTypeId := id FROM `civicrm_option_value` WHERE `name` = 'Grant';
+SELECT @maxWeight := MAX( CAST( `weight` AS UNSIGNED ) ) + 1 FROM  `civicrm_option_value` WHERE `option_group_id` = @dashId;
 
-INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, `label`, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, `description`, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) VALUES
-(@activityTypeId, @optionGroupId, 'Grant', @maxValue, 'Grant', NULL, 1, NULL, @maxWeight, 'Online Grant Application', 0, 1, 1, 5, NULL, NULL);
+INSERT IGNORE INTO `civicrm_option_value` (`option_group_id`, {localize field='label'}`label`{/localize}, `value`, `name`, `weight`, {localize field='description'}`description`{/localize}, `is_active`) VALUES (@dashId, {localize}'{ts escape="sql"}Grants{/ts}'{/localize}, @maxValue, 'CiviGrant', @maxWeight, {localize}'Grants on dashboard'{/localize}, 1);
 
-ALTER TABLE `civicrm_grant_app_page` ADD `confirm_text` TEXT NULL DEFAULT NULL AFTER `thankyou_footer`, ADD `confirm_footer` TEXT NULL DEFAULT NULL AFTER `confirm_text`;
+SELECT @statusId := id FROM `civicrm_option_group` WHERE `name` = 'grant_status';
+
+SELECT @maxValue := MAX( CAST( `value` AS UNSIGNED ) ) + 1 FROM  `civicrm_option_value` WHERE `option_group_id` = @statusId;
+
+SELECT @maxWeight := MAX( CAST( `weight` AS UNSIGNED ) ) + 1 FROM  `civicrm_option_value` WHERE `option_group_id` = @statusId;
+
+INSERT IGNORE INTO `civicrm_option_value` (`option_group_id`, {localize field='label'}`label`{/localize}, `value`, `name`, `weight`, `is_active`) VALUES (@statusId, {localize}'{ts escape="sql"}Draft{/ts}'{/localize}, @maxValue, 'Draft', @maxWeight, 1);
+
