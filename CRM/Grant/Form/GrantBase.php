@@ -153,7 +153,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
     $this->_fields = $this->get('fields');
     $this->assign('title', $this->_values['title']);
     CRM_Utils_System::setTitle($this->_values['title']);
- if (!$this->_values) {
+    if (!$this->_values) {
       // get all the values from the dao object
       $this->_values = array();
       $this->_fields = array();
@@ -282,7 +282,8 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
         'grant_type_id' => 1,
         'currency' => 1,
         'rationale' => 1,
-        'status_id' => 1
+        'grant_status_id' => 1,
+        'financial_type' => 1
       );
 
       $fields = NULL;

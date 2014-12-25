@@ -94,6 +94,13 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
           'url' => $urlString . 'settings',
           'qs' => $urlParams,
           'uniqueName' => 'settings',
+        ),    
+        CRM_Core_Action::FOLLOWUP => array(
+          'name' => ts('Save as Draft'),
+          'title' => ts('Save as Draft'),
+          'url' => $urlString . 'draft',
+          'qs' => $urlParams,
+          'uniqueName' => 'draft',
         ),
         CRM_Core_Action::EXPORT => array(
           'name' => ts('Receipt'),
@@ -164,38 +171,40 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
    * @static
    */
   function browse($action = NULL) {
-     $params = array();
-     $query = "SELECT * from civicrm_grant_app_page WHERE 1";
-     $grantPage = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Grant_DAO_GrantApplicationPage');
-     $rows = array();
-     $allowToDelete = CRM_Core_Permission::check('delete in CiviGrant');
-     //get configure actions links.
-     $configureActionLinks = self::configureActionLinks();
-     $query = "
-       SELECT  id
-       FROM  civicrm_grant_app_page
-       WHERE  1";
-     $grantAppPage = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Grant_DAO_GrantApplicationPage');
-     $grantAppPageIds = array();
-     while ($grantAppPage->fetch()) {
-         $grantAppPageIds[$grantAppPage->id] = $grantAppPage->id;
-     }
+    $params = array();
+    $query = "SELECT * from civicrm_grant_app_page WHERE 1";
+    $grantPage = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Grant_DAO_GrantApplicationPage');
+    $rows = array();
+    $allowToDelete = CRM_Core_Permission::check('delete in CiviGrant');
+    //get configure actions links.
+    $configureActionLinks = self::configureActionLinks();
+    $query = "
+      SELECT  id
+      FROM  civicrm_grant_app_page
+      WHERE  1";
+    $grantAppPage = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Grant_DAO_GrantApplicationPage');
+    $grantAppPageIds = array();
+    while ($grantAppPage->fetch()) {
+      $grantAppPageIds[$grantAppPage->id] = $grantAppPage->id;
+    }
     //get all section info.
     $grantAppPageSectionInfo = CRM_Grant_BAO_GrantApplicationPage::getSectionInfo($grantAppPageIds);
     
     while ($grantPage->fetch()) {
       $rows[$grantPage->id] = array();
       CRM_Core_DAO::storeValues($grantPage, $rows[$grantPage->id]);
-
+      
       // form all action links
       $action = array_sum(array_keys($this->actionLinks()));
-
+      
       //add configure actions links.
       $action += array_sum(array_keys($configureActionLinks));
 
       //add online grant links.
-      $action += array_sum(array_keys(self::onlineGrantLinks()));
-
+      if ($grantPage->is_active) {
+        $action += array_sum(array_keys(self::onlineGrantLinks()));
+      }
+      
       if ($grantPage->is_active) {
         $action -= CRM_Core_Action::ENABLE;
       }

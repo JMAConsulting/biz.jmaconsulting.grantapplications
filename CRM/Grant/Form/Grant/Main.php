@@ -313,25 +313,21 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
         CRM_Core_BAO_CMSUser::buildForm($this, $profileID, TRUE);
       }
     }
-    $draft = array();
+    $buttonArray[] = array(
+      'type' => 'upload',
+      'name' => ts('Submit'),
+      'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+      'isDefault' => TRUE,
+    );
     if ($this->_isDraft) {
-      $draft = array(
+       $buttonArray[] = array(
         'type' => 'save',
         'name' => ts('Save as Draft'),
         'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
         'isDefault' => TRUE,
       );
     }
-    $this->addButtons(array(
-      $draft,
-      array(
-        'type' => 'upload',
-        'name' => ts('Submit'),
-        'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
-        'isDefault' => TRUE,
-      ),
-     )
-    );  
+    $this->addButtons($buttonArray);  
     // set up attachments
     if (CRM_Utils_Request::retrieve('gid', 'Positive')) {
       $gid = CRM_Utils_Request::retrieve('gid', 'Positive');
