@@ -23,10 +23,11 @@
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
 *}
+<br>
 <div class='crm-container manage-grant-apps' id='crm-container'>
   <h3>{ts}Manage Grant Application Pages{/ts}</h3>
     {include file="CRM/common/enableDisableApi.tpl"}
-{include file="CRM/common/crmeditable.tpl"}
+    {include file="CRM/common/crmeditable.tpl"}
     {include file="CRM/common/jsortable.tpl"}
      <table id="options" class="display">
        <thead>
