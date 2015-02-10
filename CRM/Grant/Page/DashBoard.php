@@ -94,6 +94,7 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
           'url' => $urlString . 'settings',
           'qs' => $urlParams,
           'uniqueName' => 'settings',
+          'class' => 'no-popup',
         ),    
         CRM_Core_Action::FOLLOWUP => array(
           'name' => ts('Save as Draft'),
@@ -101,6 +102,7 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
           'url' => $urlString . 'draft',
           'qs' => $urlParams,
           'uniqueName' => 'draft',
+          'class' => 'no-popup',
         ),
         CRM_Core_Action::EXPORT => array(
           'name' => ts('Receipt'),
@@ -108,6 +110,7 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
           'url' => $urlString . 'thankyou',
           'qs' => $urlParams,
           'uniqueName' => 'thankyou',
+          'class' => 'no-popup',
         ),
         CRM_Core_Action::PROFILE => array(
           'name' => ts('Profiles'),
@@ -115,6 +118,7 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
           'url' => $urlString . 'custom',
           'qs' => $urlParams,
           'uniqueName' => 'custom',
+          'class' => 'no-popup',
         ),
       );
     }
@@ -128,7 +132,7 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
    * @return array $_onlineGrantLinks.
    *
    */
-  function &onlineGrantLinks() {
+  function onlineGrantLinks() {
     if (!isset(self::$_onlineGrantLinks)) {
       $urlString = 'civicrm/grant/transact';
       $urlParams = 'reset=1&id=%%id%%';
@@ -140,6 +144,7 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
           'qs' => $urlParams,
           'fe' => TRUE,
           'uniqueName' => 'live_page',
+          'class' => 'no-popup',
         ),
       );
     }

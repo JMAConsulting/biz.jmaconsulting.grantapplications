@@ -144,12 +144,13 @@ function grantapplications_civicrm_buildForm($formName, &$form) {
 }
 
 function grantapplications_civicrm_pageRun(&$page) {
-  if( $page->getVar('_name') == 'CRM_Grant_Page_DashBoard') {
+  if ($page->getVar('_name') == 'CRM_Grant_Page_DashBoard') {
     //FIXME: Avoid overwriting core
     CRM_Core_Region::instance('page-body')->add(array(
       'template' => 'CRM/Grant/Page/GrantApplicationDashboard.tpl',
     ));
   }
+
   if ($page->getVar('_name') == 'CRM_Contact_Page_View_UserDashBoard') {
     $cid = $page->getVar('_contactId'); 
     // Check if grant program extension is enabled
@@ -362,4 +363,16 @@ function grantapplications_enableDisableNavigationMenu($action) {
   }
   
   grantapplications_addRemoveMenu($action);
+}
+
+function grantapplications_dashboardActionLinks() {
+  return array(
+    CRM_Core_Action::UPDATE => array(
+      'name' => ts('Edit'),
+      'url' => 'civicrm/grant/transact',
+      'qs' => 'reset=1&id=%%id%%&gid=%%gid%%',
+      'title' => ts('Edit Grant Application'),
+      'class' => 'no-popup',
+    ),
+  );
 }
