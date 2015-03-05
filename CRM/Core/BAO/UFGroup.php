@@ -2182,6 +2182,9 @@ AND    ( entity_id IS NULL OR entity_id <= 0 )
     elseif ($fieldName == 'grant_status_id') {
       $form->add('select', $name, $title, CRM_Core_PseudoConstant::get('CRM_Grant_DAO_Grant', 'grant_status_id'), $required, $selectAttributes);
     }
+    elseif ($fieldName == 'grant_report_received') {
+      $form->add('advcheckbox', $name, $title, $attributes, $required);
+    }
     elseif ($fieldName == 'signature_html') {
       $form->addWysiwyg($name, $title, CRM_Core_DAO::getAttribute('CRM_Core_DAO_Email', $fieldName));
     }
