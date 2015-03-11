@@ -346,7 +346,7 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
       if (!CRM_Utils_Array::value($sectionName, $sectionsInfo)) {
         $classes = array();
         if (isset($link['class'])) {
-          $classes = $link['class'];
+          $classes = array($link['class']);
         }
         $link['class'] = array_merge($classes, array('disabled'));
       }
