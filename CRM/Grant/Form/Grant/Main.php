@@ -210,6 +210,11 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     //process drafts
     if ($gid = CRM_Utils_Request::retrieve('gid', 'Positive')) {
       $ssParams = array();
+      $grantStatusID = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_Grant', $gid, 'status_id');
+      $grantStatus = CRM_Core_PseudoConstant::get('CRM_Grant_DAO_Grant', 'status_id', array('labelColumn' => 'name'));
+      if ($grantStatusID != array_search('Draft', $grantStatus)) {
+        CRM_Core_Error::fatal(ts('This grant application has already been submitted.'));
+      }
       $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$gid.'%"');
       CRM_Contact_BAO_SavedSearch::retrieve($ssParams, $savedSearch);
       $this->_defaults = array_replace( $this->_defaults, unserialize($savedSearch['form_values']) );
