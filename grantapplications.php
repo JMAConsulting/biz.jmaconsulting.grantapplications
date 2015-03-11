@@ -193,7 +193,7 @@ function grantapplications_civicrm_pageRun(&$page) {
       $relationshipType = CRM_Core_PseudoConstant::relationshipType('name');
       $grantType = CRM_Core_PseudoConstant::get('CRM_Grant_DAO_Grant', 'grant_type_id');
       $grantStatus = CRM_Core_PseudoConstant::get('CRM_Grant_DAO_Grant', 'status_id');
-      $grantStatusByName = CRM_Core_PseudoConstant::get('CRM_Grant_DAO_Grant', 'status_id');
+      $grantStatusByName = CRM_Core_PseudoConstant::get('CRM_Grant_DAO_Grant', 'status_id', array('labelColumn' => 'name'));
       
       if ($enabled) {
         $extraSelect = ', grant_program_id ';
