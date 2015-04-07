@@ -41,7 +41,7 @@ class CRM_Grant_Page_UserDashboard extends CRM_Contact_Page_View_UserDashBoard {
    * return null
    * @access public
    */
-  function listGrants() {
+  public function listGrants() {
     $controller = new CRM_Core_Controller_Simple('CRM_Grant_Form_Search', ts('Grants'), NULL);
     $controller->setEmbedded(TRUE);
     $controller->reset();
@@ -61,7 +61,7 @@ class CRM_Grant_Page_UserDashboard extends CRM_Contact_Page_View_UserDashBoard {
    * return null
    * @access public
    */
-  function run() {
+  public function run() {
     parent::preProcess();
     $this->listGrants();
   }

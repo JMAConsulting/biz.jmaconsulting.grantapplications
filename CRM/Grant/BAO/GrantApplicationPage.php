@@ -63,12 +63,12 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
    * @return Object             DAO object on sucess, null otherwise
    * @static
    */
-  static
+  public static
   function setIsActive($id, $is_active) {
     return CRM_Core_DAO::setFieldValue('CRM_Grant_DAO_GrantApplicationPage', $id, 'is_active', $is_active);
   }
 
-  function deleteGrantApplicationPage($id, $title) {
+  public function deleteGrantApplicationPage($id, $title) {
     $transaction = new CRM_Core_Transaction();
     
     // first delete the join entries associated with this grant application page
@@ -91,7 +91,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
     CRM_Core_Session::setStatus(ts('The Grant Application page \'%1\' has been deleted.', array(1 => $title)));
   }
 
-  static function setValues($id, &$values) {
+  public static function setValues($id, &$values) {
     $params = array(
       'id' => $id,
     );
@@ -126,7 +126,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
    * @static
    * @access public
    */
-  static function addActivity(&$grant,
+  public static function addActivity(&$grant,
     $targetContactID = NULL,
     $activityType = 'Grant'
   ) {
@@ -182,7 +182,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
    * @access public
    * @static
    */
-  static function sendMail($contactID, &$values, $returnMessageText = FALSE, $fieldTypes = NULL) {
+  public static function sendMail($contactID, &$values, $returnMessageText = FALSE, $fieldTypes = NULL) {
     $gIds = $params = array();
     $email = NULL;
     if (isset($values['custom_pre_id'])) {
@@ -311,7 +311,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
      * Construct the message to be sent by the send function
      *
      */
-  function composeMessage($tplParams, $contactID, $isTest) {
+  public function composeMessage($tplParams, $contactID, $isTest) {
     $sendTemplateParams = array(
       'groupName' => 'msg_tpl_workflow_grant',
       'valueName' => 'grant_online_receipt',
@@ -337,7 +337,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
    * @access public
    * @static
    */
-  static function getSectionInfo($grantAppPageIds = array(
+  public static function getSectionInfo($grantAppPageIds = array(
     )) {
     $info = array();
     $whereClause = NULL;
@@ -382,7 +382,7 @@ AND module = 'CiviGrant'  AND civicrm_uf_join.is_active = 1 ) $whereClause";
    * @access public
    * @static
    */
-  static function buildCustomProfile($gid, $name, $cid, &$template, &$params, $onBehalfId = NULL) {
+  public static function buildCustomProfile($gid, $name, $cid, &$template, &$params, $onBehalfId = NULL) {
     //Ignore fields for mails
     $fieldsToIgnore = array(
       'amount_granted' => 1,

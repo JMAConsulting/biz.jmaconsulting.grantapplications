@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.6                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2014                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -23,12 +23,12 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2014
+ * @copyright CiviCRM LLC (c) 2004-2015
  *
  */
 
@@ -41,17 +41,18 @@ class CRM_Core_Page_AJAX_Location {
    * FIXME: we should make this method like getLocBlock() OR use the same method and
    * remove this one.
    *
-   * Function to obtain the location of given contact-id.
+   * obtain the location of given contact-id.
    * This method is used by on-behalf-of form to dynamically generate poulate the
    * location field values for selected permissioned contact.
    */
-  static function getPermissionedLocation() {
+  public static function getPermissionedLocation() {
     $cid = CRM_Utils_Request::retrieve('cid', 'Integer', CRM_Core_DAO::$_nullObject, TRUE);
     $ufId = CRM_Utils_Request::retrieve('ufId', 'Integer', CRM_Core_DAO::$_nullObject, TRUE);
     $relContact = CRM_Utils_Type::escape($_GET['relContact'], 'Integer', CRM_Core_DAO::$_nullObject, TRUE);
-
+    
     // Verify user id
-    $user = CRM_Utils_Request::retrieve('uid', 'Integer', CRM_Core_DAO::$_nullObject, FALSE, CRM_Core_Session::singleton()->get('userID'));
+    $user = CRM_Utils_Request::retrieve('uid', 'Integer', CRM_Core_DAO::$_nullObject, FALSE, CRM_Core_Session::singleton()
+        ->get('userID'));
     if (empty($user) || (CRM_Utils_Request::retrieve('cs', 'String', $form, FALSE) && !CRM_Contact_BAO_Contact_Permission::validateChecksumContact($user, CRM_Core_DAO::$_nullObject, FALSE))
     ) {
       CRM_Utils_System::civiExit();
@@ -63,13 +64,13 @@ class CRM_Core_Page_AJAX_Location {
       CRM_Utils_System::civiExit();
     }
 
-    $values      = array();
+    $values = array();
     $entityBlock = array('contact_id' => $cid);
-    $location    = CRM_Core_BAO_Location::getValues($entityBlock);
+    $location = CRM_Core_BAO_Location::getValues($entityBlock);
 
     $config = CRM_Core_Config::singleton();
     $addressSequence = array_flip($config->addressSequence());
-
+    
     if (!empty($relContact)) {
       $elements = array(
         "phone_1_phone" =>
@@ -100,8 +101,8 @@ class CRM_Core_Page_AJAX_Location {
     }
     else {
       $profileFields = CRM_Core_BAO_UFGroup::getFields($ufId, FALSE, CRM_Core_Action::VIEW, NULL, NULL, FALSE,
-        NULL, FALSE, NULL, CRM_Core_Permission::CREATE, NULL
-      );
+                                                       NULL, FALSE, NULL, CRM_Core_Permission::CREATE, NULL
+                                                       );
       $website = CRM_Core_BAO_Website::getValues($entityBlock, $values);
 
       foreach ($location as $fld => $values) {
@@ -176,7 +177,7 @@ class CRM_Core_Page_AJAX_Location {
             'fld' => $field,
             'locTypeId' => $locTypeId,
             'type' => $type,
-            'value' =>  isset($location['address'][1]) ? $location['address'][1][$addField] : null,
+            'value' => isset($location['address'][1]) ? $location['address'][1][$addField] : NULL,
           );
           unset($profileFields["{$field}-{$locTypeId}"]);
         }
@@ -188,7 +189,6 @@ class CRM_Core_Page_AJAX_Location {
 
       if (!empty($defaults)) {
         foreach ($profileFields as $key => $val) {
-
           if (array_key_exists($key, $defaults)) {
             $htmlType = CRM_Utils_Array::value('html_type', $val);
             if ($htmlType == 'Radio') {
@@ -211,7 +211,7 @@ class CRM_Core_Page_AJAX_Location {
               $elements["onbehalf_{$key}"]['type'] = $htmlType;
               $elements["onbehalf_{$key}"]['value'] = $defaults[$key];
               $elements["onbehalf_{$key}"]['id'] = $defaults["{$key}_id"];
-            }            
+            }         
             elseif ($htmlType == 'File') {
               $elements["onbehalf_{$key}"]['type'] = $htmlType;
               $elements["onbehalf_{$key}"]['value'] = '';
@@ -235,18 +235,19 @@ class CRM_Core_Page_AJAX_Location {
         }
       }
     }
+
     CRM_Utils_JSON::output($elements);
   }
 
-  static function jqState() {
+  public static function jqState() {
     CRM_Utils_JSON::output(CRM_Core_BAO_Location::getChainSelectValues($_GET['_value'], 'country'));
   }
 
-  static function jqCounty() {
+  public static function jqCounty() {
     CRM_Utils_JSON::output(CRM_Core_BAO_Location::getChainSelectValues($_GET['_value'], 'stateProvince'));
   }
 
-  static function getLocBlock() {
+  public static function getLocBlock() {
     // i wish i could retrieve loc block info based on loc_block_id,
     // Anyway, lets retrieve an event which has loc_block_id set to 'lbid'.
     if ($_REQUEST['lbid']) {
@@ -267,9 +268,15 @@ class CRM_Core_Page_AJAX_Location {
     // lets output only required fields.
     foreach ($addressOptions as $element => $isSet) {
       if ($isSet && (!in_array($element, array(
-        'im', 'openid')))) {
+          'im',
+          'openid',
+        )))
+      ) {
         if (in_array($element, array(
-          'country', 'state_province', 'county'))) {
+          'country',
+          'state_province',
+          'county',
+        ))) {
           $element .= '_id';
         }
         elseif ($element == 'address_name') {
@@ -279,19 +286,28 @@ class CRM_Core_Page_AJAX_Location {
         $value = CRM_Utils_Array::value($element, $location['address'][1]);
         $value = $value ? $value : "";
         $result[str_replace(array(
-          '][', '[', "]"), array('_', '_', ''), $fld)] = $value;
+          '][',
+          '[',
+          "]",
+        ), array('_', '_', ''), $fld)] = $value;
       }
     }
 
     foreach (array(
-      'email', 'phone_type_id', 'phone') as $element) {
+               'email',
+               'phone_type_id',
+               'phone',
+             ) as $element) {
       $block = ($element == 'phone_type_id') ? 'phone' : $element;
       for ($i = 1; $i < 3; $i++) {
         $fld = "{$block}[{$i}][{$element}]";
         $value = CRM_Utils_Array::value($element, $location[$block][$i]);
         $value = $value ? $value : "";
         $result[str_replace(array(
-          '][', '[', "]"), array('_', '_', ''), $fld)] = $value;
+          '][',
+          '[',
+          "]",
+        ), array('_', '_', ''), $fld)] = $value;
       }
     }
 
@@ -300,4 +316,5 @@ class CRM_Core_Page_AJAX_Location {
 
     CRM_Utils_JSON::output($result);
   }
+
 }

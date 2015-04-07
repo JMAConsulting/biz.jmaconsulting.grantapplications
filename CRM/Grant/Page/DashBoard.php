@@ -47,7 +47,8 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
    *
    * @return array $_actionLinks
    *
-   */ function &actionLinks() {
+   */ 
+  public function &actionLinks() {
     // check if variable _actionsLinks is populated
     if (!isset(self::$_actionLinks)) {
       // helper variable for nicer formatting
@@ -81,7 +82,7 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
    * @return array $_configureActionLinks
    *
    */
-  function &configureActionLinks() {
+  public function &configureActionLinks() {
     // check if variable _actionsLinks is populated
     if (!isset(self::$_configureActionLinks)) {
       $urlString = 'civicrm/admin/grant/';
@@ -132,7 +133,7 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
    * @return array $_onlineGrantLinks.
    *
    */
-  function onlineGrantLinks() {
+  public function onlineGrantLinks() {
     if (!isset(self::$_onlineGrantLinks)) {
       $urlString = 'civicrm/grant/transact';
       $urlParams = 'reset=1&id=%%id%%';
@@ -159,7 +160,7 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
    * @access public
    *
    */
-  function preProcess() {
+  public function preProcess() {
     $admin = CRM_Core_Permission::check('administer CiviCRM');
 
     $grantSummary = CRM_Grant_BAO_Grant::getGrantSummary($admin);
@@ -175,7 +176,7 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
    * @access public
    * @static
    */
-  function browse($action = NULL) {
+  public function browse($action = NULL) {
     $params = array();
     $query = "SELECT * from civicrm_grant_app_page WHERE 1";
     $grantPage = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Grant_DAO_GrantApplicationPage');
@@ -268,7 +269,7 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
    * return null
    * @access public
    */
-  function run() {
+  public function run() {
       
     $action = CRM_Utils_Request::retrieve('action', 'String',
       // default to 'browse'
@@ -329,7 +330,7 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
     return parent::run();
   }
 
-  function formatConfigureLinks($sectionsInfo) {
+  public function formatConfigureLinks($sectionsInfo) {
     //build the formatted configure links.
     $formattedConfLinks = self::configureActionLinks();
     foreach ($formattedConfLinks as $act => & $link) {
