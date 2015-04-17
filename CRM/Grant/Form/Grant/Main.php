@@ -374,11 +374,13 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
    * @static
    */
   static function formRule($fields, $files, $self) {
-    $errors = array();
-  
-    if (array_key_exists('grant_amount_requested', $fields)) {
-      if (!CRM_Utils_Array::value('grant_amount_requested', $fields) ||  CRM_Utils_Array::value('grant_amount_requested', $fields) < 0) {
-        $errors['grant_amount_requested'] = ts('Requested amount has to be greater than zero.');
+    $errors = array();  
+    if (array_key_exists('amount_requested', $fields)) {
+      if (!is_numeric($fields['amount_requested'])) {
+        $errors['amount_requested'] = ts('Please enter valid amount.');        
+      }
+      if ($fields['amount_requested'] < 0) {
+        $errors['amount_requested'] = ts('Requested amount has to be greater than zero.');
       }
     }
     return empty($errors) ? TRUE : $errors;
@@ -426,10 +428,10 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       $this->set('is_draft', 0);
     }
     
-    if (CRM_Utils_Array::value('default_amount_hidden', $params) > 0 && !CRM_Utils_Array::value('amount_total', $params)) {  
+    if (CRM_Utils_Array::value('default_amount_hidden', $params) > 0 && !CRM_Utils_Array::value('amount_requested', $params)) {  
         $this->set('default_amount', $params['default_amount_hidden']);
     } elseif (CRM_Utils_Array::value('amount_requested', $params))  {
-        $this->set('default_amount', $params['amount_total']);
+        $this->set('default_amount', $params['amount_requested']);
     }
   }
 }
