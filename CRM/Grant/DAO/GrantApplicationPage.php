@@ -408,7 +408,12 @@ class CRM_Grant_DAO_GrantApplicationPage extends CRM_Core_DAO
         'receipt_text' => array(
           'name' => 'receipt_text',
           'type' => CRM_Utils_Type::T_TEXT,
-          'title' => ts('Receipt Text') ,
+          'title' => ts('Receipt Text'), 
+          'rows' => 6,
+          'cols' => 50,
+          'html' => array(
+            'type' => 'TextArea',
+          ) ,
         ) ,
         'is_active' => array(
           'name' => 'is_active',
