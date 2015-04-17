@@ -247,12 +247,12 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     $this->buildCustom($this->_values['custom_pre_id'], 'customPre');
     $this->buildCustom($this->_values['custom_post_id'], 'customPost');
     
-    if ( !CRM_Utils_Array::value('amount_total', $this->_fields) && CRM_Utils_Array::value('default_amount', $this->_values) ){
+    if ( !CRM_Utils_Array::value('amount_requested', $this->_fields) && CRM_Utils_Array::value('default_amount', $this->_values) ){
         $this->assign('defaultAmount', $this->_values['default_amount']);
         $this->add('hidden', "default_amount_hidden",
           $this->_values['default_amount'] ? $this->_values['default_amount'] : '0', '', FALSE
         );
-    } else if ( !CRM_Utils_Array::value('default_amount', $this->_fields) && !CRM_Utils_Array::value('amount_total', $this->_fields) ) {
+    } else if ( !CRM_Utils_Array::value('default_amount', $this->_fields) && !CRM_Utils_Array::value('amount_requested', $this->_fields) ) {
         $this->assign('defaultAmount', '0.00');
         $this->add('hidden', "default_amount_hidden",
           '0.00', '', FALSE
@@ -262,8 +262,8 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       NULL, '', FALSE
     );
     $this->add('hidden', "is_draft", '0', '', FALSE);
-    if ( CRM_Utils_Array::value('amount_total', $this->_fields) ) {
-      $this->addRule('amount_total', ts('Please enter a valid amount (numbers and decimal point only).'), 'money');
+    if ( CRM_Utils_Array::value('amount_requested', $this->_fields) ) {
+      $this->addRule('amount_requested', ts('Please enter a valid amount (numbers and decimal point only).'), 'money');
     }
 
     if ($this->_values['is_for_organization']) {
