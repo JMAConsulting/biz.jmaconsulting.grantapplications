@@ -826,8 +826,8 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     // create relationship
     $relParams['contact_check'][$orgID] = 1;
     $cid = array('contact' => $contactID);
-    CRM_Contact_BAO_Relationship::create($relParams, $cid);
-
+    CRM_Contact_BAO_Relationship::legacyCreateMultiple($relParams, $cid);
+    
     // if multiple match - send a duplicate alert
     if ($dupeIDs && (count($dupeIDs) > 1)) {
       $values['onbehalf_dupe_alert'] = 1;
