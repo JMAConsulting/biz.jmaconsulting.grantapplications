@@ -41,7 +41,7 @@
  * @return array
  *   API Result array Array of matching grant application_pages
  */
-function civicrm_api3_grantapplication_page_get($params) {
+function civicrm_api3_grant_application_page_get($params) {
   return _civicrm_api3_basic_get(_civicrm_api3_get_BAO(__FUNCTION__), $params);
 }
 
@@ -55,7 +55,7 @@ function civicrm_api3_grantapplication_page_get($params) {
  *
  * @return array
  */
-function _civicrm_api3_grantapplication_page_getlist_defaults(&$request) {
+function _civicrm_api3_grant_application_page_getlist_defaults(&$request) {
   return array(
     'description_field' => array(
       'intro_text',
