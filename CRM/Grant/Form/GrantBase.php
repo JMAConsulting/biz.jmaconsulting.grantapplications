@@ -74,7 +74,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
    * @var array
    * @protected
    */
-  protected $_defaults;
+  public $_defaults;
 
   /**
    * The params submitted by the form and computed by the app
