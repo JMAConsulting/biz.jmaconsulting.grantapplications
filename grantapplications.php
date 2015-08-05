@@ -77,6 +77,22 @@ function grantapplications_civicrm_managed(&$entities) {
   return _grantapplications_civix_civicrm_managed($entities);
 }
 
+function grantapplications_civicrm_preProcess($formName, &$form) {
+  if ($formName == "CRM_Core_Form_ShortCode") {
+    $config = CRM_Core_Config::singleton();
+    if (in_array('CiviGrant', $config->enableComponents)) {
+      $form->components['grant'] = array(
+        'label' => ts("Grant Application Page"),
+        'select' => array(
+          'key' => 'id',
+          'entity' => 'GrantApplicationPage',
+          'select' => array('minimumInputLength' => 0),
+        ),
+      );
+    }
+  }
+}
+
 function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form) {
   $errors = array();
   if ($formName == 'CRM_Grant_Form_Grant_Confirm') {
