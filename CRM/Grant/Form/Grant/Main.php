@@ -43,7 +43,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
   public $_onBehalfRequired = FALSE;
   public $_onbehalf = FALSE;
   public $_isDraft = FALSE;
-  protected $_defaults;
+  public $_defaults;
 
   /**
    * Function to set variables up before form is built
