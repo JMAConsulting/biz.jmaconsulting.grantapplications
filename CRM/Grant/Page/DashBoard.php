@@ -181,7 +181,7 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
     $query = "SELECT * from civicrm_grant_app_page WHERE 1";
     $grantPage = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Grant_DAO_GrantApplicationPage');
     $rows = array();
-    $allowToDelete = CRM_Core_Permission::check('delete in CiviGrant');
+    $allowToDelete = CRM_Core_Permission::check('delete grant application');
     //get configure actions links.
     $configureActionLinks = self::configureActionLinks();
     $query = "

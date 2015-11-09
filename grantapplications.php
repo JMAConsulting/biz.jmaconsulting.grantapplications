@@ -91,6 +91,25 @@ function grantapplications_civicrm_preProcess($formName, &$form) {
       );
     }
   }
+/**
+ * Implementation of hook_civicrm_xmlMenu
+ *
+ * @param $files array(string)
+ */
+function grantapplications_civicrm_permission(&$permissions) {
+  $prefix = ts('CiviGrant') . ': ';
+  $permissions['submit online grant application'] = array(
+    $prefix . ts('apply for Grant Application'),
+    ts('Submit grant applications online'),
+  );
+  $permissions['edit grant application'] = array(
+    $prefix . ts('edit Grant Applications'),
+    ts('Create or edit grant applications and their criteria'),
+  );
+  $permissions['delete grant application'] = array(
+    $prefix . ts('delete Grant Applications'),
+    ts('Delete grant applications and their criteria'),
+  );
 }
 
 function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form) {
@@ -178,10 +197,10 @@ function grantapplications_civicrm_pageRun(&$page) {
       $actionLinks = array();
     }
     $permissions = array(CRM_Core_Permission::VIEW);
-    if (CRM_Core_Permission::check('edit grants')) {
+    if (CRM_Core_Permission::check('edit grant application')) {
       $permissions[] = CRM_Core_Permission::EDIT;
     }
-    if (CRM_Core_Permission::check('delete in CiviGrant')) {
+    if (CRM_Core_Permission::check('delete grant application')) {
       $permissions[] = CRM_Core_Permission::DELETE;
     }
     $mask = CRM_Core_Action::mask($permissions);
