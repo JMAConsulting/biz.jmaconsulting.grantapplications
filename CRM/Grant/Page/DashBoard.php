@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2014                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -23,12 +23,12 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2014
+ * @copyright CiviCRM LLC (c) 2004-2015
  * $Id$
  *
  */
@@ -157,8 +157,6 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
    * the contact and calls the appropriate type of page to view.
    *
    * @return void
-   * @access public
-   *
    */
   public function preProcess() {
     $admin = CRM_Core_Permission::check('administer CiviCRM');
@@ -263,11 +261,10 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
      $this->assign('fields', $rows);
   }
   /**
-   * This function is the main function that is called when the page loads,
+   * the main function that is called when the page loads,
    * it decides the which action has to be taken for the page.
    *
-   * return null
-   * @access public
+   * @return null
    */
   public function run() {
       
