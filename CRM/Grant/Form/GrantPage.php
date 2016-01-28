@@ -72,6 +72,13 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
   protected $_values;
 
   /**
+   * Explicitly declare the entity api name.
+   */
+  public function getDefaultEntity() {
+    return 'Grant';
+  }
+
+  /**
    * Function to set variables up before form is built
    *
    * @return void
