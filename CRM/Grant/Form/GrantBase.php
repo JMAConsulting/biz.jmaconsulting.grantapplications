@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.4                                                |
+ | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2013                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -23,19 +23,16 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2013
- * $Id$
- *
+ * @copyright CiviCRM LLC (c) 2004-2015
  */
 
 /**
- * This class generates form components for processing a ontribution
- *
+ * This class generates form components for processing a contribution.
  */
 class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
 
@@ -43,12 +40,11 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
    * the id of the grant application page that we are proceessing
    *
    * @var int
-   * @public
    */
   public $_id;
 
   /**
-   * the mode that we are in
+   * The mode that we are in
    *
    * @var string
    * @protect
@@ -111,28 +107,17 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
    * @access public
    */
   public function preProcess() {
-    $config = CRM_Core_Config::singleton();
-    $session = CRM_Core_Session::singleton();
 
     // current grant application page id
-    $this->_id = CRM_Utils_Request::retrieve('id', 'Positive',
-      $this
-    );
-   
+    $this->_id = CRM_Utils_Request::retrieve('id', 'Positive', $this);
     if (!$this->_id) {
-      $pastGrantID = $session->get('pastGrantID');
-      if (!$pastGrantID) {
-        CRM_Core_Error::fatal(ts('We can\'t load the requested web page due to an incomplete link. This can be caused by using your browser\'s Back button or by using an incomplete or invalid link.'));
-      }
-      else {
-        CRM_Core_Error::fatal(ts('This grant application has already been submitted. Click <a href=\'%1\'>here</a> if you want to apply for another grant.', array(1 => CRM_Utils_System::url('civicrm/grant/transact', 'reset=1&id=' . $pastGrantID))));
-      }
-    }
-    else {
-      $session->set('pastGrantID', $this->_id);
+      // seems like the session is corrupted and/or we lost the id trail
+      // lets just bump this to a regular session error and redirect user to main page
+      $this->controller->invalidKeyRedirect();
     }
 
-    $this->_userID = $session->get('userID');
+    // this was used prior to the cleverer this_>getContactID - unsure now
+    $this->_userID = CRM_Core_Session::singleton()->get('userID');
 
     // we do not want to display recently viewed items, so turn off
     $this->assign('displayRecent', FALSE);
@@ -141,11 +126,9 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
     $this->assign('browserPrint', TRUE);
 
     // action
-    $this->_action = CRM_Utils_Request::retrieve('action', 'String',
-      $this, FALSE, 'add'
-    );
+    $this->_action = CRM_Utils_Request::retrieve('action', 'String', $this, FALSE, 'add');
     $this->assign('action', $this->_action);
-  
+
     // current mode
     $this->_mode = ($this->_action == 1024) ? 'test' : 'live';
 
@@ -228,11 +211,11 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
 
     // assign the address formatted up for display
     $addressParts = array(
-      "street_address-Primary",
-      "city-Primary",
-      "postal_code-Primary",
-      "state_province-Primary",
-      "country-Primary",
+      "street_address-{$this->_bltID}",
+      "city-{$this->_bltID}",
+      "postal_code-{$this->_bltID}",
+      "state_province-{$this->_bltID}",
+      "country-{$this->_bltID}",
     );
 
     $addressFields = array();
@@ -242,13 +225,14 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
     }
 
     $this->assign('address', CRM_Utils_Address::format($addressFields));
-    if (CRM_Utils_Array::value('hidden_onbehalf_profile', $this->_params)) {
+
+    if (!empty($this->_params['onbehalf_profile_id']) && !empty($this->_params['onbehalf'])) {
       $this->assign('onBehalfName', $this->_params['organization_name']);
       $locTypeId = array_keys($this->_params['onbehalf_location']['email']);
       $this->assign('onBehalfEmail', $this->_params['onbehalf_location']['email'][$locTypeId[0]]['email']);
     }
     $this->assign('email',
-      $this->controller->exportValue('Main', "email-Primary")
+      $this->controller->exportValue('Main', "email-{$this->_bltID}")
     );
 
     // also assign the receipt_text
@@ -258,17 +242,17 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
   }
 
   /**
-   * Function to add the custom fields
+   * Add the custom fields.
    *
-   * @return None
-   * @access public
+   * @param int $id
+   * @param string $name
+   * @param bool $viewOnly
+   * @param null $profileContactType
+   * @param array $fieldTypes
    */
-  function buildCustom($id, $name, $viewOnly = FALSE, $onBehalf = FALSE, $fieldTypes = NULL) {
-    $stateCountryMap = array();
-
+  public function buildCustom($id, $name, $viewOnly = FALSE, $profileContactType = NULL, $fieldTypes = NULL) {
     if ($id) {
-      $session = CRM_Core_Session::singleton();
-      $contactID = $this->_userID;
+      $contactID = $this->getContactID();
 
       // we don't allow conflicting fields to be
       // configured via profile - CRM 2100
@@ -283,7 +267,6 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
         'currency' => 1,
         'rationale' => 1,
         'grant_status_id' => 1,
-        'financial_type' => 1
       );
 
       $fields = NULL;
@@ -301,14 +284,14 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
       if ($fields) {
         // unset any email-* fields since we already collect it, CRM-2888
         foreach (array_keys($fields) as $fieldName) {
-          if (substr($fieldName, 0, 6) == 'email-') {
+          if (substr($fieldName, 0, 6) == 'email-' && !in_array($profileContactType, array('honor', 'onbehalf'))) {
             unset($fields[$fieldName]);
           }
         }
 
         if (array_intersect_key($fields, $fieldsToIgnore)) {
           $fields = array_diff_key($fields, $fieldsToIgnore);
-          CRM_Core_Session::setStatus(ts('Some of the profile fields cannot be configured for this page.'));
+          CRM_Core_Session::setStatus(ts('Some of the profile fields cannot be configured for this page.'), ts('Warning'), 'alert');
         }
 
         $fields = array_diff_assoc($fields, $this->_fields);
@@ -359,24 +342,17 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
             }
           }
 
-          list($prefixName, $index) = CRM_Utils_System::explode('-', $key, 2);
-          if ($prefixName == 'state_province' || $prefixName == 'country' || $prefixName == 'county') {
-            if (!array_key_exists($index, $stateCountryMap)) {
-              $stateCountryMap[$index] = array();
-            }
-            $stateCountryMap[$index][$prefixName] = $key;
-          }
-
-          if ($onBehalf) {
+          if ($profileContactType) {
             if (!empty($fieldTypes) && in_array($field['field_type'], $fieldTypes)) {
               CRM_Core_BAO_UFGroup::buildProfile(
                 $this,
                 $field,
                 CRM_Profile_Form::MODE_CREATE,
                 $contactID,
-                TRUE
+                TRUE,
+                $profileContactType
               );
-              $this->_fields['onbehalf'][$key] = $field;
+              $this->_fields[$profileContactType][$key] = $field;
             }
             else {
               unset($fields[$key]);
@@ -400,9 +376,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
 
         $this->assign($name, $fields);
 
-        if ($addCaptcha &&
-          !$viewOnly
-        ) {
+        if ($addCaptcha && !$viewOnly) {
           $captcha = CRM_Utils_ReCAPTCHA::singleton();
           $captcha->add($this);
           $this->assign('isCaptcha', TRUE);
@@ -411,7 +385,14 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
     }
   }
 
-  function checkTemplateFileExists($suffix = NULL) {
+  /**
+   * Check template file exists.
+   *
+   * @param string $suffix
+   *
+   * @return null|string
+   */
+  public function checkTemplateFileExists($suffix = NULL) {
     if ($this->_id) {
       $templateFile = "CRM/Grant/Form/Grant/{$this->_id}/{$this->_name}.{$suffix}tpl";
       $template = CRM_Core_Form::getTemplate();
@@ -422,12 +403,25 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
     return NULL;
   }
 
-  function getTemplateFileName() {
+  /**
+   * Use the form name to create the tpl file name.
+   *
+   * @return string
+   */
+  public function getTemplateFileName() {
     $fileName = $this->checkTemplateFileExists();
     return $fileName ? $fileName : parent::getTemplateFileName();
   }
 
-  function overrideExtraTemplateFileName() {
+  /**
+   * Add the extra.tpl in.
+   *
+   * Default extra tpl file basically just replaces .tpl with .extra.tpl
+   * i.e. we do not override - why isn't this done at the CRM_Core_Form level?
+   *
+   * @return string
+   */
+  public function overrideExtraTemplateFileName() {
     $fileName = $this->checkTemplateFileExists('extra.');
     return $fileName ? $fileName : parent::overrideExtraTemplateFileName();
   }
