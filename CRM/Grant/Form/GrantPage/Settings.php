@@ -129,9 +129,9 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
       );
     }
  
-    $this->addWysiwyg('intro_text', ts('Introductory Message'), $attributes['intro_text']);
+    $this->add('wysiwyg', 'intro_text', ts('Introductory Message'), $attributes['intro_text']);
 
-    $this->addWysiwyg('footer_text', ts('Footer Message'), $attributes['footer_text']);
+    $this->add('wysiwyg', 'footer_text', ts('Footer Message'), $attributes['footer_text']);
     
     // collect default amount
     $this->add('text', 'default_amount', ts('Default Amount'), array('size' => 8, 'maxlength' => 12));

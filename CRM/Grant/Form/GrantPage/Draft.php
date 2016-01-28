@@ -61,10 +61,9 @@ class CRM_Grant_Form_GrantPage_Draft extends CRM_Grant_Form_GrantPage {
   public function buildQuickForm() {
     $this->addElement('checkbox', 'is_draft', ts('Save as Draft Enabled?'), NULL, array('onclick' => "showSavedDetails()"));
     // thank you title and text (html allowed in text)
-    $this->add('text', 'draft_title', ts('Save as Draft Title'), CRM_Core_DAO::getAttribute('CRM_Grant_DAO_GrantApplicationPage', 'draft_title'));
-    $this->addWysiwyg('draft_text', ts('Save as Draft Message'), CRM_Core_DAO::getAttribute('CRM_Grant_DAO_GrantApplicationPage', 'draft_text'));
-    $this->addWysiwyg('draft_footer', ts('Save as Draft Page Footer'), CRM_Core_DAO::getAttribute('CRM_Grant_DAO_GrantApplicationPage', 'draft_footer'));
-
+    $this->add('wysiwyg', 'draft_title', ts('Save as Draft Title'), CRM_Core_DAO::getAttribute('CRM_Grant_DAO_GrantApplicationPage', 'draft_title'));
+    $this->add('wysiwyg', 'draft_text', ts('Save as Draft Message'), CRM_Core_DAO::getAttribute('CRM_Grant_DAO_GrantApplicationPage', 'draft_text'));
+    $this->add('wysiwyg', 'draft_footer', ts('Save as Draft Page Footer'), CRM_Core_DAO::getAttribute('CRM_Grant_DAO_GrantApplicationPage', 'draft_footer'));
     $this->addFormRule(array('CRM_Grant_Form_GrantPage_Draft', 'formRule'));
 
     parent::buildQuickForm();
