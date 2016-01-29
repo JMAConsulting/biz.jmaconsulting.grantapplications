@@ -1,9 +1,9 @@
 <?php
 /*
   +--------------------------------------------------------------------+
-  | CiviCRM version 4.4                                                |
+  | CiviCRM version 4.7                                                |
   +--------------------------------------------------------------------+
-  | Copyright CiviCRM LLC (c) 2004-2013                                |
+  | Copyright CiviCRM LLC (c) 2004-2015                                |
   +--------------------------------------------------------------------+
   | This file is a part of CiviCRM.                                    |
   |                                                                    |
@@ -23,14 +23,12 @@
   | GNU Affero General Public License or the licensing of CiviCRM,     |
   | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
   +--------------------------------------------------------------------+
-*/
+ */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2013
- * $Id$
- *
+ * @copyright CiviCRM LLC (c) 2004-2015
  */
 
 /**
@@ -39,10 +37,8 @@
  */
 class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
 
-  public $_relatedOrganizationFound;
-  public $_onBehalfRequired = FALSE;
-  public $_onbehalf = FALSE;
   public $_isDraft = FALSE;
+
   public $_defaults;
 
   /**
@@ -61,96 +57,38 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
 
     // make sure we have right permission to edit this user
     $csContactID = $this->getContactID();
-    $reset       = CRM_Utils_Request::retrieve('reset', 'Boolean', CRM_Core_DAO::$_nullObject);
-    $mainDisplay = CRM_Utils_Request::retrieve('_qf_Main_display', 'Boolean', CRM_Core_DAO::$_nullObject);
 
-    if ($reset) {
-      $this->assign('reset', $reset);
-    }
-
-    if ($mainDisplay) {
-      $this->assign('mainDisplay', $mainDisplay);
-    }
+   $this->assign('reset', CRM_Utils_Request::retrieve('reset', 'Boolean', CRM_Core_DAO::$_nullObject));
+    $this->assign('reset', CRM_Utils_Request::retrieve('reset', 'Boolean', CRM_Core_DAO::$_nullObject));
+    $this->assign('mainDisplay', CRM_Utils_Request::retrieve('_qf_Main_display', 'Boolean',
+      CRM_Core_DAO::$_nullObject));
 
     // Checking if is Save as Draft is enabled
     if (!empty($this->_values['is_draft'])) {
       $this->_isDraft = TRUE;
     }
 
-    // Possible values for 'is_for_organization':
-    // * 0 - org profile disabled
-    // * 1 - org profile optional
-    // * 2 - org profile required
-    $this->_onbehalf = FALSE;
-    if (!empty($this->_values['is_for_organization'])) {
-      if ($this->_values['is_for_organization'] == 2) {
-        $this->_onBehalfRequired = TRUE;
-      }
-      // Add organization profile if 1 of the following are true:
-      // If the org profile is required
-      if ($this->_onBehalfRequired ||
-        // Or we are building the form for the first time
-        empty($_POST) ||
-        // Or the user has submitted the form and checked the "On Behalf" checkbox
-        !empty($_POST['is_for_organization'])
-      ) {
-        $this->_onbehalf = TRUE;
-        CRM_Grant_Form_Grant_OnBehalfOf::preProcess($this);
-      }
-    }
-    $this->assign('onBehalfRequired', $this->_onBehalfRequired);
-
     if (!empty($this->_values['intro_text'])) {
       $this->assign('intro_text', $this->_values['intro_text']);
     }
 
     $qParams = "reset=1&amp;id={$this->_id}";
-    
-    $this->assign( 'qParams' , $qParams );
 
-    if (CRM_Utils_Array::value('footer_text', $this->_values)) {
+    $this->assign('qParams', $qParams);
+
+    if (!empty($this->_values['footer_text'])) {
       $this->assign('footer_text', $this->_values['footer_text']);
-    }
-
-    //CRM-5001
-    if (CRM_Utils_Array::value('is_for_organization', $this->_values)) {
-      $msg = ts('Mixed profile not allowed for on behalf of registration/sign up.');
-      if ($preID = CRM_Utils_Array::value('custom_pre_id', $this->_values)) {
-        $preProfile = CRM_Core_BAO_UFGroup::profileGroups($preID);
-        foreach (array(
-            'Individual', 'Organization', 'Household') as $contactType) {
-          if (in_array($contactType, $preProfile) &&
-            (in_array('Membership', $preProfile) ||
-              in_array('Contribution', $preProfile)
-            )
-          ) {
-            CRM_Core_Error::fatal($msg);
-          }
-        }
-      }
-
-      if ($postID = CRM_Utils_Array::value('custom_post_id', $this->_values)) {
-        $postProfile = CRM_Core_BAO_UFGroup::profileGroups($postID);
-        foreach (array(
-            'Individual', 'Organization', 'Household') as $contactType) {
-          if (in_array($contactType, $postProfile) &&
-            (in_array('Membership', $postProfile) ||
-              in_array('Contribution', $postProfile)
-            )
-          ) {
-            CRM_Core_Error::fatal($msg);
-          }
-        }
-      }
     }
   }
 
-  function setDefaultValues() {
+  /**
+   * Set the default values.
+   */
+  public function setDefaultValues() {
     // check if the user is registered and we have a contact ID
     $contactID = $this->getContactID();
 
     if (!empty($contactID)) {
-      $options = array();
       $fields = array();
       $removeCustomFieldTypes = array('Contribution', 'Membership', 'Activity', 'Participant', 'Grant');
       $grantFields = CRM_Grantapplications_BAO_GrantApplicationProfile::getGrantFields(FALSE);
@@ -170,18 +108,9 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
         $fields[$name] = 1;
       }
 
-      $names = array(
-        'first_name', 'middle_name', 'last_name', "street_address-Primary", "city-Primary",
-        "postal_code-Primary", "country_id-Primary", "state_province_id-Primary",
-      );
-      foreach ($names as $name) {
-        $fields[$name] = 1;
+      if (!empty($fields)) {
+        CRM_Core_BAO_UFGroup::setProfileDefaults($contactID, $fields, $this->_defaults);
       }
-      $fields["state_province-Primary"] = 1;
-      $fields["country-Primary"] = 1;
-      $fields['email-Primary'] = 1;
-     
-      CRM_Core_BAO_UFGroup::setProfileDefaults($contactID, $fields, $this->_defaults);
 
     }
 
@@ -192,7 +121,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
         if ($customFieldID = CRM_Core_BAO_CustomField::getKeyID($name)) {
           if (!isset($this->_defaults[$name])) {
               CRM_Core_BAO_CustomField::setProfileDefaults($customFieldID, $name, $this->_defaults,
-                NULL, CRM_Profile_Form::MODE_REGISTER
+                $entityId, CRM_Profile_Form::MODE_REGISTER
                );
           }
         }
@@ -223,29 +152,40 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
   }
 
   /**
-   * Function to build the form
-   *
-   * @return None
-   * @access public
+   * Build the form object.
    */
   public function buildQuickForm() {
-   
+    // build profiles first so that we can determine address fields etc
+    // and then show copy address checkbox
+    $this->buildCustom($this->_values['custom_pre_id'], 'customPre');
+    $this->buildCustom($this->_values['custom_post_id'], 'customPost');
+
+    $this->buildComponentForm($this->_id, $this);
+
+    if (!empty($this->_fields) && !empty($this->_values['custom_pre_id'])) {
+      $profileAddressFields = array();
+      foreach ($this->_fields as $key => $value) {
+        CRM_Core_BAO_UFField::assignAddressField($key, $profileAddressFields, array('uf_group_id' => $this->_values['custom_pre_id']));
+      }
+      $this->set('profileAddressFields', $profileAddressFields);
+    }
+
     $config = CRM_Core_Config::singleton();
 
-    if ($this->_onbehalf) {
-      CRM_Grant_Form_Grant_OnBehalfOf::buildQuickForm($this);
+    $contactID = $this->getContactID();
+    if ($contactID) {
+      $this->assign('contact_id', $contactID);
+      $this->assign('display_name', CRM_Contact_BAO_Contact::displayName($contactID));
     }
 
     $this->applyFilter('__ALL__', 'trim');
-    $this->add('text', "email-Primary",
-      ts('Email Address'), array(
-        'size' => 30, 'maxlength' => 60), TRUE
+    $this->add('text', "email-{$this->_bltID}",
+      ts('Email Address'),
+      array('size' => 30, 'maxlength' => 60, 'class' => 'email'),
+      TRUE
     );
  
-    $this->addRule("email-Primary", ts('Email is not valid.'), 'email');
- 
-    $this->buildCustom($this->_values['custom_pre_id'], 'customPre');
-    $this->buildCustom($this->_values['custom_post_id'], 'customPost');
+    $this->addRule("email-{$this->_bltID}", ts('Email is not valid.'), 'email');
     
     if ( !CRM_Utils_Array::value('amount_requested', $this->_fields) && CRM_Utils_Array::value('default_amount', $this->_values) ){
         $this->assign('defaultAmount', $this->_values['default_amount']);
@@ -266,10 +206,6 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       $this->addRule('amount_requested', ts('Please enter a valid amount (numbers and decimal point only).'), 'money');
     }
 
-    if ($this->_values['is_for_organization']) {
-      $this->buildOnBehalfOrganization();
-    }
-
     if ( !empty( $this->_fields ) ) {
       $profileAddressFields = array();
       $numericFields['amount_total'] = 'Float';
@@ -288,7 +224,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     }
 
     //to create an cms user
-    if (!$this->_userID) {
+    if (!$this->_contactID) {
       $createCMSUser = FALSE;
 
       if ($this->_values['custom_pre_id']) {
@@ -363,17 +299,18 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
   }
   
   /**
-   * global form rule
+   * Global form rule.
    *
-   * @param array $fields  the input form values
-   * @param array $files   the uploaded files if any
-   * @param array $options additional user data
+   * @param array $fields
+   *   The input form values.
+   * @param array $files
+   *   The uploaded files if any.
+   * @param CRM_Core_Form $self
    *
-   * @return true if no errors, else array of errors
-   * @access public
-   * @static
+   * @return bool|array
+   *   true if no errors, else array of errors
    */
-  static function formRule($fields, $files, $self) {
+  public static function formRule($fields, $files, $self) {
     $errors = array();  
     if (array_key_exists('amount_requested', $fields)) {
       if (!is_numeric($fields['amount_requested'])) {
@@ -387,24 +324,6 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
   }
 
   /**
-   * build elements to enable grant application on behalf of an organization.
-   *
-   * @access public
-   */
-  function buildOnBehalfOrganization() {
-  
-    if (!$this->_onBehalfRequired) {
-      $this->addElement('checkbox', 'is_for_organization',
-        $this->_values['for_organization'],
-        NULL, array('onclick' => "showOnBehalf( );")
-      );
-    }
-
-    $this->assign('is_for_organization', TRUE);
-    $this->assign('urlPath', 'civicrm/grant/transact');
-  }
-
-  /**
    * Function to process the form
    *
    * @access public
@@ -412,13 +331,12 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
    * @return None
    */
   public function postProcess() {
-    $config = CRM_Core_Config::singleton();
-    $session = CRM_Core_Session::singleton();
     // we first reset the confirm page so it accepts new values
     $this->controller->resetPage('Confirm');
 
     // get the submitted form values.
     $params = $this->controller->exportValues($this->_name);
+    $this->submit($params);
    
     $buttonName = $this->controller->getButtonName();
     if ($buttonName == $this->getButtonName('save')) {
