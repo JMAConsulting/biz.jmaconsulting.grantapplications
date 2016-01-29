@@ -89,6 +89,13 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
   public $_fields;
 
   /**
+   * The billing location id for this grant application page.
+   *
+   * @var int
+   */
+  public $_bltID;
+
+  /**
    * Cache the amount to make things easier
    *
    * @var float
