@@ -103,6 +103,13 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
    */
   public $_amount;
 
+  /**
+   * The contact id of the person for whom membership is being added or renewed based on the cid in the url,
+   * checksum, or session
+   * @var int
+   */
+  public $_contactID;
+
   protected $_userID;
 
   public $_action;
@@ -125,6 +132,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
 
     // this was used prior to the cleverer this_>getContactID - unsure now
     $this->_userID = CRM_Core_Session::singleton()->get('userID');
+    $this->_contactID = $this->getContactID();
 
     // we do not want to display recently viewed items, so turn off
     $this->assign('displayRecent', FALSE);
@@ -390,6 +398,112 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
         }
       }
     }
+  }
+
+  /**
+   * Add onbehalf profile fields and native module fields.
+   *
+   * @param int $id
+   * @param CRM_Core_Form $form
+   */
+  public function buildComponentForm($id, $form) {
+    if (empty($id)) {
+      return;
+    }
+
+    $contactID = $this->getContactID();
+
+    if (empty($form->_values['onbehalf_profile_id'])) {
+      return;
+    }
+
+    if (!CRM_Core_DAO::getFieldValue('CRM_Core_DAO_UFGroup', $form->_values['onbehalf_profile_id'], 'is_active')) {
+      CRM_Core_Error::fatal(ts('This grant application page has been configured for application of grant on behalf of an organization and the selected onbehalf profile is either disabled or not found.'));
+    }
+
+    if ($contactID) {
+      // retrieve all permissioned organizations of contact $contactID
+      $organizations = CRM_Contact_BAO_Relationship::getPermissionedContacts($contactID, NULL, NULL, 'Organization');
+
+      if (count($organizations)) {
+        // Related org url - pass checksum if needed
+        $args = array(
+          'ufId' => $form->_values['onbehalf_profile_id'],
+          'cid' => '',
+        );
+        if (!empty($_GET['cs'])) {
+          $args = array(
+            'ufId' => $form->_values['onbehalf_profile_id'],
+            'uid' => $this->_contactID,
+            'cs' => $_GET['cs'],
+            'cid' => '',
+          );
+        }
+        $locDataURL = CRM_Utils_System::url('civicrm/ajax/permlocation', $args, FALSE, NULL, FALSE);
+        $form->assign('locDataURL', $locDataURL);
+      }
+      if (count($organizations) > 0) {
+        $form->add('select', 'onbehalfof_id', '', CRM_Utils_Array::collect('name', $organizations));
+
+        $orgOptions = array(
+          0 => ts('Select an existing organization'),
+          1 => ts('Enter a new organization'),
+        );
+        $form->addRadio('org_option', ts('options'), $orgOptions);
+        $form->setDefaults(array('org_option' => 0));
+      }
+    }
+
+    $form->assign('fieldSetTitle', ts('Organization Details'));
+
+    if (CRM_Utils_Array::value('is_for_organization', $form->_values)) {
+      if ($form->_values['is_for_organization'] == 2) {
+        $form->assign('onBehalfRequired', TRUE);
+      }
+      else {
+        $form->addElement('checkbox', 'is_for_organization',
+          $form->_values['for_organization'],
+          NULL
+        );
+      }
+    }
+
+    $profileFields = CRM_Core_BAO_UFGroup::getFields(
+      $form->_values['onbehalf_profile_id'],
+      FALSE, CRM_Core_Action::VIEW, NULL,
+      NULL, FALSE, NULL, FALSE, NULL,
+      CRM_Core_Permission::CREATE, NULL
+    );
+
+    $form->assign('onBehalfOfFields', $profileFields);
+    if (!empty($form->_submitValues['onbehalf'])) {
+      if (!empty($form->_submitValues['onbehalfof_id'])) {
+        $form->assign('submittedOnBehalf', $form->_submitValues['onbehalfof_id']);
+      }
+      $form->assign('submittedOnBehalfInfo', json_encode($form->_submitValues['onbehalf']));
+    }
+
+    $fieldTypes = array('Contact', 'Organization');
+    $contactSubType = CRM_Contact_BAO_ContactType::subTypes('Organization');
+    $fieldTypes = array_merge($fieldTypes, $contactSubType);
+
+    foreach ($profileFields as $name => $field) {
+      if (in_array($field['field_type'], $fieldTypes)) {
+        list($prefixName, $index) = CRM_Utils_System::explode('-', $name, 2);
+        if (in_array($prefixName, array('organization_name', 'email')) && empty($field['is_required'])) {
+          $field['is_required'] = 1;
+        }
+        if (count($form->_submitValues) &&
+            empty($form->_submitValues['is_for_organization']) &&
+            $form->_values['is_for_organization'] == 1 &&
+            !empty($field['is_required'])
+            ) {
+          $field['is_required'] = FALSE;
+        }
+        CRM_Core_BAO_UFGroup::buildProfile($form, $field, NULL, NULL, FALSE, 'onbehalf', NULL, 'onbehalf');
+      }
+    }
+
   }
 
   /**
