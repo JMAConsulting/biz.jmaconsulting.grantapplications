@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                               |
+ | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2013                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -23,14 +23,12 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2013
- * $Id$
- *
+ * @copyright CiviCRM LLC (c) 2004-2015
  */
 
 /**
@@ -39,10 +37,9 @@
 class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
 
   /**
-   * the id of the contact associated with this grant application
+   * The id of the contact associated with this contribution.
    *
    * @var int
-   * @public
    */
   public $_contactID;
 
@@ -88,10 +85,18 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
 
       $this->_params['organization_name'] = $this->_params['onbehalf']['organization_name'];
       $addressBlocks = array(
-        'street_address', 'city', 'state_province',
-        'postal_code', 'country', 'supplemental_address_1',
-        'supplemental_address_2', 'supplemental_address_3',
-        'postal_code_suffix', 'geo_code_1', 'geo_code_2', 'address_name',
+        'street_address',
+        'city',
+        'state_province',
+        'postal_code',
+        'country',
+        'supplemental_address_1',
+        'supplemental_address_2',
+        'supplemental_address_3',
+        'postal_code_suffix',
+        'geo_code_1',
+        'geo_code_2',
+        'address_name',
       );
 
       $blocks = array('email', 'phone', 'im', 'url', 'openid');
@@ -116,65 +121,67 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
 
           $isPrimary = 1;
           if (isset($this->_params['onbehalf_location']['address'])
-               && count($this->_params['onbehalf_location']['address']) > 0) {
+            && count($this->_params['onbehalf_location']['address']) > 0
+          ) {
             $isPrimary = 0;
           }
 
           $this->_params['onbehalf_location']['address'][$locType][$field] = $value;
-          if (!CRM_Utils_Array::value('is_primary', $this->_params['onbehalf_location']['address'][$locType])) {
+          if (empty($this->_params['onbehalf_location']['address'][$locType]['is_primary'])) {
             $this->_params['onbehalf_location']['address'][$locType]['is_primary'] = $isPrimary;
-        }
+          }
           $this->_params['onbehalf_location']['address'][$locType]['location_type_id'] = $locType;
         }
         elseif (in_array($field, $blocks)) {
           if (!$typeId || is_numeric($typeId)) {
-            $blockName     = $fieldName = $field;
-            $locationType  = 'location_type_id';
-            if ( $locType == 'Primary' ) {
+            $blockName = $fieldName = $field;
+            $locationType = 'location_type_id';
+            if ($locType == 'Primary') {
               $defaultLocationType = CRM_Core_BAO_LocationType::getDefault();
               $locationValue = $defaultLocationType->id;
             }
             else {
               $locationValue = $locType;
             }
-            $locTypeId     = '';
+            $locTypeId = '';
             $phoneExtField = array();
 
             if ($field == 'url') {
-              $blockName     = 'website';
-              $locationType  = 'website_type_id';
-              $locationValue = CRM_Utils_Array::value("{$loc}-website_type_id", $this->_params['onbehalf']);
+              $blockName = 'website';
+              $locationType = 'website_type_id';
+              list($field, $locationValue) = explode('-', $loc);
             }
             elseif ($field == 'im') {
               $fieldName = 'name';
               $locTypeId = 'provider_id';
-              $typeId    = $this->_params['onbehalf']["{$loc}-provider_id"];
+              $typeId = $this->_params['onbehalf']["{$loc}-provider_id"];
             }
             elseif ($field == 'phone') {
               list($field, $locType, $typeId) = explode('-', $loc);
               $locTypeId = 'phone_type_id';
 
               //check if extension field exists
-              $extField = str_replace('phone','phone_ext', $loc);
+              $extField = str_replace('phone', 'phone_ext', $loc);
               if (isset($this->_params['onbehalf'][$extField])) {
                 $phoneExtField = array('phone_ext' => $this->_params['onbehalf'][$extField]);
               }
             }
 
             $isPrimary = 1;
-            if ( isset ($this->_params['onbehalf_location'][$blockName] )
-              && count( $this->_params['onbehalf_location'][$blockName] ) > 0 ) {
-                $isPrimary = 0;
+            if (isset ($this->_params['onbehalf_location'][$blockName])
+              && count($this->_params['onbehalf_location'][$blockName]) > 0
+            ) {
+              $isPrimary = 0;
             }
             if ($locationValue) {
               $blockValues = array(
-                $fieldName    => $value,
+                $fieldName => $value,
                 $locationType => $locationValue,
-                'is_primary'  => $isPrimary,
+                'is_primary' => $isPrimary,
               );
 
               if ($locTypeId) {
-                $blockValues = array_merge($blockValues, array($locTypeId  => $typeId));
+                $blockValues = array_merge($blockValues, array($locTypeId => $typeId));
               }
               if (!empty($phoneExtField)) {
                 $blockValues = array_merge($blockValues, $phoneExtField);
@@ -200,11 +207,14 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
         }
       }
     }
-    elseif (CRM_Utils_Array::value('is_for_organization', $this->_values)) {
+    elseif (!empty($this->_values['is_for_organization'])) {
       // no on behalf of an organization, CRM-5519
       // so reset loc blocks from main params.
       foreach (array(
-        'phone', 'email', 'address') as $blk) {
+                 'phone',
+                 'email',
+                 'address',
+               ) as $blk) {
         if (isset($this->_params[$blk])) {
           unset($this->_params[$blk]);
         }
@@ -214,10 +224,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
   }
 
   /**
-   * Function to actually build the form
-   *
-   * @return void
-   * @access public
+   * Build the form object.
    */
   public function buildQuickForm() {
     $this->assignToTemplate();
@@ -229,7 +236,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     $config = CRM_Core_Config::singleton();
     $this->buildCustom($this->_values['custom_pre_id'], 'customPre', TRUE);
     $this->buildCustom($this->_values['custom_post_id'], 'customPost', TRUE);
-    if (CRM_Utils_Array::value('hidden_onbehalf_profile', $params)) {
+    if (!empty($this->_values['onbehalf_profile_id']) && !empty($params['onbehalf'])) {
       $ufJoinParams = array(
         'module' => 'onBehalf',
         'entity_table' => 'civicrm_grant_app_page',
@@ -243,8 +250,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
       $fieldTypes     = array_merge($fieldTypes, $contactSubType);
       $fieldTypes = array_merge($fieldTypes, array('Grant'));
 
-
-      $this->buildCustom($profileId, 'onbehalfProfile', TRUE, TRUE, $fieldTypes);
+      $this->buildCustom($this->_values['onbehalf_profile_id'], 'onbehalfProfile', TRUE, 'onbehalf', $fieldTypes);
     }
     $grantButton = ts('Save Now');
     $this->assign('button', ts('Save Now'));
@@ -263,30 +269,27 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
       ),
      )
     );
+
     $defaults = array();
-    $options = array();
-    $fields = array();
-    $removeCustomFieldTypes = array('Grant');
-    foreach ($this->_fields as $name => $dontCare) {
-      if ($name == 'onbehalf') {
-        foreach ($dontCare as $key => $value) {
-          $fields['onbehalf'][$key] = 1;
-        }
-      }
-      else {
-        $fields[$name] = 1;
-      }
-    }
+    $fields = array_fill_keys(array_keys($this->_fields), 1);
+    $fields["billing_state_province-{$this->_bltID}"] = $fields["billing_country-{$this->_bltID}"] = $fields["email-{$this->_bltID}"] = 1;
 
     $contact = $this->_params;
     foreach ($fields as $name => $dontCare) {
-      if ($name == 'onbehalf') {
-        foreach ($dontCare as $key => $value) {
-          if (isset($contact['onbehalf'][$key])) {
-            $defaults[$key] = $contact['onbehalf'][$key];
+      // Recursively set defaults for nested fields
+      if (isset($contact[$name]) && is_array($contact[$name]) && ($name == 'onbehalf')) {
+        foreach ($contact[$name] as $fieldName => $fieldValue) {
+          if (is_array($fieldValue) && !in_array($this->_fields[$name][$fieldName]['html_type'], array(
+              'Multi-Select',
+              'AdvMulti-Select',
+            ))
+          ) {
+            foreach ($fieldValue as $key => $value) {
+              $defaults["{$name}[{$fieldName}][{$key}]"] = $value;
+            }
           }
-          if (isset($contact['onbehalf']["{$key}_id"])) {
-            $defaults["{$key}_id"] = $contact['onbehalf']["{$key}_id"];
+          else {
+            $defaults["{$name}[{$fieldName}]"] = $fieldValue;
           }
         }
       }
@@ -301,8 +304,11 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
             $defaults["{$name}_id"] = $contact["{$name}_id"];
           }
         }
-        elseif (in_array($name, array('addressee', 'email_greeting', 'postal_greeting'))
-          && CRM_Utils_Array::value($name . '_custom', $contact)
+        elseif (in_array($name, array(
+            'addressee',
+            'email_greeting',
+            'postal_greeting',
+          )) && !empty($contact[$name . '_custom'])
         ) {
           $defaults[$name . '_custom'] = $contact[$name . '_custom'];
         }
@@ -417,24 +423,22 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
    * @access public
    */
   public function postProcess() {
-    $config = CRM_Core_Config::singleton();
     $contactID = $this->getContactID();
 
     // add a description field at the very beginning
     $this->_params['description'] = ts('Online Grant Application') . ':' . $this->_values['title'];
 
     // fix currency ID
-    $this->_params['currencyID'] = $config->defaultCurrency;
+    $this->_params['currencyID'] = CRM_Core_Config::singleton()->defaultCurrency;
 
     $params = $this->_params;
     $fields = array();
 
-    if (CRM_Utils_Array::value('image_URL', $params)) {
+    if (!empty($params['image_URL'])) {
       CRM_Contact_BAO_Contact::processImageParams($params);
     }
 
-    // set email for primary location.
-    $fields['email-Primary'] = 1;
+    $fields = array('email-Primary' => 1);
 
     // get the add to groups
     $addToGroups = array();
@@ -444,7 +448,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
       $fields[$name] = 1;
 
       // get the add to groups for uf fields
-      if (CRM_Utils_Array::value('add_to_group_id', $value)) {
+      if (!empty($value['add_to_group_id'])) {
         $addToGroups[$value['add_to_group_id']] = $value['add_to_group_id'];
       }
     }
@@ -460,7 +464,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     // organization params in a separate variable, to make sure
     // normal behavior is continued. And use that variable to
     // process on-behalf-of functionality.
-    if (CRM_Utils_Array::value('hidden_onbehalf_profile', $this->_params)) {
+    if (!empty($this->_values['onbehalf_profile_id'])) {
       $behalfOrganization = array();
       $orgFields = array('organization_name', 'organization_id', 'org_option');
       foreach ($orgFields as $fld) {
@@ -476,13 +480,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
             $behalfOrganization[$fld] = $values;
           }
           elseif (!(strstr($fld, '-'))) {
-            if (in_array($fld, array(
-              'contribution_campaign_id', 'member_campaign_id'))) {
-              $fld = 'campaign_id';
-            }
-            else {
               $behalfOrganization[$fld] = $values;
-            }
             $this->_params[$fld] = $values;
           }
         }
@@ -491,12 +489,12 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
       if (array_key_exists('onbehalf_location', $params) && is_array($params['onbehalf_location'])) {
         foreach ($params['onbehalf_location'] as $block => $vals) {
           //fix for custom data (of type checkbox, multi-select)
-          if ( substr($block, 0, 7) == 'custom_' ) {
+          if (substr($block, 0, 7) == 'custom_') {
             continue;
           }
           // fix the index of block elements
-          if (is_array($vals) ) {
-            foreach ( $vals as $key => $val ) {
+          if (is_array($vals)) {
+            foreach ($vals as $key => $val) {
               //dont adjust the index of address block as
               //it's index is WRT to location type
               $newKey = ($block == 'address') ? $key : ++$key;
@@ -506,7 +504,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
         }
         unset($params['onbehalf_location']);
       }
-      if (CRM_Utils_Array::value('onbehalf[image_URL]', $params)) {
+      if (!empty($params['onbehalf[image_URL]'])) {
         $behalfOrganization['image_URL'] = $params['onbehalf[image_URL]'];
       }
       // Process attachments for custom fields
@@ -517,6 +515,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
         }
       }
     }
+
     // check for profile double opt-in and get groups to be subscribed
     $subscribeGroupIds = CRM_Core_BAO_UFGroup::getDoubleOptInGroupIds($params, $contactID);
 
@@ -537,7 +536,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
 
     if (empty($contactID)) {
       $dupeParams = $params;
-      if (CRM_Utils_Array::value('onbehalf', $dupeParams)) {
+      if (!empty($dupeParams['onbehalf'])) {
         unset($dupeParams['onbehalf']);
       }
 
@@ -756,43 +755,46 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
   }
 
 /**
-   * Function to add on behalf of organization and it's location
+   * Add on behalf of organization and it's location.
    *
-   * @param $behalfOrganization array  array of organization info
-   * @param $contactID          int    individual contact id. One
-   * who is doing the process of applying for the grant.
+   * This situation occurs when on behalf of is enabled for the grant application page and the person
+   * signing up does so on behalf of an organization.
    *
-   * @param $values             array  form values array
-   * @param $params
-   * @param null $fields
+   * @param array $behalfOrganization
+   *   array of organization info.
+   * @param int $contactID
+   *   individual contact id. One.
+   *   who is doing the process of .
    *
-   * @return void
-   * @access public
+   * @param array $values
+   *   form values array.
+   * @param array $params
+   * @param array $fields
+   *   Array of fields from the onbehalf profile relevant to the organization.
    */
-  static function processOnBehalfOrganization(&$behalfOrganization, &$contactID, &$values, &$params, $fields = NULL) {
-    $isCurrentEmployer = FALSE;
+  public static function processOnBehalfOrganization(&$behalfOrganization, &$contactID, &$values, &$params, $fields = NULL) {
+    $isNotCurrentEmployer = FALSE;
+    $dupeIDs = array();
     $orgID = NULL;
-    if (CRM_Utils_Array::value('organization_id', $behalfOrganization) &&
-      CRM_Utils_Array::value('org_option', $behalfOrganization)
-    ) {
+    if (!empty($behalfOrganization['organization_id'])) {
       $orgID = $behalfOrganization['organization_id'];
       unset($behalfOrganization['organization_id']);
-      $isCurrentEmployer = TRUE;
+    }
+    // create employer relationship with $contactID only when new organization is there
+    // else retain the existing relationship
+    else {
+      // get the Employee relationship type id
+      $relTypeId = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_RelationshipType', 'Employee of', 'id', 'name_a_b');
+
+      // keep relationship params ready
+      $relParams['relationship_type_id'] = $relTypeId . '_a_b';
+      $relParams['is_permission_a_b'] = 1;
+      $relParams['is_active'] = 1;
+      $isNotCurrentEmployer = TRUE;
     }
 
     // formalities for creating / editing organization.
     $behalfOrganization['contact_type'] = 'Organization';
-
-    // get the relationship type id
-    $relType = new CRM_Contact_DAO_RelationshipType();
-    $relType->name_a_b = 'Employee of';
-    $relType->find(TRUE);
-    $relTypeId = $relType->id;
-
-    // keep relationship params ready
-    $relParams['relationship_type_id'] = $relTypeId . '_a_b';
-    $relParams['is_permission_a_b'] = 1;
-    $relParams['is_active'] = 1;
 
     if (!$orgID) {
       // check if matching organization contact exists
@@ -802,7 +804,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
 
       // CRM-6243 says to pick the first org even if more than one match
       if (count($dupeIDs) >= 1) {
-        $behalfOrganization['contact_id'] = $dupeIDs[0];
+        $behalfOrganization['contact_id'] = $orgID = $dupeIDs[0];
         // don't allow name edit
         unset($behalfOrganization['organization_name']);
       }
@@ -843,8 +845,6 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
 
       // required for mailing/template display ..etc
       $values['related_contact'] = $contactID;
-      // required for IPN
-      $params['related_contact'] = $contactID;
 
       //make this employee of relationship as current
       //employer / employee relationship,  CRM-3532
