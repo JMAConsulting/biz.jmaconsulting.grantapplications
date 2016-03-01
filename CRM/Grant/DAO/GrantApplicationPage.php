@@ -168,18 +168,6 @@ class CRM_Grant_DAO_GrantApplicationPage extends CRM_Core_DAO
    */
   public $thankyou_footer;
   /**
-   * if true, signup is done on behalf of an organization
-   *
-   * @var boolean
-   */
-  public $is_for_organization;
-  /**
-   * This text field is shown when is_for_organization is checked. For example - I am applying for a grant on behalf on an organization.
-   *
-   * @var text
-   */
-  public $for_organization;
-  /**
    * if true, receipt is automatically emailed to contact on success
    *
    * @var boolean
@@ -359,20 +347,6 @@ class CRM_Grant_DAO_GrantApplicationPage extends CRM_Core_DAO
           'type' => CRM_Utils_Type::T_TEXT,
           'title' => ts('Thank-you Footer') ,
         ) ,
-        'is_for_organization' => array(
-          'name' => 'is_for_organization',
-          'type' => CRM_Utils_Type::T_BOOLEAN,
-        ) ,
-        'for_organization' => array(
-          'name' => 'for_organization',
-          'type' => CRM_Utils_Type::T_TEXT,
-          'title' => ts('On Behalf Of Organization') ,
-          'rows' => 2,
-          'cols' => 50,
-          'html' => array(
-            'type' => 'TextArea',
-          ) ,
-        ) ,
         'is_email_receipt' => array(
           'name' => 'is_email_receipt',
           'type' => CRM_Utils_Type::T_BOOLEAN,
@@ -467,8 +441,6 @@ class CRM_Grant_DAO_GrantApplicationPage extends CRM_Core_DAO
         'thankyou_title' => 'thankyou_title',
         'thankyou_text' => 'thankyou_text',
         'thankyou_footer' => 'thankyou_footer',
-        'is_for_organization' => 'is_for_organization',
-        'for_organization' => 'for_organization',
         'is_email_receipt' => 'is_email_receipt',
         'receipt_from_name' => 'receipt_from_name',
         'receipt_from_email' => 'receipt_from_email',
