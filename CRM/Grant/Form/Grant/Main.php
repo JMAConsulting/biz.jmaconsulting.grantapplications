@@ -322,6 +322,18 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
   }
 
   /**
+   * Submit function.
+   *
+   * This is just a placeholder.
+   *
+   * @param array $params
+   *   Submitted values.
+   */
+  public function submit($params) {
+    return TRUE;
+  }
+
+  /**
    * Function to process the form
    *
    * @access public
