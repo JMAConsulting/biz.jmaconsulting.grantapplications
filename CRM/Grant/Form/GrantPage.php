@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2013                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -23,18 +23,16 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2013
- * $Id$
- *
+ * @copyright CiviCRM LLC (c) 2004-2015
  */
 
 /**
- * form to process actions on the group aspect of Custom Data
+ * Grant Application Page form.
  */
 class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
 
@@ -42,32 +40,29 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
    * the page id saved to the session for an update
    *
    * @var int
-   * @access protected
    */
   protected $_id;
+
   /**
-   * are we in single form mode or wizard mode?
+   * Are we in single form mode or wizard mode?
    *
    * @var boolean
-   * @access protected
    */
   protected $_single;
 
   /**
-   * is this the first page?
+   * Is this the first page?
    *
    * @var boolean
-   * @access protected
    */
   protected $_first = FALSE;
-  
+
   /**
-   * is this the last page?
+   * Is this the last page?
    *
    * @var boolean
-   * @access protected
    */
-  protected $_isLast = FALSE;
+  protected $_last = FALSE;
   
   protected $_values;
 
@@ -79,10 +74,7 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
   }
 
   /**
-   * Function to set variables up before form is built
-   *
-   * @return void
-   * @access public
+   * Set variables up before form is built.
    */
   public function preProcess() {
     // current grant application page id
@@ -106,6 +98,10 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
       }
     }
 
+    // CRM-16776 - show edit/copy/create buttons on Profiles Tab if user has required permission.
+    if (CRM_Core_Permission::check('administer CiviCRM')) {
+      $this->assign('perm', TRUE);
+    }
     // set up tabs
     CRM_Grant_Form_GrantPage_TabHeader::build($this);
 
@@ -126,19 +122,18 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
       if (isset($this->_id) && $this->_id) {
         $params = array('id' => $this->_id);
         CRM_Core_DAO::commonRetrieve('CRM_Grant_DAO_GrantApplicationPage', $params, $this->_values);
+        CRM_Grant_BAO_GrantApplicationPage::setValues($this->_id, $this->_values);
       }
       $this->set('values', $this->_values);
     }
+    // Preload libraries required by the "Profiles" tab
 	$schemas = array('IndividualModel', 'OrganizationModel', 'GrantModel');
     CRM_UF_Page_ProfileEditor::registerProfileScripts();
     CRM_UF_Page_ProfileEditor::registerSchemas($schemas);
   }
 
   /**
-   * Function to actually build the form
-   *
-   * @return void
-   * @access public
+   * Build the form object.
    */
   public function buildQuickForm() {
     $this->applyFilter('__ALL__', 'trim');
@@ -154,9 +149,8 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
       $this->addElement('hidden', 'cancelURL', $this->_cancelURL);
     }
 
-
     if ($this->_single) {
-      $buttons = array( 
+      $buttons = array(
         array(
           'type' => 'next',
           'name' => ts('Save'),
@@ -170,7 +164,7 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
           'subName' => 'done',
         ),
       );
-      if (!$this->_isLast) {
+      if (!$this->_last) {
         $buttons[] = array(
           'type' => 'submit',
           'name' => ts('Save and Next'),
@@ -178,22 +172,35 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
           'subName' => 'savenext',
         );
       }
+      $buttons[] = array(
+        'type' => 'cancel',
+        'name' => ts('Cancel'),
+      );
+      $this->addButtons($buttons);
     }
     else {
       $buttons = array();
+      if (!$this->_first) {
+        $buttons[] = array(
+          'type' => 'back',
+          'name' => ts('Previous'),
+          'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+        );
+      }
       $buttons[] = array(
         'type' => 'next',
-        'name' => ts('Continue >>'),
+        'name' => ts('Continue'),
         'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
         'isDefault' => TRUE,
       );
+      $buttons[] = array(
+        'type' => 'cancel',
+        'name' => ts('Cancel'),
+      );
+
+      $this->addButtons($buttons);
     }
 
-    $buttons[] = array(
-      'type' => 'cancel',
-      'name' => ts('Cancel'),
-    );
-    $this->addButtons($buttons);
     $session->replaceUserContext($this->_cancelURL);
     // views are implemented as frozen form
     if ($this->_action & CRM_Core_Action::VIEW) {
@@ -206,17 +213,16 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
   }
 
   /**
-   * This function sets the default values for the form. Note that in edit/view mode
+   * Set default values for the form. Note that in edit/view mode
    * the default values are retrieved from the database
    *
-   * @access public
    *
-   * @return void
+   * @return array
+   *   defaults
    */
-  function setDefaultValues() {
+  public function setDefaultValues() {
     //some child classes calling setdefaults directly w/o preprocess.
     $this->_values = $this->get('values');
-   
     if (!is_array($this->_values)) {
       $this->_values = array();
       if (isset($this->_id) && $this->_id) {
@@ -235,11 +241,11 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
         $defaults['default_amount'] = CRM_Utils_Money::format($defaults['default_amount'], NULL, '%a');
       }
 
-      if (CRM_Utils_Array::value('end_date', $defaults)) {
+      if (!empty($defaults['end_date'])) {
         list($defaults['end_date'], $defaults['end_date_time']) = CRM_Utils_Date::setDateDefaults($defaults['end_date']);
       }
 
-      if (CRM_Utils_Array::value('start_date', $defaults)) {
+      if (!empty($defaults['start_date'])) {
         list($defaults['start_date'], $defaults['start_date_time']) = CRM_Utils_Date::setDateDefaults($defaults['start_date']);
       }
     }
@@ -248,23 +254,11 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
       // set current date as start date
       list($defaults['start_date'], $defaults['start_date_time']) = CRM_Utils_Date::setDateDefaults();
     }
-    if (!isset($defaults['for_organization'])) {
-      $defaults['for_organization'] = ts('I am applying for a grant on behalf of an organization.');
-    }
-    if (CRM_Utils_Array::value('is_for_organization', $defaults)) {
-      $defaults['is_organization'] = 1;
-    }
-    else {
-      $defaults['is_for_organization'] = 1;
-    }
     return $defaults;
   }
 
   /**
-   * Process the form
-   *
-   * @return void
-   * @access public
+   * Process the form.
    */
   public function postProcess() {
     $pageId = $this->get('id');
@@ -275,20 +269,19 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
     }
   }
 
-  function endPostProcess() {
-     
+  public function endPostProcess() {
     // make submit buttons keep the current working tab opened, or save and next tab
     if ($this->_action & CRM_Core_Action::UPDATE) {
       $className = CRM_Utils_String::getClassName($this->_name);
-     
+
       //retrieve list of pages from StateMachine and find next page
       //this is quite painful because StateMachine is full of protected variables
       //so we have to retrieve all pages, find current page, and then retrieve next
       $stateMachine = new CRM_Grant_StateMachine_GrantPage($this);
-      $states       = $stateMachine->getStates();
-      $statesList   = array_keys($states);
-      $currKey      = array_search($className, $statesList);
-      $nextPage     = (array_key_exists($currKey + 1, $statesList)) ? $statesList[$currKey + 1] : '';
+      $states = $stateMachine->getStates();
+      $statesList = array_keys($states);
+      $currKey = array_search($className, $statesList);
+      $nextPage = (array_key_exists($currKey + 1, $statesList)) ? $statesList[$currKey + 1] : '';
 
       //unfortunately, some classes don't map to subpage names, so we alter the exceptions
           
@@ -304,8 +297,8 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
       }
 
       CRM_Core_Session::setStatus(ts("'%1' information has been saved.",
-          array(1 => $subPageName)
-        ));
+        array(1 => $subPageName)
+      ), ts('Saved'), 'success');
 
       $this->postProcessHook();
 
@@ -332,7 +325,15 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
     }
   }
 
-  function getTemplateFileName() {
+  /**
+   * Use the form name to create the tpl file name.
+   *
+   * @return string
+   */
+  /**
+   * @return string
+   */
+  public function getTemplateFileName() {
     if ($this->controller->getPrint() || $this->getVar('_id') <= 0 ||
       ($this->_action & CRM_Core_Action::DELETE) ||
       (CRM_Utils_String::getClassName($this->_name) == 'AddProduct')
@@ -345,5 +346,5 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
       return 'CRM/Grant/Form/GrantPage/Tab.tpl';
     }
   }
-}
 
+}

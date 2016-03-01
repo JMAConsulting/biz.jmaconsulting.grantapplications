@@ -46,16 +46,14 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
     $defaults = parent::setDefaultValues();
 
     if ($this->_id) {
-      $title = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantApplicationPage',
-                                           $this->_id,
-                                           'title'
-                                           );
+      $title = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantApplicationPage', $this->_id, 'title');
       CRM_Utils_System::setTitle(ts('Title and Settings') . " ($title)");
 
       $module = 'on_behalf';
       $ufJoinDAO = new CRM_Core_DAO_UFJoin();
       $ufJoinDAO->module = $module;
       $ufJoinDAO->entity_id = $this->_id;
+      $ufJoinDAO->entity_table = 'civicrm_grant_app_page';
       if ($ufJoinDAO->find(TRUE)) {
         $jsonData = CRM_Contribute_BAO_ContributionPage::formatModuleData($ufJoinDAO->module_data, TRUE, $module);
         $defaults['onbehalf_profile_id'] = $ufJoinDAO->uf_group_id;
@@ -179,6 +177,11 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
         }
       }
     }
+    $start = CRM_Utils_Date::processDate($values['start_date']);
+    $end = CRM_Utils_Date::processDate($values['end_date']);
+    if (($end < $start) && ($end != 0)) {
+      $errors['end_date'] = ts('End date should be after Start date.');
+    }
     return $errors;
   }
 
@@ -214,7 +217,7 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
     $ufJoinParams = array(
       'is_organization' => array(
         'module' => 'on_behalf',
-        'entity_table' => 'civicrm_contribution_page',
+        'entity_table' => 'civicrm_grant_app_page',
         'entity_id' => $dao->id,
       ),
     );
