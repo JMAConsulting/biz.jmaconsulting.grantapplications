@@ -234,6 +234,17 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
 
         CRM_Core_BAO_UFJoin::create($ufJoinParam);
       }
+      else {
+        $params['for_organization'] = NULL;
+
+        $ufId = CRM_Core_BAO_UFJoin::findJoinEntryId($ufJoinParam);
+        CRM_Core_Error::debug( '$ufId', $ufId );
+        if ($ufId) {
+          $ufJoinParam['uf_group_id'] = CRM_Core_BAO_UFJoin::findUFGroupId($ufJoinParam);
+          $ufJoinParam['is_active'] = 0;
+          CRM_Core_BAO_UFJoin::create($ufJoinParam);
+        }
+      }
     }
 
     $this->set('id', $dao->id);

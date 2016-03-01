@@ -149,6 +149,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
 
     $this->_values = $this->get('values');
     $this->_fields = $this->get('fields');
+    $this->_bltID = $this->get('bltID');
     $this->assign('title', $this->_values['title']);
     CRM_Utils_System::setTitle($this->_values['title']);
     if (!$this->_values) {
@@ -166,11 +167,11 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
         CRM_Core_Error::fatal(ts('The page you requested is currently unavailable.'));
       }
       
-      if ($this->_values['custom_pre_id']) {
+      if (!empty($this->_values['custom_pre_id'])) {
         $preProfileType = CRM_Core_BAO_UFField::getProfileType($this->_values['custom_pre_id']);
       }
 
-      if ($this->_values['custom_post_id']) {
+      if (!empty($this->_values['custom_post_id'])) {
         $postProfileType = CRM_Core_BAO_UFField::getProfileType($this->_values['custom_post_id']);
       }
 
@@ -179,6 +180,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
     }
       
     $this->assign('is_email_receipt', $this->_values['is_email_receipt']);
+    $this->assign('bltID', $this->_bltID);
 
     //assign cancelSubscription URL to templates
     $this->assign('cancelSubscriptionUrl',
@@ -198,20 +200,14 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
   }
 
   /**
-   * set the default values
-   *
-   * @return void
-   * @access public
+   * Set the default values.
    */
-  function setDefaultValues() {
+  public function setDefaultValues() {
     return $this->_defaults;
   }
 
   /**
-   * assign the minimal set of variables to the template
-   *
-   * @return void
-   * @access public
+   * Assign the minimal set of variables to the template.
    */
   function assignToTemplate() {
       $vars = array(

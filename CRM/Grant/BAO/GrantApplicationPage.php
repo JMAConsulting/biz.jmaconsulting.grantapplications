@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2013                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -23,14 +23,12 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2013
- * $Id$
- *
+ * @copyright CiviCRM LLC (c) 2004-2015
  */
 
 /**
@@ -39,32 +37,36 @@
 class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationPage {
 
   /**
-   * takes an associative array and creates a grant application page object
+   * Creates a grant application page.
    *
-   * @param array $params (reference ) an assoc array of name/value pairs
+   * @param array $params
    *
    * @return object CRM_Grant_DAO_GrantApplicationPage object
-   * @access public
-   * @static
    */
   public static function create(&$params) {
+    $hook = empty($params['id']) ? 'create' : 'edit';
+    CRM_Utils_Hook::pre($hook, 'GrantApplicationPage', CRM_Utils_Array::value('id', $params), $params);
     $dao = new CRM_Grant_DAO_GrantApplicationPage();
     $dao->copyValues($params);
     $dao->save();
+    CRM_Utils_Hook::post($hook, 'GrantApplicationPage', $dao->id, $dao);
     return $dao;
   }
 
   /**
-   * update the is_active flag in the db
+   * Update the is_active flag in the db.
    *
-   * @param int      $id        id of the database record
-   * @param boolean  $is_active value we want to set the is_active field
+   * @deprecated - this bypasses hooks.
    *
-   * @return Object             DAO object on sucess, null otherwise
-   * @static
+   * @param int $id
+   *   Id of the database record.
+   * @param bool $is_active
+   *   Value we want to set the is_active field.
+   *
+   * @return Object
+   *   DAO object on success, null otherwise
    */
-  public static
-  function setIsActive($id, $is_active) {
+  public static function setIsActive($id, $is_active) {
     return CRM_Core_DAO::setFieldValue('CRM_Grant_DAO_GrantApplicationPage', $id, 'is_active', $is_active);
   }
 
@@ -91,36 +93,60 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
     CRM_Core_Session::setStatus(ts('The Grant Application page \'%1\' has been deleted.', array(1 => $title)));
   }
 
+  /**
+   * Load values for a contribution page.
+   *
+   * @param int $id
+   * @param array $values
+   */
   public static function setValues($id, &$values) {
-    $params = array(
-      'id' => $id,
-    );
+    $modules = array('CiviGrant', 'on_behalf');
+	$values['custom_pre_id'] = $values['custom_post_id'] = NULL;
+
+    $params = array('id' => $id);
 
     CRM_Core_DAO::commonRetrieve('CRM_Grant_DAO_GrantApplicationPage', $params, $values);
     
     // get the profile ids
     $ufJoinParams = array(
-      'module' => 'CiviGrant',
       'entity_table' => 'civicrm_grant_app_page',
       'entity_id' => $id,
     );
-    list($values['custom_pre_id'],
-      $customPostIds
-    ) = CRM_Core_BAO_UFJoin::getUFGroupIds($ufJoinParams);
 
-    if (!empty($customPostIds)) {
-      $values['custom_post_id'] = $customPostIds[0];
-    }
-    else {
-      $values['custom_post_id'] = '';
+    // retrieve profile id as also unserialize module_data corresponding to each $module
+    foreach ($modules as $module) {
+      $ufJoinParams['module'] = $module;
+      $ufJoin = new CRM_Core_DAO_UFJoin();
+      $ufJoin->copyValues($ufJoinParams);
+      if ($module == 'CiviGrant') {
+        $ufJoin->orderBy('weight asc');
+        $ufJoin->find();
+        while ($ufJoin->fetch()) {
+          if ($ufJoin->weight == 1) {
+            $values['custom_pre_id'] = $ufJoin->uf_group_id;
+          }
+          else {
+            $values['custom_post_id'] = $ufJoin->uf_group_id;
+          }
+        }
+      }
+      else {
+        $ufJoin->find(TRUE);
+        if (!$ufJoin->is_active) {
+          continue;
+        }
+        $params = CRM_Contribute_BAO_ContributionPage::formatModuleData($ufJoin->module_data, TRUE, $module);
+        $values = array_merge($params, $values);
+        $values['onbehalf_profile_id'] = $ufJoin->uf_group_id;
+      }
     }
   }
 
   /**
-   * Function to add activity for Membership/Event/Contribution
+   * Function to add activity for Grant
    *
    * @param object  $activity   (reference) particular component object
-   * @param string  $activityType for Membership Signup or Renewal
+   * @param string  $activityType for Grant
    *
    *
    * @static
@@ -304,7 +330,63 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
         $sendTemplateParams['bcc'] = CRM_Utils_Array::value('bcc_receipt', $values);
         list($sent, $subject, $message, $html) = CRM_Core_BAO_MessageTemplate::sendTemplate($sendTemplateParams);
       }
+
+      // send duplicate alert, if dupe match found during on-behalf-of processing.
+      if (!empty($values['onbehalf_dupe_alert'])) {
+        $sendTemplateParams['groupName'] = 'msg_tpl_workflow_grant';
+        $sendTemplateParams['valueName'] = 'grant_dupalert';
+        $sendTemplateParams['from'] = ts('Automatically Generated') . " <{$values['receipt_from_email']}>";
+        $sendTemplateParams['toName'] = CRM_Utils_Array::value('receipt_from_name', $values);
+        $sendTemplateParams['toEmail'] = CRM_Utils_Array::value('receipt_from_email', $values);
+        $sendTemplateParams['tplParams']['onBehalfID'] = $contactID;
+        $sendTemplateParams['tplParams']['receiptMessage'] = $message;
+
+        // fix cc and reset back to original, CRM-6976
+        $sendTemplateParams['cc'] = $originalCCReceipt;
+
+        CRM_Core_BAO_MessageTemplate::sendTemplate($sendTemplateParams);
+      }
     }
+  }
+
+  /**
+   * Get the profile title and fields.
+   *
+   * @param int $gid
+   * @param int $cid
+   * @param array $params
+   * @param array $fieldTypes
+   *
+   * @return array
+   */
+  protected static function getProfileNameAndFields($gid, $cid, &$params, $fieldTypes = array()) {
+    $groupTitle = NULL;
+    $values = array();
+    if ($gid) {
+      if (CRM_Core_BAO_UFGroup::filterUFGroups($gid, $cid)) {
+        $fields = CRM_Core_BAO_UFGroup::getFields($gid, FALSE, CRM_Core_Action::VIEW, NULL, NULL, FALSE, NULL, FALSE, NULL, CRM_Core_Permission::CREATE, NULL);
+        foreach ($fields as $k => $v) {
+          if (!$groupTitle) {
+            $groupTitle = $v["groupTitle"];
+          }
+          // suppress all file fields from display and formatting fields
+          if (
+            CRM_Utils_Array::value('data_type', $v, '') == 'File' ||
+            CRM_Utils_Array::value('name', $v, '') == 'image_URL' ||
+            CRM_Utils_Array::value('field_type', $v) == 'Formatting'
+          ) {
+            unset($fields[$k]);
+          }
+
+          if (!empty($fieldTypes) && (!in_array($v['field_type'], $fieldTypes))) {
+            unset($fields[$k]);
+          }
+        }
+
+        CRM_Core_BAO_UFGroup::getValues($cid, $fields, $values, FALSE, $params);
+      }
+    }
+    return array($groupTitle, $values);
   }
   
   /*
