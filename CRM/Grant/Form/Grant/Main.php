@@ -59,9 +59,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     $csContactID = $this->getContactID();
 
    $this->assign('reset', CRM_Utils_Request::retrieve('reset', 'Boolean', CRM_Core_DAO::$_nullObject));
-    $this->assign('reset', CRM_Utils_Request::retrieve('reset', 'Boolean', CRM_Core_DAO::$_nullObject));
-    $this->assign('mainDisplay', CRM_Utils_Request::retrieve('_qf_Main_display', 'Boolean',
-      CRM_Core_DAO::$_nullObject));
+   $this->assign('mainDisplay', CRM_Utils_Request::retrieve('_qf_Main_display', 'Boolean', CRM_Core_DAO::$_nullObject));
 
     // Checking if is Save as Draft is enabled
     if (!empty($this->_values['is_draft'])) {

@@ -2581,6 +2581,11 @@ AND    ( entity_id IS NULL OR entity_id <= 0 )
       self::setComponentDefaults($fields, $componentId, $component, $defaults);
     }
 
+    //Handling Event Participation Part of the batch profile
+    if (CRM_Core_Permission::access('CiviGrant') && $component == 'Grant') {
+      self::setComponentDefaults($fields, $componentId, $component, $defaults);
+    }
+
     //Handling membership Part of the batch profile
     if (CRM_Core_Permission::access('CiviMember') && $component == 'Membership') {
       self::setComponentDefaults($fields, $componentId, $component, $defaults);
