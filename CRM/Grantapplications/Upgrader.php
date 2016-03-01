@@ -63,6 +63,74 @@ class CRM_Grantapplications_Upgrader extends CRM_Grantapplications_Upgrader_Base
     return TRUE;
   }
 
+  /**
+   * Upgrade to add on behalf module data
+   *
+   * @return TRUE on success
+   * @throws Exception
+   */
+  public function upgrade_4700() {
+    $this->ctx->log->info('Applying update 4700');
+    $this->addTask(ts('Migrate \'on behalf of\' information to module_data'), 'migrateOnBehalfOfInfo');
+    // this path is relative to the extension base dir
+    $this->executeSqlFile('sql/upgrade_4700.sql');
+    return TRUE;
+  }
+
+  /**
+   * Migrate on-behalf information to uf_join.module_data as on-behalf columns will be dropped
+   * on DB upgrade
+   *
+   * @param CRM_Queue_TaskContext $ctx
+   *
+   * @return bool
+   *   TRUE for success
+   */
+  public static function migrateOnBehalfOfInfo() {
+    $ufGroupDAO = new CRM_Core_DAO_UFJoin();
+    $ufGroupDAO->module = 'OnBehalf';
+    $ufGroupDAO->find(TRUE);
+
+    $query = "SELECT cp.*, uj.id as join_id
+      FROM civicrm_grant_app_page cp
+      INNER JOIN civicrm_uf_join uj ON uj.entity_id = cp.id AND uj.module = 'OnBehalf'";
+    $dao = CRM_Core_DAO::executeQuery($query);
+
+    if ($dao->N) {
+      $domain = new CRM_Core_DAO_Domain();
+      $domain->find(TRUE);
+      while ($dao->fetch()) {
+        $onBehalfParams['on_behalf'] = array('is_for_organization' => $dao->is_for_organization);
+        if ($domain->locales) {
+          $locales = explode(CRM_Core_DAO::VALUE_SEPARATOR, $domain->locales);
+          foreach ($locales as $locale) {
+            $for_organization = "for_organization_{$locale}";
+            $onBehalfParams['on_behalf'] += array(
+              $locale => array(
+                'for_organization' => $dao->$for_organization,
+              ),
+            );
+          }
+        }
+        else {
+          $onBehalfParams['on_behalf'] += array(
+            'default' => array(
+              'for_organization' => $dao->for_organization,
+            ),
+          );
+        }
+        $ufJoinParam = array(
+          'id' => $dao->join_id,
+          'module' => 'on_behalf',
+          'module_data' => json_encode($onBehalfParams),
+        );
+        CRM_Core_BAO_UFJoin::create($ufJoinParam);
+      }
+    }
+
+    return TRUE;
+  }
+
 
   /**
    * Example: Run a slow upgrade process by breaking it up into smaller chunk
