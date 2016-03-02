@@ -295,7 +295,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
       if ($fields) {
         // unset any email-* fields since we already collect it, CRM-2888
         foreach (array_keys($fields) as $fieldName) {
-          if (substr($fieldName, 0, 6) == 'email-' && !in_array($profileContactType, array('honor', 'onbehalf'))) {
+          if (substr($fieldName, 0, 6) == 'email-' && !in_array($profileContactType, array('onbehalf'))) {
             unset($fields[$fieldName]);
           }
         }

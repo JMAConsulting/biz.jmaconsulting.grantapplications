@@ -1,8 +1,8 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2013                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -46,7 +46,6 @@
       </div>
     {/if}
   </div>
-
   <div class="spacer"></div>
   {if $default_amount_hidden}
     <div class="crm-group amount_display-group">
@@ -65,21 +64,17 @@
   {/if} 
   {if $onbehalfProfile}
     <div class="crm-group onBehalf_display-group label-left crm-profile-view">
-      {include file="CRM/UF/Form/Block.tpl" fields=$onbehalfProfile}
-      <div class="crm-section organization_email-section">
-        <div class="label">{ts}Organization Email{/ts}</div>
-        <div class="content">{$onBehalfEmail}</div>
-        <div class="clear"></div>
-      </div>
+      {include file="CRM/UF/Form/Block.tpl" fields=$onbehalfProfile prefix='onbehalf'}
     </div>
   {/if}
+
   {if $customPre}
-    <fieldset class="label-left">
+    <fieldset class="label-left crm-profile-view">
       {include file="CRM/UF/Form/Block.tpl" fields=$customPre}
     </fieldset>
   {/if}
   {if $customPost}
-    <fieldset class="label-left">
+    <fieldset class="label-left crm-profile-view">
       {include file="CRM/UF/Form/Block.tpl" fields=$customPost}
     </fieldset>
   {/if}

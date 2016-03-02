@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2013                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -23,25 +23,20 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2012
- * $Id$
- *
+ * @copyright CiviCRM LLC (c) 2004-2015
  */
 
 /**
- * form for thank-you / success page - 3rd step of online grant application process
+ * Form for thank-you / success page - 3rd step of online grant application process.
  */
 class CRM_Grant_Form_Grant_ThankYou extends CRM_Grant_Form_GrantBase {
   /**
-   * Function to set variables up before form is built
-   *
-   * @return void
-   * @access public
+   * Set variables up before form is built.
    */
   public function preProcess() {
     parent::preProcess();
@@ -62,16 +57,16 @@ class CRM_Grant_Form_Grant_ThankYou extends CRM_Grant_Form_GrantBase {
     }
     // Make the grantPageID avilable to the template
     $this->assign('grantPageID', $this->_id);
+    $this->assign('is_for_organization', CRM_Utils_Array::value('is_for_organization', $this->_params));
   }
 
   /**
-   * overwrite action, since we are only showing elements in frozen mode
+   * Overwrite action, since we are only showing elements in frozen mode
    * no help display needed
    *
    * @return int
-   * @access public
    */
-  function getAction() {
+  public function getAction() {
     if ($this->_action & CRM_Core_Action::PREVIEW) {
       return CRM_Core_Action::VIEW | CRM_Core_Action::PREVIEW;
     }
@@ -81,57 +76,37 @@ class CRM_Grant_Form_Grant_ThankYou extends CRM_Grant_Form_GrantBase {
   }
 
   /**
-   * Function to actually build the form
-   *
-   * @return void
-   * @access public
+   * Build the form object.
    */
   public function buildQuickForm() {
     $this->assignToTemplate();
+    $option = $this->get('option');
     $this->assign('receiptFromEmail', CRM_Utils_Array::value('receipt_from_email', $this->_values));
 
     $params = $this->_params;
  
     $qParams = "reset=1&amp;id={$this->_id}";
 
-    $this->assign( 'qParams' , $qParams );
+    $this->assign('qParams', $qParams);
 
     $this->buildCustom($this->_values['custom_pre_id'], 'customPre', TRUE);
     $this->buildCustom($this->_values['custom_post_id'], 'customPost', TRUE);
-    if (CRM_Utils_Array::value('hidden_onbehalf_profile', $params)) {
-      $ufJoinParams = array(
-        'module' => 'onBehalf',
-        'entity_table' => 'civicrm_grant_app_page',
-        'entity_id' => $this->_id,
-      );
-      $OnBehalfProfile = CRM_Core_BAO_UFJoin::getUFGroupIds($ufJoinParams);
-      $profileId = $OnBehalfProfile[0];
-
-      $fieldTypes     = array('Contact', 'Organization');
+    if (!empty($params['onbehalf'])) {
+      $fieldTypes = array('Contact', 'Organization');
       $contactSubType = CRM_Contact_BAO_ContactType::subTypes('Organization');
-      $fieldTypes     = array_merge($fieldTypes, $contactSubType);
+      $fieldTypes = array_merge($fieldTypes, $contactSubType);
       $fieldTypes = array_merge($fieldTypes, array('Grant'));
-      
 
-      $this->buildCustom($profileId, 'onbehalfProfile', TRUE, TRUE, $fieldTypes);
+      $this->buildCustom($this->_values['onbehalf_profile_id'], 'onbehalfProfile', TRUE, 'onbehalf', $fieldTypes);
     }
     $this->assign('application_received_date',
       CRM_Utils_Date::mysqlToIso(CRM_Utils_Array::value('receive_date', $this->_params))
     );
 
     $defaults = array();
-    $options = array();
     $fields = array();
-    $removeCustomFieldTypes = array('Grant');
     foreach ($this->_fields as $name => $dontCare) {
-      if ($name == 'onbehalf') {
-        foreach ($dontCare as $key => $value) {
-          $fields['onbehalf'][$key] = 1;
-        }
-      }
-      else {
-        $fields[$name] = 1;
-      }
+      $fields[$name] = 1;
     }
     $fields['state_province'] = $fields['country'] = $fields['email'] = 1;
     $contact = $this->_params = $this->controller->exportValues('Main');
@@ -174,19 +149,7 @@ class CRM_Grant_Form_Grant_ThankYou extends CRM_Grant_Form_GrantBase {
       $this->assign('files', $files);
     }
     foreach ($fields as $name => $dontCare) {
-      if ($name == 'onbehalf') {
-        foreach ($dontCare as $key => $value) {
-          //$defaults[$key] = $contact['onbehalf'][$key];
-          if (isset($contact['onbehalf'][$key])) {
-          $defaults[$key] = $contact['onbehalf'][$key];
-        }
-          if (isset($contact['onbehalf']["{$key}_id"])) {
-            $defaults["{$key}_id"] = $contact['onbehalf']["{$key}_id"];
-      }
-
-        }
-      }
-      elseif (isset($contact[$name])) {
+      if (isset($contact[$name])) {
         $defaults[$name] = $contact[$name];
         if (substr($name, 0, 7) == 'custom_') {
           $timeField = "{$name}_time";
@@ -194,8 +157,11 @@ class CRM_Grant_Form_Grant_ThankYou extends CRM_Grant_Form_GrantBase {
             $defaults[$timeField] = $contact[$timeField];
           }
         }
-        elseif (in_array($name, array('addressee', 'email_greeting', 'postal_greeting'))
-          && CRM_Utils_Array::value($name . '_custom', $contact)
+        elseif (in_array($name, array(
+              'addressee',
+              'email_greeting',
+              'postal_greeting',
+            )) && !empty($contact[$name . '_custom'])
         ) {
           $defaults[$name . '_custom'] = $contact[$name . '_custom'];
         }
@@ -203,6 +169,7 @@ class CRM_Grant_Form_Grant_ThankYou extends CRM_Grant_Form_GrantBase {
     }
 
     $this->_submitValues = array_merge($this->_submitValues, $defaults);
+
     $this->setDefaults($defaults);
     $this->freeze();
 
@@ -210,5 +177,5 @@ class CRM_Grant_Form_Grant_ThankYou extends CRM_Grant_Form_GrantBase {
     // CRM-9491
     $this->controller->reset();
   }
-}
 
+}
