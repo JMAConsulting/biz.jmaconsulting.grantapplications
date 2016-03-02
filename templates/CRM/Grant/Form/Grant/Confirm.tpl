@@ -1,6 +1,6 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
@@ -62,7 +62,7 @@
   {/if}
   {if $onbehalfProfile}
     <div class="crm-group onBehalf_display-group label-left crm-profile-view">
-      {include file="CRM/UF/Form/Block.tpl" fields=$onbehalfProfile}
+      {include file="CRM/UF/Form/Block.tpl" fields=$onbehalfProfile prefix='onbehalf'}
       <div class="crm-section organization_email-section">
         <div class="label">{ts}Organization Email{/ts}</div>
         <div class="content">{$onBehalfEmail}</div>

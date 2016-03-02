@@ -74,14 +74,9 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     }
 
     // if onbehalf-of-organization
-    if (CRM_Utils_Array::value('hidden_onbehalf_profile', $this->_params)) {
-      if (CRM_Utils_Array::value('org_option', $this->_params) &&
-        CRM_Utils_Array::value('organization_id', $this->_params)
-      ) {
-        if (CRM_Utils_Array::value('onbehalfof_id', $this->_params)) {
-          $this->_params['organization_id'] = $this->_params['onbehalfof_id'];
-        }
-      }
+    if (!empty($this->_values['onbehalf_profile_id']) && !empty($this->_params['onbehalf']['organization_name'])) {
+      // CRM-15182
+      $this->_params['organization_id'] = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $this->_params['onbehalf']['organization_name'], 'id', 'display_name');
 
       $this->_params['organization_name'] = $this->_params['onbehalf']['organization_name'];
       $addressBlocks = array(
@@ -593,7 +588,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     }
     // If onbehalf-of-organization grant application add organization
     // and it's location.
-    if (isset($params['hidden_onbehalf_profile']) && isset($behalfOrganization['organization_name'])) {
+    if (isset($this->_values['onbehalf_profile_id']) && isset($behalfOrganization['organization_name']) && !empty($this->_params['is_for_organization'])) {
       $ufFields = array();
       foreach ($this->_fields['onbehalf'] as $name => $value) {
         $ufFields[$name] = 1;
@@ -764,7 +759,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
    *   array of organization info.
    * @param int $contactID
    *   individual contact id. One.
-   *   who is doing the process of .
+   *   who is doing the process of applying for grant.
    *
    * @param array $values
    *   form values array.
@@ -826,9 +821,11 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
       NULL, NULL, 'Organization'
     );
     // create relationship
-    $relParams['contact_check'][$orgID] = 1;
-    $cid = array('contact' => $contactID);
-    CRM_Contact_BAO_Relationship::legacyCreateMultiple($relParams, $cid);
+    if ($isNotCurrentEmployer) {
+      $relParams['contact_check'][$orgID] = 1;
+      $cid = array('contact' => $contactID);
+      CRM_Contact_BAO_Relationship::legacyCreateMultiple($relParams, $cid);
+    }
     
     // if multiple match - send a duplicate alert
     if ($dupeIDs && (count($dupeIDs) > 1)) {
@@ -848,13 +845,13 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
 
       //make this employee of relationship as current
       //employer / employee relationship,  CRM-3532
-      if ($isCurrentEmployer &&
+      if ($isNotCurrentEmployer &&
         ($orgID != CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $contactID, 'employer_id'))
       ) {
-        $isCurrentEmployer = FALSE;
+        $isNotCurrentEmployer = FALSE;
       }
 
-      if (!$isCurrentEmployer && $orgID) {
+      if (!$isNotCurrentEmployer && $orgID) {
         //build current employer params
         $currentEmpParams[$contactID] = $orgID;
         CRM_Contact_BAO_Contact_Utils::setCurrentEmployer($currentEmpParams);
