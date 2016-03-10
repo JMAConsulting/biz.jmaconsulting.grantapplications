@@ -86,15 +86,15 @@ function grantapplications_civicrm_permission(&$permissions) {
   $prefix = ts('CiviGrant') . ': ';
   $permissions['submit online grant application'] = array(
     $prefix . ts('apply for Grant Application'),
-    ts('Submit grant applications online'),
+    ts('Submit Grant Applications online'),
   );
-  $permissions['edit grant application'] = array(
-    $prefix . ts('edit Grant Applications'),
-    ts('Create or edit grant applications and their criteria'),
+  $permissions['edit grant application page'] = array(
+    $prefix . ts('edit Grant Application Pages'),
+    ts('Create or edit grant application pages and their criteria'),
   );
-  $permissions['delete grant application'] = array(
-    $prefix . ts('delete Grant Applications'),
-    ts('Delete grant applications and their criteria'),
+  $permissions['delete grant application page'] = array(
+    $prefix . ts('delete Grant Application Pages'),
+    ts('Delete grant application pages and their criteria'),
   );
 }
 
@@ -189,7 +189,7 @@ function grantapplications_civicrm_pageRun(&$page) {
       WHERE 1";
     $grantPage = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Grant_DAO_GrantApplicationPage');
     $rows = array();
-    $allowToDelete = CRM_Core_Permission::check('delete grant application');
+    $allowToDelete = CRM_Core_Permission::check('delete grant application page');
     //get configure actions links.
     $configureActionLinks = CRM_Grant_BAO_GrantApplicationPage::configureActionLinks();
     $query = "SELECT
@@ -285,10 +285,10 @@ function grantapplications_civicrm_pageRun(&$page) {
       $actionLinks = array();
     }
     $permissions = array(CRM_Core_Permission::VIEW);
-    if (CRM_Core_Permission::check('edit grant application')) {
+    if (CRM_Core_Permission::check('edit grant application page')) {
       $permissions[] = CRM_Core_Permission::EDIT;
     }
-    if (CRM_Core_Permission::check('delete grant application')) {
+    if (CRM_Core_Permission::check('delete grant application page')) {
       $permissions[] = CRM_Core_Permission::DELETE;
     }
     $mask = CRM_Core_Action::mask($permissions);
