@@ -38,6 +38,148 @@
  */
 class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationPage {
 
+  private static $_actionLinks;
+  private static $_configureActionLinks;
+  private static $_onlineGrantLinks;
+
+  /**
+   * Get the action links for this page.
+   *
+   * @return array $_actionLinks
+   *
+   */ 
+  public static function &actionLinks() {
+    // check if variable _actionsLinks is populated
+    if (!isset(self::$_actionLinks)) {
+      // helper variable for nicer formatting
+      $deleteExtra = ts('Are you sure you want to delete this Grant application page?');
+
+      self::$_actionLinks = array(
+        CRM_Core_Action::ENABLE => array(
+          'name' => ts('Enable'),
+          'ref' => 'crm-enable-disable',
+          'title' => ts('Enable'),
+        ),
+        CRM_Core_Action::DISABLE => array(
+          'name' => ts('Disable'),
+          'title' => ts('Disable'),
+          'ref' => 'crm-enable-disable',
+        ),
+        CRM_Core_Action::DELETE => array(
+          'name' => ts('Delete'),
+          'url' => CRM_Utils_System::currentPath(),
+          'qs' => 'action=delete&reset=1&id=%%id%%',
+          'title' => ts('Delete'),
+          'extra' => 'onclick = "return confirm(\'' . $deleteExtra . '\');"',
+        ),
+      );
+    }
+    return self::$_actionLinks;
+  }
+
+  /**
+   * Get the configure action links for this page.
+   *
+   * @return array $_configureActionLinks
+   *
+   */
+  public static function &configureActionLinks() {
+    // check if variable _actionsLinks is populated
+    if (!isset(self::$_configureActionLinks)) {
+      $urlString = 'civicrm/admin/grant/';
+      $urlParams = 'reset=1&action=update&id=%%id%%';
+
+      self::$_configureActionLinks = array(
+        CRM_Core_Action::ADD => array(
+          'name' => ts('Info and Settings'),
+          'title' => ts('Info and Settings'),
+          'url' => $urlString . 'settings',
+          'qs' => $urlParams,
+          'uniqueName' => 'settings',
+          'class' => 'no-popup',
+        ),    
+        CRM_Core_Action::FOLLOWUP => array(
+          'name' => ts('Save as Draft'),
+          'title' => ts('Save as Draft'),
+          'url' => $urlString . 'draft',
+          'qs' => $urlParams,
+          'uniqueName' => 'draft',
+          'class' => 'no-popup',
+        ),
+        CRM_Core_Action::EXPORT => array(
+          'name' => ts('Receipt'),
+          'title' => ts('Receipt'),
+          'url' => $urlString . 'thankyou',
+          'qs' => $urlParams,
+          'uniqueName' => 'thankyou',
+          'class' => 'no-popup',
+        ),
+        CRM_Core_Action::PROFILE => array(
+          'name' => ts('Profiles'),
+          'title' => ts('Profiles'),
+          'url' => $urlString . 'custom',
+          'qs' => $urlParams,
+          'uniqueName' => 'custom',
+          'class' => 'no-popup',
+        ),
+      );
+    }
+
+    return self::$_configureActionLinks;
+  }
+  
+  /**
+   * Get the online grant links.
+   *
+   * @return array $_onlineGrantLinks.
+   *
+   */
+  public static function onlineGrantLinks() {
+    if (!isset(self::$_onlineGrantLinks)) {
+      $urlString = 'civicrm/grant/transact';
+      $urlParams = 'reset=1&id=%%id%%';
+      self::$_onlineGrantLinks = array(
+        CRM_Core_Action::RENEW => array(
+          'name' => ts('Grant Application (Live)'),
+          'title' => ts('Grant Application (Live)'),
+          'url' => $urlString,
+          'qs' => $urlParams,
+          'fe' => TRUE,
+          'uniqueName' => 'live_page',
+          'class' => 'no-popup',
+        ),
+      );
+    }
+
+    return self::$_onlineGrantLinks;
+  }
+  
+  public static function formatConfigureLinks($sectionsInfo) {
+    //build the formatted configure links.
+    $formattedConfLinks = self::configureActionLinks();
+    foreach ($formattedConfLinks as $act => & $link) {
+      $sectionName = CRM_Utils_Array::value('uniqueName', $link);
+      if (!$sectionName) {
+        continue;
+      }
+
+      $classes = array();
+      if (isset($link['class'])) {
+        $classes = $link['class'];
+      }
+
+      if (!CRM_Utils_Array::value($sectionName, $sectionsInfo)) {
+        $classes = array();
+        if (isset($link['class'])) {
+          $classes = array($link['class']);
+        }
+        $link['class'] = array_merge($classes, array('disabled'));
+      }
+    }
+
+    return $formattedConfLinks;
+  }
+  
   /**
    * takes an associative array and creates a grant application page object
    *
