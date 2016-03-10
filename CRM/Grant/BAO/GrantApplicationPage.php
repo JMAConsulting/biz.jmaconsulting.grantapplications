@@ -151,7 +151,13 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
 
     return self::$_onlineGrantLinks;
   }
-  
+
+  /**
+   * Format the configurable action links.
+   *
+   * @return array $formattedConfLinks.
+   *
+   */
   public static function formatConfigureLinks($sectionsInfo) {
     //build the formatted configure links.
     $formattedConfLinks = self::configureActionLinks();

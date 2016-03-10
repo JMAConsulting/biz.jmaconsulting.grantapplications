@@ -109,7 +109,8 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
       $controller->set('id', $id);
       $controller->process();
       return $controller->run();
-    }else {
+    }
+    else {
       $controller = new CRM_Core_Controller_Simple('CRM_Grant_Form_Search', ts('grants'), NULL);
       $controller->setEmbedded(TRUE);
       $controller->reset();

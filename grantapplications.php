@@ -183,15 +183,18 @@ function grantapplications_civicrm_buildForm($formName, &$form) {
 function grantapplications_civicrm_pageRun(&$page) {
   if ($page->getVar('_name') == 'CRM_Grant_Page_DashBoard') {
     $params = array();
-    $query = "SELECT * FROM civicrm_grant_app_page WHERE 1";
+    $query = "SELECT
+      *
+      FROM civicrm_grant_app_page
+      WHERE 1";
     $grantPage = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Grant_DAO_GrantApplicationPage');
     $rows = array();
     $allowToDelete = CRM_Core_Permission::check('delete grant application');
     //get configure actions links.
     $configureActionLinks = CRM_Grant_BAO_GrantApplicationPage::configureActionLinks();
-    $query = "
-      SELECT  id
-      FROM  civicrm_grant_app_page
+    $query = "SELECT
+      id
+      FROM civicrm_grant_app_page
       WHERE  1";
     $grantAppPage = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Grant_DAO_GrantApplicationPage');
     $grantAppPageIds = array();
@@ -222,54 +225,53 @@ function grantapplications_civicrm_pageRun(&$page) {
       else {
         $action -= CRM_Core_Action::DISABLE;
       }
-         
-      //CRM-441
+
       if (!$allowToDelete) {
         $action -= CRM_Core_Action::DELETE;
       }
       $sectionsInfo = CRM_Utils_Array::value($grantPage->id, $grantAppPageSectionInfo, array());
 
       $rows[$grantPage->id]['configureActionLinks'] = CRM_Core_Action::formLink(CRM_Grant_BAO_GrantApplicationPage::formatConfigureLinks($sectionsInfo),
-                                                                                $action,
-                                                                                array('id' => $grantPage->id),
-                                                                                ts('Configure'),
-                                                                                TRUE,
-                                                                                'grantapppage.configure.actions',
-                                                                                'GrantAppPage',
-                                                                                $grantPage->id
-                                                                                );
+        $action,
+        array('id' => $grantPage->id),
+        ts('Configure'),
+        TRUE,
+        'grantapppage.configure.actions',
+        'GrantAppPage',
+        $grantPage->id
+      );
                   
       //build the online grant application links.
       $rows[$grantPage->id]['onlineGrantLinks'] = CRM_Core_Action::formLink(CRM_Grant_BAO_GrantApplicationPage::onlineGrantLinks(),
-                                                                            $action,
-                                                                            array('id' => $grantPage->id),
-                                                                            ts('Grant Application (Live)'),
-                                                                            FALSE,
-                                                                            'grantapppage.online.links',
-                                                                            'GrantAppPage',
-                                                                            $grantPage->id
-                                                                            );
+        $action,
+        array('id' => $grantPage->id),
+        ts('Grant Application (Live)'),
+        FALSE,
+        'grantapppage.online.links',
+        'GrantAppPage',
+        $grantPage->id
+      );
          
       //build the normal action links.
       $rows[$grantPage->id]['action'] = CRM_Core_Action::formLink(CRM_Grant_BAO_GrantApplicationPage::actionLinks(),
-                                                                  $action,
-                                                                  array('id' => $grantPage->id),
-                                                                  ts('more'),
-                                                                  TRUE,
-                                                                  'grantapppage.action.links',
-                                                                  'GrantAppPage',
-                                                                  $grantPage->id
-                                                                  );
+        $action,
+        array('id' => $grantPage->id),
+        ts('more'),
+        TRUE,
+        'grantapppage.action.links',
+        'GrantAppPage',
+        $grantPage->id
+      );
          
       $rows[$grantPage->id]['title'] = $grantPage->title;
       $rows[$grantPage->id]['is_active'] = $grantPage->is_active;
       $rows[$grantPage->id]['id'] = $grantPage->id;
     }
     $page->assign('fields', $rows);
-    //FIXME: Avoid overwriting core
+
     CRM_Core_Region::instance('page-body')->add(array(
-                                                      'template' => 'CRM/Grant/Page/GrantApplicationDashboard.tpl',
-                                                      ));
+      'template' => 'CRM/Grant/Page/GrantApplicationDashboard.tpl',
+    ));
   }
 
   if ($page->getVar('_name') == 'CRM_Contact_Page_View_UserDashBoard') {
@@ -324,7 +326,18 @@ function grantapplications_civicrm_pageRun(&$page) {
         if ($relationshipType[$values['relationship_type_id']]['name_a_b'] != 'Employee of') {
           continue;
         }
-        $query = "SELECT grant_type_id, application_received_date, amount_total, status_id, id, currency {$extraSelect} FROM civicrm_grant WHERE contact_id = {$values['cid']} AND status_id = " . array_search('Draft', $grantStatusByName);
+        $query = "SELECT
+          grant_type_id,
+          application_received_date,
+          amount_total,
+          status_id,
+          id,
+          currency
+          {$extraSelect}
+          FROM civicrm_grant 
+          WHERE contact_id = {$values['cid']}
+          AND status_id = " . array_search('Draft', $grantStatusByName);
+
         $dao = CRM_Core_DAO::executeQuery($query);
         while ($dao->fetch()) {
           $row = array();
