@@ -1,8 +1,8 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2011                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -56,7 +56,7 @@
         </table>
         {/strip}
     {else}
-        <div class="messages status">
+        <div class="messages status no-popup">
            <div class="icon inform-icon"></div>
                     {ts}There are no grants on record for you.{/ts}
         </div>
