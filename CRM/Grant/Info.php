@@ -32,8 +32,6 @@
  *
  * @package CRM
  * @copyright CiviCRM LLC (c) 2004-2015
- * $Id$
- *
  */
 class CRM_Grant_Info extends CRM_Core_Component_Info {
 
@@ -44,27 +42,41 @@ class CRM_Grant_Info extends CRM_Core_Component_Info {
 
   /**
    * @inheritDoc
+   * Provides base information about the component.
+   * Needs to be implemented in component's information
+   * class.
+   *
+   * @return array
+   *   collection of required component settings
+   */
+  /**
    * @return array
    */
   public function getInfo() {
     return array(
       'name' => 'CiviGrant',
       'translatedName' => ts('CiviGrant'),
-      'title' => 'CiviCRM Grant Management Engine',
-      'path' => 'CRM_Grant_',
+      'title' => 'CiviCRM Grant Engine',
       'search' => 1,
       'showActivitiesInCore' => 1,
     );
   }
 
-
   /**
    * @inheritDoc
+   * Provides permissions that are used by component.
+   * Needs to be implemented in component's information
+   * class.
+   *
+   * NOTE: if using conditionally permission return,
+   * implementation of $getAllUnconditionally is required.
+   *
    * @param bool $getAllUnconditionally
    * @param bool $descriptions
    *   Whether to return permission descriptions
    *
-   * @return array
+   * @return array|null
+   *   collection of permissions, null if none
    */
   public function getPermissions($getAllUnconditionally = FALSE, $descriptions = FALSE) {
     $permissions = array(
@@ -75,6 +87,9 @@ class CRM_Grant_Info extends CRM_Core_Component_Info {
       'edit grants' => array(
         ts('edit grants'),
         ts('Create and update grants'),
+      ),
+      'submit online grant application' => array(
+        ts('submit online grant application'),
       ),
       'delete in CiviGrant' => array(
         ts('delete in CiviGrant'),
@@ -92,29 +107,53 @@ class CRM_Grant_Info extends CRM_Core_Component_Info {
   }
 
   /**
+   * Provides permissions that are unwise for Anonymous Roles to have.
+   *
+   * @return array
+   *   list of permissions
+   * @see CRM_Component_Info::getPermissions
+   */
+  /**
+   * @return array
+   */
+  public function getAnonymousPermissionWarnings() {
+    return array(
+      'access CiviGrant',
+    );
+  }
+
+  /**
    * @inheritDoc
-   * @return null
+   * Provides information about user dashboard element
+   * offered by this component.
+   *
+   * @return array|null
+   *   collection of required dashboard settings,
+   *                    null if no element offered
+   */
+  /**
+   * @return array|null
    */
   public function getUserDashboardElement() {
-    return array('name' => ts('Grant'),
+    return array(
+      'name' => ts('Grant'),
       'title' => ts('Your Grant(s)'),
-      'perm' => array('edit grants'),
+      'perm' => array('submit online grant application'),
       'weight' => 50,
     );
   }
 
   /**
    * @inheritDoc
-   * @return null
+   * Provides information about user dashboard element
+   * offered by this component.
+   *
+   * @return array|null
+   *   collection of required dashboard settings,
+   *                    null if no element offered
    */
-  public function getUserDashboardObject() {
-    // no dashboard element for this component
-    return NULL;
-  }
-
   /**
-   * @inheritDoc
-   * @return array
+   * @return array|null
    */
   public function registerTab() {
     return array(
@@ -126,7 +165,15 @@ class CRM_Grant_Info extends CRM_Core_Component_Info {
 
   /**
    * @inheritDoc
-   * @return array
+   * Provides information about advanced search pane
+   * offered by this component.
+   *
+   * @return array|null
+   *   collection of required pane settings,
+   *                    null if no element offered
+   */
+  /**
+   * @return array|null
    */
   public function registerAdvancedSearchPane() {
     return array(
@@ -137,7 +184,16 @@ class CRM_Grant_Info extends CRM_Core_Component_Info {
 
   /**
    * @inheritDoc
-   * @return null
+   * Provides potential activity types that this
+   * component might want to register in activity history.
+   * Needs to be implemented in component's information
+   * class.
+   *
+   * @return array|null
+   *   collection of activity types
+   */
+  /**
+   * @return array|null
    */
   public function getActivityTypes() {
     return NULL;
@@ -146,6 +202,7 @@ class CRM_Grant_Info extends CRM_Core_Component_Info {
   /**
    * add shortcut to Create New.
    * @param $shortCuts
+   * @param $newCredit
    */
   public function creatNewShortcut(&$shortCuts) {
     if (CRM_Core_Permission::check('access CiviGrant') &&
