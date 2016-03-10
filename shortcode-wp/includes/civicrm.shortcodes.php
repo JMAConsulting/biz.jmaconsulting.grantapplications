@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2013                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -28,7 +28,7 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2013
+ * @copyright CiviCRM LLC (c) 2004-2015
  *
  */
 
@@ -710,7 +710,7 @@ class CiviCRM_For_WordPress_Shortcodes {
         $params['id'] = $args['id'];
 
         // get grant application page
-        $sql = "SELECT title, intro_text from civicrm_grant_app_page where id = {$params['id']}";
+        $sql = "SELECT title, intro_text FROM civicrm_grant_app_page WHERE id = {$params['id']}";
         $dao = CRM_Core_DAO::executeQuery($sql);
         while ($dao->fetch()) {
           $data['title'] = $dao->title;
