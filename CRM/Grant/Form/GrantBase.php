@@ -32,7 +32,7 @@
  */
 
 /**
- * This class generates form components for processing a contribution.
+ * This class generates form components for processing a grant application.
  */
 class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
 

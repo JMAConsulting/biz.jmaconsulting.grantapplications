@@ -52,8 +52,7 @@ class CRM_Grant_Form_GrantPage_TabHeader {
     return $tabs;
   }
 
-  static
-  function process(&$form) {
+  static function process(&$form) {
     if ($form->getVar('_id') <= 0) {
       return NULL;
     }
