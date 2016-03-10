@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <extension key="biz.jmaconsulting.grantapplications" type="module">
   <downloadUrl>https://github.com/JMAConsulting/biz.jmaconsulting.grantapplications/archive/v1.4.1.zip</downloadUrl>
   <file>grantapplications</file>
@@ -22,7 +22,7 @@
   <compatibility>
     <ver>4.7</ver>
   </compatibility>
-  <comments></comments>
+  <comments/>
   <civix>
     <namespace>CRM/Grantapplications</namespace>
   </civix>
