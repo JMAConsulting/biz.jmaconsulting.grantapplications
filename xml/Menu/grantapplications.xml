@@ -39,6 +39,15 @@
     <access_arguments>access CiviGrant</access_arguments>
   </item>
   <item>
+     <path>civicrm/grant/delete</path>
+     <title>Delete Grant</title>
+     <page_callback>CRM_Grant_Form_GrantPage_Delete</page_callback>
+     <path_arguments>action=delete</path_arguments>
+     <access_arguments>delete grant application</access_arguments>
+     <page_type>1</page_type>
+     <component>CiviGrant</component>
+  </item>
+  <item>
     <path>civicrm/grant/transact</path>
     <title>CiviGrant</title>
     <page_callback>CRM_Grant_Controller_Grant</page_callback>

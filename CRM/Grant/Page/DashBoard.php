@@ -90,37 +90,15 @@ class CRM_Grant_Page_DashBoard extends CRM_Core_Page {
       return $controller->run();
     }
 
-    if ($action & CRM_Core_Action::DELETE) {
-      CRM_Utils_System::appendBreadCrumb($breadCrumb);
-
-      $session = CRM_Core_Session::singleton();
-      $session->pushUserContext(CRM_Utils_System::url(CRM_Utils_System::currentPath(),
-        'reset=1&action=browse'
-      ));
-
-      $id = CRM_Utils_Request::retrieve('id', 'Positive',
-        $this, FALSE, 0
-      );
-    
-      $controller = new CRM_Core_Controller_Simple('CRM_Grant_Form_GrantPage_Delete',
-        'Delete Grant Application Page',
-        CRM_Core_Action::DELETE
-      );
-      $controller->set('id', $id);
-      $controller->process();
-      return $controller->run();
-    }
-    else {
-      $controller = new CRM_Core_Controller_Simple('CRM_Grant_Form_Search', ts('grants'), NULL);
-      $controller->setEmbedded(TRUE);
-      $controller->reset();
-      $controller->set('limit', 10);
-      $controller->set('force', 1);
-      $controller->set('context', 'search');
-      $controller->process();
-      $controller->run();
-      $this->browse();
-    }
+    $controller = new CRM_Core_Controller_Simple('CRM_Grant_Form_Search', ts('grants'), NULL);
+    $controller->setEmbedded(TRUE);
+    $controller->reset();
+    $controller->set('limit', 10);
+    $controller->set('force', 1);
+    $controller->set('context', 'search');
+    $controller->process();
+    $controller->run();
+    $this->browse();
     return parent::run();
   }
 

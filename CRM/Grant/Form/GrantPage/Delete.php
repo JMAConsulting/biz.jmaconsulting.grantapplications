@@ -69,8 +69,11 @@ class CRM_Grant_Form_GrantPage_Delete extends CRM_Grant_Form_GrantPage {
    * @access public
    */
   public function buildQuickForm() {
+    $id = CRM_Utils_Request::retrieve('id', 'Positive',
+      $this, FALSE, 0
+    );
   
-    $this->_title = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantApplicationPage', $this->_id, 'title');
+    $this->_title = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantApplicationPage', $id, 'title');
     $this->assign('title', $this->_title);
 
     $buttons = array();
@@ -115,5 +118,9 @@ class CRM_Grant_Form_GrantPage_Delete extends CRM_Grant_Form_GrantPage {
     $transaction->commit();
 
     CRM_Core_Session::setStatus(ts('The Grant Application page \'%1\' has been deleted.', array(1 => $this->_title)));
+    $session = CRM_Core_Session::singleton();
+    $session->pushUserContext(CRM_Utils_System::url('civicrm/grant',
+      'reset=1'
+    ));
   }
 }

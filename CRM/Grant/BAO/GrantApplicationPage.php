@@ -65,7 +65,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
         ),
         CRM_Core_Action::DELETE => array(
           'name' => ts('Delete'),
-          'url' => CRM_Utils_System::currentPath(),
+          'url' => 'civicrm/grant/delete',
           'qs' => 'action=delete&reset=1&id=%%id%%',
           'title' => ts('Delete'),
           'extra' => 'onclick = "return confirm(\'' . $deleteExtra . '\');"',
