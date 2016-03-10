@@ -182,10 +182,94 @@ function grantapplications_civicrm_buildForm($formName, &$form) {
 
 function grantapplications_civicrm_pageRun(&$page) {
   if ($page->getVar('_name') == 'CRM_Grant_Page_DashBoard') {
+    $params = array();
+    $query = "SELECT * FROM civicrm_grant_app_page WHERE 1";
+    $grantPage = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Grant_DAO_GrantApplicationPage');
+    $rows = array();
+    $allowToDelete = CRM_Core_Permission::check('delete grant application');
+    //get configure actions links.
+    $configureActionLinks = CRM_Grant_BAO_GrantApplicationPage::configureActionLinks();
+    $query = "
+      SELECT  id
+      FROM  civicrm_grant_app_page
+      WHERE  1";
+    $grantAppPage = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Grant_DAO_GrantApplicationPage');
+    $grantAppPageIds = array();
+    while ($grantAppPage->fetch()) {
+      $grantAppPageIds[$grantAppPage->id] = $grantAppPage->id;
+    }
+    //get all section info.
+    $grantAppPageSectionInfo = CRM_Grant_BAO_GrantApplicationPage::getSectionInfo($grantAppPageIds);
+    
+    while ($grantPage->fetch()) {
+      $rows[$grantPage->id] = array();
+      CRM_Core_DAO::storeValues($grantPage, $rows[$grantPage->id]);
+      
+      // form all action links
+      $action = array_sum(array_keys(CRM_Grant_BAO_GrantApplicationPage::actionLinks()));
+      
+      //add configure actions links.
+      $action += array_sum(array_keys($configureActionLinks));
+
+      //add online grant links.
+      if ($grantPage->is_active) {
+        $action += array_sum(array_keys(CRM_Grant_BAO_GrantApplicationPage::onlineGrantLinks()));
+      }
+      
+      if ($grantPage->is_active) {
+        $action -= CRM_Core_Action::ENABLE;
+      }
+      else {
+        $action -= CRM_Core_Action::DISABLE;
+      }
+         
+      //CRM-441
+      if (!$allowToDelete) {
+        $action -= CRM_Core_Action::DELETE;
+      }
+      $sectionsInfo = CRM_Utils_Array::value($grantPage->id, $grantAppPageSectionInfo, array());
+
+      $rows[$grantPage->id]['configureActionLinks'] = CRM_Core_Action::formLink(CRM_Grant_BAO_GrantApplicationPage::formatConfigureLinks($sectionsInfo),
+                                                                                $action,
+                                                                                array('id' => $grantPage->id),
+                                                                                ts('Configure'),
+                                                                                TRUE,
+                                                                                'grantapppage.configure.actions',
+                                                                                'GrantAppPage',
+                                                                                $grantPage->id
+                                                                                );
+                  
+      //build the online grant application links.
+      $rows[$grantPage->id]['onlineGrantLinks'] = CRM_Core_Action::formLink(CRM_Grant_BAO_GrantApplicationPage::onlineGrantLinks(),
+                                                                            $action,
+                                                                            array('id' => $grantPage->id),
+                                                                            ts('Grant Application (Live)'),
+                                                                            FALSE,
+                                                                            'grantapppage.online.links',
+                                                                            'GrantAppPage',
+                                                                            $grantPage->id
+                                                                            );
+         
+      //build the normal action links.
+      $rows[$grantPage->id]['action'] = CRM_Core_Action::formLink(CRM_Grant_BAO_GrantApplicationPage::actionLinks(),
+                                                                  $action,
+                                                                  array('id' => $grantPage->id),
+                                                                  ts('more'),
+                                                                  TRUE,
+                                                                  'grantapppage.action.links',
+                                                                  'GrantAppPage',
+                                                                  $grantPage->id
+                                                                  );
+         
+      $rows[$grantPage->id]['title'] = $grantPage->title;
+      $rows[$grantPage->id]['is_active'] = $grantPage->is_active;
+      $rows[$grantPage->id]['id'] = $grantPage->id;
+    }
+    $page->assign('fields', $rows);
     //FIXME: Avoid overwriting core
     CRM_Core_Region::instance('page-body')->add(array(
-      'template' => 'CRM/Grant/Page/GrantApplicationDashboard.tpl',
-    ));
+                                                      'template' => 'CRM/Grant/Page/GrantApplicationDashboard.tpl',
+                                                      ));
   }
 
   if ($page->getVar('_name') == 'CRM_Contact_Page_View_UserDashBoard') {
