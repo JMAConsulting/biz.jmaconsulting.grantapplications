@@ -45,6 +45,20 @@ function civicrm_api3_grant_application_page_get($params) {
   return _civicrm_api3_basic_get(_civicrm_api3_get_BAO(__FUNCTION__), $params);
 }
 
+/**
+ * Create or update a Grant Application Page.
+ *
+ * @param array $params
+ *   Array per getfields metadata.
+ *
+ * @return array
+ *   api result array
+ */
+function civicrm_api3_grant_application_page_create($params) {
+  $result = _civicrm_api3_basic_create(_civicrm_api3_get_BAO(__FUNCTION__), $params);
+  return $result;
+}
+
 
 /**
  * Set default getlist parameters.
