@@ -91,6 +91,8 @@ function grantapplications_civicrm_preProcess($formName, &$form) {
       );
     }
   }
+}
+
 /**
  * Implementation of hook_civicrm_xmlMenu
  *
