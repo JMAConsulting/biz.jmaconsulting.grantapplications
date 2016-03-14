@@ -55,7 +55,7 @@
     <path>civicrm/grant/transact</path>
     <title>CiviGrant</title>
     <page_callback>CRM_Grant_Controller_Grant</page_callback>
-    <access_arguments>access CiviGrant,submit online grant application</access_arguments>
+    <access_arguments>submit online grant application</access_arguments>
     <weight>0</weight> 
     <is_ssl>true</is_ssl>
     <is_public>true</is_public>
