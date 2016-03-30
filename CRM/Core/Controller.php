@@ -193,14 +193,8 @@ class CRM_Core_Controller extends HTML_QuickForm_Controller {
     // lets try to get it from the session and/or the request vars
     // we do this early on in case there is a fatal error in retrieving the
     // key and/or session
-    $this->_entryURL = CRM_Utils_Request::retrieve(
-      'entryURL',
-      'String',
-      $this,
-      FALSE,
-      NULL,
-      $_REQUEST
-    );
+    $this->_entryURL
+      = CRM_Utils_Request::retrieve('entryURL', 'String', $this);
 
     // add a unique validable key to the name
     $name = CRM_Utils_System::getClassName($this);
@@ -426,8 +420,6 @@ class CRM_Core_Controller extends HTML_QuickForm_Controller {
    * Setter method for stateMachine.
    *
    * @param CRM_Core_StateMachine $stateMachine
-   *
-   * @return void
    */
   public function setStateMachine($stateMachine) {
     $this->_stateMachine = $stateMachine;
@@ -867,18 +859,25 @@ class CRM_Core_Controller extends HTML_QuickForm_Controller {
   }
 
   /**
-   * Instead of outputting a fatal error message, we'll just redirect to the entryURL if present
+   * Instead of outputting a fatal error message, we'll just redirect
+   * to the entryURL if present
    *
    * @return void
    */
   public function invalidKeyRedirect() {
-    if ($this->_entryURL) {
-      CRM_Core_Session::setStatus(ts('Your browser session has expired and we are unable to complete your form submission. We have returned you to the initial step so you can complete and resubmit the form. If you experience continued difficulties, please contact us for assistance.'));
-      return CRM_Utils_System::redirect($this->_entryURL);
+    if ($this->_entryURL && $url_parts = parse_url($this->_entryURL)) {
+      // CRM-16832: Ensure local redirects only.
+      if (!empty($url_parts['path'])) {
+        // Prepend a slash, but don't duplicate it.
+        $redirect_url = '/' . ltrim($url_parts['path'], '/');
+        if (!empty($url_parts['query'])) {
+          $redirect_url .= '?' . $url_parts['query'];
+        }
+        CRM_Core_Session::setStatus(ts('Your browser session has expired and we are unable to complete your form submission. We have returned you to the initial step so you can complete and resubmit the form. If you experience continued difficulties, please contact us for assistance.'));
+        return CRM_Utils_System::redirect($redirect_url);
+      }
     }
-    else {
-      self::invalidKeyCommon();
-    }
+    self::invalidKeyCommon();
   }
 
 }
