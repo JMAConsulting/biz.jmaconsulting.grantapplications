@@ -57,7 +57,7 @@ class CRM_UF_Page_Group extends CRM_Core_Page {
    *
    * @return array
    */
-  public function &actionLinks() {
+  public static function &actionLinks() {
     // check if variable _actionsLinks is populated
     if (!self::$_actionLinks) {
       // helper variable for nicer formatting
@@ -331,7 +331,7 @@ class CRM_UF_Page_Group extends CRM_Core_Page {
       $ufGroup[$id]['is_reserved'] = $value['is_reserved'];
 
       // form all action links
-      $action = array_sum(array_keys($this->actionLinks()));
+      $action = array_sum(array_keys(self::actionLinks()));
 
       // update enable/disable links depending on uf_group properties.
       if ($value['is_active']) {
@@ -351,10 +351,13 @@ class CRM_UF_Page_Group extends CRM_Core_Page {
       $groupTypes = self::extractGroupTypes($value['group_type']);
 
       // drop Create, Edit and View mode links if profile group_type is one of the following:
-      $groupComponents = array('Contribution', 'Membership', 'Activity', 'Participant', 'Case', 'Grant');
-      $componentFound = array_intersect($groupComponents, array_keys($groupTypes));
-      if (!empty($componentFound)) {
+      // Contribution, Membership, Activity, Participant, Case, Grant
+      $isMixedProfile = CRM_Core_BAO_UFField::checkProfileType($id);
+      if ($isMixedProfile) {
         $action -= CRM_Core_Action::ADD;
+        $action -= CRM_Core_Action::ADVANCED;
+        $action -= CRM_Core_Action::BASIC;
+        $action -= CRM_Core_Action::PROFILE;
       }
 
       $ufGroup[$id]['group_type'] = self::formatGroupTypes($groupTypes);
