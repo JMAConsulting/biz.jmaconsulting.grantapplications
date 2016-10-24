@@ -700,7 +700,6 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     }
     if ($online && $grant) {
         CRM_Core_BAO_CustomValueTable::postProcess($form->_params,
-        CRM_Core_DAO::$_nullArray,
         'civicrm_grant',
         $grant->id,
         'Grant'
