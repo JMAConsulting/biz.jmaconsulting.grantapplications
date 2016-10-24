@@ -109,7 +109,7 @@ class CRM_Grant_Form_Grant_ThankYou extends CRM_Grant_Form_GrantBase {
       $fields[$name] = 1;
     }
     $fields['state_province'] = $fields['country'] = $fields['email'] = 1;
-    $contact = $this->_params = $this->controller->exportValues('Main');
+    $contact = $this->_params;
     if (CRM_Utils_Array::value('fileFields', $this->_fields)) {
       foreach ($this->_fields['fileFields'] as $key => $value) {
         if (CRM_Utils_Array::value('fileID', $value)) {
