@@ -17,7 +17,7 @@
     <email>joe.murray@jmaconsulting.biz</email>
   </maintainer>
   <releaseDate>2016-03-30</releaseDate>
-  <version>1.4.2</version>
+  <version>1.4.4</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>4.6</ver>
