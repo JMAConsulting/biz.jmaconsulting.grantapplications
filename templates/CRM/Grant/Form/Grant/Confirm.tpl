@@ -38,7 +38,7 @@
     <div id="crm-submit-buttons" class="crm-submit-buttons">
       {include file="CRM/common/formButtons.tpl" location="top"}
     </div>
-    {if $default_amount_hidden and !$amount_requested}
+    {if $default_amount_hidden and !$amount_requested and $default_amount_hidden neq "0.00"}
     <div class="crm-group amount_display-group">
       <div class="header-dark">
         {ts}Grant Requested Amount{/ts}
@@ -47,7 +47,7 @@
         {ts}Requested Amount{/ts}: <strong>{$default_amount_hidden|crmMoney}</strong>
       </div>
     </div>
-  {/if}
+    {/if}
 
   {if $email}
     <div class="crm-group grantee_email-group">

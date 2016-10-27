@@ -48,7 +48,7 @@
   </div>
 
   <div class="spacer"></div>
-  {if $default_amount_hidden}
+  {if $default_amount_hidden and $default_amount_hidden neq "0.00"}
     <div class="crm-group amount_display-group">
       <div class="header-dark">
         {ts}Grant Requested Amount{/ts}
