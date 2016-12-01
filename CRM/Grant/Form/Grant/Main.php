@@ -119,7 +119,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
         if ($customFieldID = CRM_Core_BAO_CustomField::getKeyID($name)) {
           if (!isset($this->_defaults[$name])) {
               CRM_Core_BAO_CustomField::setProfileDefaults($customFieldID, $name, $this->_defaults,
-                $entityId, CRM_Profile_Form::MODE_REGISTER
+                NULL, CRM_Profile_Form::MODE_REGISTER
                );
           }
         }

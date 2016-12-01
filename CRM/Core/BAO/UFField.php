@@ -796,7 +796,7 @@ SELECT  id
       if (in_array($field['field_name'], $validBillingFields)) {
         $validProfileFields[] = $field['field_name'];
       }
-      if ($field['is_required']) {
+      if (CRM_Utils_Array::value('is_required', $field)) {
         $requiredProfileFields[] = $field['field_name'];
       }
     }

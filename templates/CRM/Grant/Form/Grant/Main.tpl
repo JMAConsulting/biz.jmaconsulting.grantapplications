@@ -50,7 +50,7 @@
   </div>
 
   <div class="crm-section default_amount-section">
-    {if $defaultAmount}
+    {if $defaultAmount neq "0.00"}
       <div class="label">Requested Amount</div>
       <div class="content">
         {$defaultAmount|crmMoney}
