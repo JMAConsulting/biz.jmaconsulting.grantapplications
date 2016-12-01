@@ -3,7 +3,7 @@
  +--------------------------------------------------------------------+
  | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2015                                |
+ | Copyright CiviCRM LLC (c) 2004-2016                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -28,7 +28,7 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2015
+ * @copyright CiviCRM LLC (c) 2004-2016
  */
 
 /**
@@ -807,7 +807,7 @@ SELECT  id
 
     if (!empty($index) && (
         // it's empty so we set it OR
-        !CRM_Utils_array::value($prefixName, $profileAddressFields)
+        !CRM_Utils_Array::value($prefixName, $profileAddressFields)
         //we are dealing with billing id (precedence)
         || $index == $billing_id
         // we are dealing with primary & billing not set
@@ -1131,6 +1131,10 @@ SELECT  id
         'contribution_status_id' => array(
           'name' => 'contribution_status_id',
           'title' => ts('Contribution Status'),
+        ),
+        'trxn_id' => array(
+          'name' => 'contribution_trxn_id',
+          'title' => ts('Contribution Transaction ID'),
         ),
       );
     }

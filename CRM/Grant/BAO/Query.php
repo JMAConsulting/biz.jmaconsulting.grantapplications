@@ -3,7 +3,7 @@
  +--------------------------------------------------------------------+
  | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2015                                |
+ | Copyright CiviCRM LLC (c) 2004-2016                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -28,11 +28,11 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2015
+ * @copyright CiviCRM LLC (c) 2004-2016
  * $Id$
  *
  */
-class CRM_Grant_BAO_Query {
+class CRM_Grant_BAO_Query extends CRM_Core_BAO_Query {
   /**
    * @return array
    */
@@ -275,15 +275,6 @@ class CRM_Grant_BAO_Query {
   }
 
   /**
-   * Getter for the qill object.
-   *
-   * @return string
-   */
-  public function qill() {
-    return (isset($this->_qill)) ? $this->_qill : "";
-  }
-
-  /**
    * @param $mode
    * @param bool $includeCustomFields
    *
@@ -361,34 +352,9 @@ class CRM_Grant_BAO_Query {
     $form->add('text', 'grant_amount_high', ts('Maximum Amount'), array('size' => 8, 'maxlength' => 8));
     $form->addRule('grant_amount_high', ts('Please enter a valid money value (e.g. %1).', array(1 => CRM_Utils_Money::format('99.99', ' '))), 'money');
 
-    // add all the custom  searchable fields
-    $grant = array('Grant');
-    $groupDetails = CRM_Core_BAO_CustomGroup::getGroupDetail(NULL, TRUE, $grant);
-    if ($groupDetails) {
-      $form->assign('grantGroupTree', $groupDetails);
-      foreach ($groupDetails as $group) {
-        foreach ($group['fields'] as $field) {
-          $fieldId = $field['id'];
-          $elementName = 'custom_' . $fieldId;
-          CRM_Core_BAO_CustomField::addQuickFormElement($form, $elementName, $fieldId, FALSE, TRUE);
-        }
-      }
-    }
+    self::addCustomFormFields($form, array('Grant'));
 
     $form->assign('validGrant', TRUE);
-  }
-
-  /**
-   * @param $row
-   * @param int $id
-   */
-  public static function searchAction(&$row, $id) {
-  }
-
-  /**
-   * @param $tables
-   */
-  public static function tableNames(&$tables) {
   }
 
 }
