@@ -84,6 +84,66 @@ class CRM_Grant_BAO_Grant_Utils {
       );
     }
   }
+
+  /**
+   * Function to process files
+   *
+   * @param object  $form   form object
+   *
+   * @static
+   * @access public
+   */
+  static function processFiles($form) {
+    $files = array();
+    foreach ($form->_fields['fileFields'] as $key => $value) {
+      if (CRM_Utils_Array::value('fileID', $value)) {
+        $url = CRM_Utils_System::url('civicrm/file',
+          'reset=1&id='.$value['fileID'].'&eid='.$value['entityID'],
+          FALSE, NULL, TRUE, TRUE
+        );
+        $fileType = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File',
+          $value['fileID'],
+          'mime_type',
+          'id'
+        );  
+        $fileName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File',
+          $value['fileID'],
+          'uri',
+          'id'
+        );  
+        if ($fileType == 'image/jpeg' ||
+            $fileType == 'image/pjpeg' ||
+            $fileType == 'image/gif' ||
+            $fileType == 'image/x-png' ||
+            $fileType == 'image/png'
+        ) {
+          $files[$key]['displayURL'] = $url;
+        }
+        else {
+          $files[$key]['fileURL'] = $url;
+        }
+        $files[$key]['fileName'] = $fileName;
+        $files[$key]['id'] = $key;
+        $files[$key]['fileID'] = $value['fileID'];
+      }
+      else {
+        $files[$key]['noDisplay'] = TRUE;
+      }
+      if (CRM_Utils_Array::value($key, $form->_params)) {
+        unset($files[$key]);
+        if (in_array($form->_params[$key]['type'], array('image/jpeg', 'image/pjpeg', 'image/gif',  'image/x-png', 'image/png'))) {
+          $files[$key]['displayURLnew'] = $form->_params[$key]['name'];
+        }
+        else {
+          $files[$key]['fileURLnew'] = $form->_params[$key]['name'];
+        }
+        preg_match("/[^\/]+$/", $form->_params[$key]['name'], $matches);
+        $files[$key]['fileName'] = $matches[0];
+      }
+    }
+    $form->assign('files', $files);
+  }
+
 }
 
 
