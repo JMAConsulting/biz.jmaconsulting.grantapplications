@@ -185,16 +185,12 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
  
     $this->addRule("email-{$this->_bltID}", ts('Email is not valid.'), 'email');
     
-    if ( !CRM_Utils_Array::value('amount_requested', $this->_fields) && CRM_Utils_Array::value('default_amount', $this->_values) ){
-        $this->assign('defaultAmount', $this->_values['default_amount']);
-        $this->add('hidden', "default_amount_hidden",
-          $this->_values['default_amount'] ? $this->_values['default_amount'] : '0', '', FALSE
-        );
-    } else if ( !CRM_Utils_Array::value('default_amount', $this->_fields) && !CRM_Utils_Array::value('amount_requested', $this->_fields) ) {
-        $this->assign('defaultAmount', '0.00');
-        $this->add('hidden', "default_amount_hidden",
-          '0.00', '', FALSE
-        );
+    if (!CRM_Utils_Array::value('amount_requested', $this->_fields)) {
+      $defaultAmount = isset($this->_values['default_amount']) ? $this->_values['default_amount'] : '0.00';
+      $this->assign('defaultAmount', $defaultAmount);
+      $this->add('hidden', "default_amount_hidden",
+        $defaultAmount, '', FALSE
+      );
     }
     $this->add('hidden', "grant_id",
       NULL, '', FALSE
@@ -276,7 +272,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     }
     if (!empty($gid)) {
       $grantType = CRM_Core_DAO::getFieldValue("CRM_Grant_DAO_Grant", $gid, "grant_type_id");
-      $groupTree = &CRM_Core_BAO_CustomGroup::getTree("Grant", $this, $gid, 0, $grantType);
+      $groupTree = CRM_Core_BAO_CustomGroup::getTree("Grant", $this, $gid, 0, $grantType);
       foreach ($groupTree as $field => $value) {
         if (isset($value['fields'])) {
           foreach ($value['fields'] as $key => $fields) {
