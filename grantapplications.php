@@ -278,6 +278,20 @@ function grantapplications_civicrm_pageRun(&$page) {
     $enabled = CRM_Grantapplications_BAO_GrantApplicationProfile::checkRelatedExtensions('biz.jmaconsulting.grantprograms');
     $smarty = CRM_Core_Smarty::singleton();
     $rels = CRM_Contact_BAO_Relationship::getRelationship($cid, 3, 0, 0, 0, NULL, NULL, TRUE);
+
+    $dashboardElements = $smarty->get_template_vars('dashboardElements');
+    $components = CRM_Core_Component::getEnabledComponents();
+    $userDashboard = $components['CiviGrant']->getUserDashboardObject();
+    $dashboardElements[] = array(
+      'class' => 'crm-dashboard-' . strtolower($components['CiviGrant']->name),
+      'sectionTitle' => ts('Your Grant(s)'),
+      'templatePath' => $userDashboard->getTemplateFileName(),
+      'weight' => 50,
+    );
+    $userDashboard->run();
+    usort($dashboardElements, array('CRM_Utils_Sort', 'cmpFunc'));
+    $page->assign('dashboardElements', $dashboardElements);
+
     $actionLinks = $smarty->get_template_vars('grant_rows');
     if (empty($actionLinks)) {
       $actionLinks = array();
