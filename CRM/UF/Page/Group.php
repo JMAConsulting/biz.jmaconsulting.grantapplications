@@ -111,12 +111,6 @@ class CRM_UF_Page_Group extends CRM_Core_Page {
           'qs' => 'action=delete&id=%%id%%',
           'title' => ts('Delete CiviCRM Profile Group'),
         ),
-        CRM_Core_Action::PROFILE => array(
-          'name' => ts('HTML Form Snippet'),
-          'url' => 'civicrm/admin/uf/group',
-          'qs' => 'action=profile&gid=%%id%%',
-          'title' => ts('HTML Form Snippet for this Profile'),
-        ),
         CRM_Core_Action::COPY => array(
           'name' => ts('Copy Profile'),
           'url' => 'civicrm/admin/uf/group',
@@ -125,6 +119,15 @@ class CRM_UF_Page_Group extends CRM_Core_Page {
           'extra' => 'onclick = "return confirm(\'' . $copyExtra . '\');"',
         ),
       );
+      $allowRemoteSubmit = CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'remote_profile_submissions');
+      if ($allowRemoteSubmit) {
+        self::$_actionLinks[CRM_Core_Action::PROFILE] = array(
+          'name' => ts('HTML Form Snippet'),
+          'url' => 'civicrm/admin/uf/group',
+          'qs' => 'action=profile&gid=%%id%%',
+          'title' => ts('HTML Form Snippet for this Profile'),
+        );
+      }
     }
     return self::$_actionLinks;
   }
@@ -342,12 +345,14 @@ class CRM_UF_Page_Group extends CRM_Core_Page {
       }
 
       $groupTypes = self::extractGroupTypes($value['group_type']);
-      $groupComponents = array('Contribution', 'Membership', 'Activity', 'Participant', 'Case', 'Grant');
 
-      // drop Create, Edit and View mode links if profile group_type is Contribution, Membership, Activities or Participant
-      $componentFound = array_intersect($groupComponents, array_keys($groupTypes));
-      if (!empty($componentFound)) {
+      // drop Create, Edit and View mode links if profile group_type is one of the following:
+      // Contribution, Membership, Activity, Participant, Case, Grant
+      $isMixedProfile = CRM_Core_BAO_UFField::checkProfileType($id);
+      if ($isMixedProfile) {
         $action -= CRM_Core_Action::ADD;
+        $action -= CRM_Core_Action::BASIC;
+        $action -= CRM_Core_Action::PROFILE;
       }
 
       $groupTypesString = '';
