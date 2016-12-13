@@ -114,8 +114,7 @@ function grantapplications_civicrm_permission(&$permissions) {
   );
 }
 
-function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form) {
-  $errors = array();
+function grantapplications_civicrm_validateForm($formName, &$fields, &$files, &$form, &$errors) {
   if ($formName == 'CRM_Grant_Form_Grant_Confirm') {
     $form->_errors = array(); // hack to prevent file fields from throwing an error in case they are required.
   }
@@ -147,7 +146,6 @@ function grantapplications_civicrm_validate($formName, &$fields, &$files, &$form
       }
     }
   }
-  return $errors;
 }
 
 function grantapplications_civicrm_buildForm($formName, &$form) {
