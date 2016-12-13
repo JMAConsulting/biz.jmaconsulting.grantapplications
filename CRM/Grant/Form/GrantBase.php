@@ -311,7 +311,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
           CRM_Core_Session::setStatus(ts('Some of the profile fields cannot be configured for this page.'));
         }
 
-        $fields = array_diff_assoc($fields, $this->_fields);
+        $fields = array_diff_key($fields, $this->_fields);
 
         CRM_Core_BAO_Address::checkContactSharedAddressFields($fields, $contactID);
         $addCaptcha = FALSE;
