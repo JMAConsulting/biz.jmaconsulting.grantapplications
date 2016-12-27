@@ -9,7 +9,7 @@
 
 ===========================================================
 
-{if $default_amount_hidden>0}
+{if $default_amount_hidden and $default_amount_hidden neq "0.00"}
 {ts}Requested Amount{/ts}: {$default_amount_hidden|crmMoney:$currency}   
 {/if}
 {if $application_received_date}
