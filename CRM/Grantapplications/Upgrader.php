@@ -78,6 +78,18 @@ class CRM_Grantapplications_Upgrader extends CRM_Grantapplications_Upgrader_Base
   }
 
   /**
+   * Upgrade to add on behalf module data
+   *
+   * @return TRUE on success
+   * @throws Exception
+   */
+  public function upgrade_4701() {
+    $this->ctx->log->info('Applying update 4701');
+    $this->executeSqlFile('sql/upgrade_4701.sql');
+    return TRUE;
+  }
+
+  /**
    * Migrate on-behalf information to uf_join.module_data as on-behalf columns will be dropped
    * on DB upgrade
    *
