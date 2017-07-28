@@ -68,20 +68,6 @@ class CRM_Grantapplications_Upgrader_Base {
   public function __construct($extensionName, $extensionDir) {
     $this->extensionName = $extensionName;
     $this->extensionDir = $extensionDir;
-    $domain = new CRM_Core_DAO_Domain();
-    $domain->find(TRUE);
-    $multilingual = (bool) $domain->locales;
-    $smarty = CRM_Core_Smarty::singleton();
-    $smarty->assign('multilingual', $multilingual);
-    $smarty->assign('locales', explode(CRM_Core_DAO::VALUE_SEPARATOR, $domain->locales));
-    $smarty->assign('domainID', CRM_Core_Config::domainID());
-    
-    // we didn't call CRM_Core_BAO_ConfigSetting::retrieve(), so we need to set $dbLocale by hand
-    if ($multilingual) {
-      $config = CRM_Core_Config::singleton();
-      global $dbLocale;
-      $dbLocale = "_{$config->lcMessages}";
-    }
   }
 
   // ******** Task helpers ********
@@ -254,9 +240,8 @@ class CRM_Grantapplications_Upgrader_Base {
   public function onInstall() {
     $files = glob($this->extensionDir . '/sql/*_install.sql');
     if (is_array($files)) {
-      $smarty = CRM_Core_Smarty::singleton();
       foreach ($files as $file) {
-        CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $smarty->fetch($file), NULL, TRUE);
+        CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $file);
       }
     }
     $files = glob($this->extensionDir . '/xml/*_install.xml');
