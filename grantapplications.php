@@ -1,5 +1,6 @@
 <?php
 require_once 'grantapplications.civix.php';
+require_once 'CRM/Grantapplications/BAO/GrantApplicationProfile.php';
 
 /**
  * Implementation of hook_civicrm_config
@@ -25,7 +26,7 @@ function grantapplications_civicrm_install() {
 
   $smarty = CRM_Core_Smarty::singleton();
   $smarty->assign('currentDirectoryPath', __DIR__);
-  CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $smarty->fetch(__DIR__ . '/sql/civicrm_msg_template.tpl'), NULL, TRUE);
+  CRM_Utils_File::runSqlQuery(CIVICRM_DSN, $smarty->fetch(__DIR__ . '/sql/civicrm_msg_template.tpl'), NULL, TRUE);
   grantapplications_addRemoveMenu(TRUE);
   return TRUE;
 }
@@ -74,6 +75,64 @@ function grantapplications_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
  * is installed, disabled, uninstalled.
  */
 function grantapplications_civicrm_managed(&$entities) {
+  $entities[] = array(
+    'module' => 'biz.jmaconsulting.grantapplications',
+    'name' => 'grant',
+    'update' => 'never',
+    'entity' => 'OptionValue',
+    'params' => array(
+      'label' => 'Grant',
+      'is_active' => 1,
+      'version' => 3,
+      'option_group_id' => 'activity_type',
+      'component_id' => CRM_Core_Component::getComponentID('CiviGrant'),
+      'description' => ts('Online Grant Application'),
+      'filter' => 1,
+    ),
+  );
+  $entities[] = array(
+    'module' => 'biz.jmaconsulting.grantapplications',
+    'name' => 'dashboard',
+    'update' => 'never',
+    'entity' => 'OptionValue',
+    'params' => array(
+      'label' => 'Grants',
+      'name' => 'CiviGrant',
+      'is_active' => 1,
+      'version' => 3,
+      'option_group_id' => 'user_dashboard_options',
+      'description' => ts('Grants on dashboard'),
+    ),
+  );
+  $entities[] = array(
+    'module' => 'biz.jmaconsulting.grantapplications',
+    'name' => 'status',
+    'update' => 'never',
+    'entity' => 'OptionValue',
+    'params' => array(
+      'label' => 'Draft',
+      'is_active' => 1,
+      'version' => 3,
+      'option_group_id' => 'grant_status',
+    ),
+  );
+  $entities[] = array(
+    'module' => 'biz.jmaconsulting.grantapplications',
+    'name' => 'navigation',
+    'update' => 'never',
+    'entity' => 'Navigation',
+    'params' => array(
+      'label' => "New Grant Application Page",
+      'name' => "grant_application_page",
+      'url' => "civicrm/admin/grant/apply?reset=1&action=add",
+      'parent_id' => "Grants",
+      'permission' => "access CiviGrant,edit Grant Application Pages",
+      'operator' => "AND",
+      'has_separator' => 1,
+      'is_active' => 1,
+      'version' => 3,
+    ),
+  );
   return _grantapplications_civix_civicrm_managed($entities);
 }
 
