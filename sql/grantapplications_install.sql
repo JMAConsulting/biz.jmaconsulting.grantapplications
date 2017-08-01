@@ -63,38 +63,4 @@ CREATE TABLE IF NOT EXISTS `civicrm_grant_app_page` (
 
 ALTER TABLE `civicrm_grant_app_page`
   ADD CONSTRAINT `FK_civicrm_grant_app_page_created_id` FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL;
---
--- Dumping data for table `civicrm_navigation`
-
-SELECT @parentId := id FROM `civicrm_navigation` WHERE `name` = 'Grants';
-
-INSERT INTO `civicrm_navigation` (`domain_id`, `label`, `name`, `url`, `permission`, `permission_operator`, `parent_id`, `is_active`, `has_separator`, `weight`) VALUES
-({$domainID}, 'New Grant Application Page', 'New Grant Application Page', 'civicrm/admin/grant/apply?reset=1&action=add', 'access CiviGrant', 'AND', @parentId, 1, 1, 4);
-
-SELECT @optionGroupId := id FROM `civicrm_option_group` WHERE `name` = 'activity_type';
-
-SELECT @maxValue := MAX( CAST( `value` AS UNSIGNED ) ) + 1 FROM  `civicrm_option_value` WHERE `option_group_id` = @optionGroupId;
-
-SELECT @maxWeight := MAX( CAST( `weight` AS UNSIGNED ) ) + 1 FROM  `civicrm_option_value` WHERE `option_group_id` = @optionGroupId;
-
-SELECT @activityTypeId := id FROM `civicrm_option_value` WHERE `name` = 'Grant';
-
-INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, {localize field='label'}`label`{/localize}, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, {localize field='description'}`description`{/localize}, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) VALUES
-(@activityTypeId, @optionGroupId, {localize}'{ts escape="sql"}Grant{/ts}'{/localize}, @maxValue, 'Grant', NULL, 1, NULL, @maxWeight, {localize}'Online Grant Application'{/localize}, 0, 1, 1, 5, NULL, NULL);
-
-SELECT @dashId := id FROM `civicrm_option_group` WHERE `name` = 'user_dashboard_options';
-
-SELECT @maxValue := MAX( CAST( `value` AS UNSIGNED ) ) + 1 FROM  `civicrm_option_value` WHERE `option_group_id` = @dashId;
-
-SELECT @maxWeight := MAX( CAST( `weight` AS UNSIGNED ) ) + 1 FROM  `civicrm_option_value` WHERE `option_group_id` = @dashId;
-
-INSERT IGNORE INTO `civicrm_option_value` (`option_group_id`, {localize field='label'}`label`{/localize}, `value`, `name`, `weight`, {localize field='description'}`description`{/localize}, `is_active`) VALUES (@dashId, {localize}'{ts escape="sql"}Grants{/ts}'{/localize}, @maxValue, 'CiviGrant', @maxWeight, {localize}'Grants on dashboard'{/localize}, 1);
-
-SELECT @statusId := id FROM `civicrm_option_group` WHERE `name` = 'grant_status';
-
-SELECT @maxValue := MAX( CAST( `value` AS UNSIGNED ) ) + 1 FROM  `civicrm_option_value` WHERE `option_group_id` = @statusId;
-
-SELECT @maxWeight := MAX( CAST( `weight` AS UNSIGNED ) ) + 1 FROM  `civicrm_option_value` WHERE `option_group_id` = @statusId;
-
-INSERT IGNORE INTO `civicrm_option_value` (`option_group_id`, {localize field='label'}`label`{/localize}, `value`, `name`, `weight`, `is_active`) VALUES (@statusId, {localize}'{ts escape="sql"}Draft{/ts}'{/localize}, @maxValue, 'Draft', @maxWeight, 1);
 

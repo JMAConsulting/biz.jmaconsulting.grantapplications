@@ -3,7 +3,7 @@
  +--------------------------------------------------------------------+
  | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2016                                |
+ | Copyright CiviCRM LLC (c) 2004-2017                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -31,7 +31,7 @@
  * abstract class.
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2016
+ * @copyright CiviCRM LLC (c) 2004-2017
  * $Id$
  *
  */
@@ -98,27 +98,6 @@ class CRM_Grant_Info extends CRM_Core_Component_Info {
    * @inheritDoc
    * @return null
    */
-  /**
-   * @return array
-   */
-  public function getAnonymousPermissionWarnings() {
-    return array(
-      'access CiviGrant',
-    );
-  }
-
-  /**
-   * @inheritDoc
-   * Provides information about user dashboard element
-   * offered by this component.
-   *
-   * @return array|null
-   *   collection of required dashboard settings,
-   *                    null if no element offered
-   */
-  /**
-   * @return array|null
-   */
   public function getUserDashboardElement() {
     return array(
       'name' => ts('Grant'),
@@ -130,15 +109,16 @@ class CRM_Grant_Info extends CRM_Core_Component_Info {
 
   /**
    * @inheritDoc
-   * Provides information about user dashboard element
-   * offered by this component.
-   *
-   * @return array|null
-   *   collection of required dashboard settings,
-   *                    null if no element offered
+   * @return null
    */
+  public function getUserDashboardObject() {
+    // no dashboard element for this component
+    return NULL;
+  }
+
   /**
-   * @return array|null
+   * @inheritDoc
+   * @return array
    */
   public function registerTab() {
     return array(
@@ -150,15 +130,7 @@ class CRM_Grant_Info extends CRM_Core_Component_Info {
 
   /**
    * @inheritDoc
-   * Provides information about advanced search pane
-   * offered by this component.
-   *
-   * @return array|null
-   *   collection of required pane settings,
-   *                    null if no element offered
-   */
-  /**
-   * @return array|null
+   * @return array
    */
   public function registerAdvancedSearchPane() {
     return array(
@@ -169,16 +141,7 @@ class CRM_Grant_Info extends CRM_Core_Component_Info {
 
   /**
    * @inheritDoc
-   * Provides potential activity types that this
-   * component might want to register in activity history.
-   * Needs to be implemented in component's information
-   * class.
-   *
-   * @return array|null
-   *   collection of activity types
-   */
-  /**
-   * @return array|null
+   * @return null
    */
   public function getActivityTypes() {
     return NULL;
