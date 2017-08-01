@@ -116,6 +116,23 @@ function grantapplications_civicrm_managed(&$entities) {
       'option_group_id' => 'grant_status',
     ),
   );
+  $entities[] = array(
+    'module' => 'biz.jmaconsulting.grantapplications',
+    'name' => 'navigation',
+    'update' => 'never',
+    'entity' => 'Navigation',
+    'params' => array(
+      'label' => "New Grant Application Page",
+      'name' => "grant_application_page",
+      'url' => "civicrm/admin/grant/apply?reset=1&action=add",
+      'parent_id' => "Grants",
+      'permission' => "access CiviGrant,edit Grant Application Pages",
+      'operator' => "AND",
+      'has_separator' => 1,
+      'is_active' => 1,
+      'version' => 3,
+    ),
+  );
   return _grantapplications_civix_civicrm_managed($entities);
 }
 

@@ -1933,6 +1933,20 @@ AND    ( entity_id IS NULL OR entity_id <= 0 )
         }
       }
     }
+    elseif (($fieldName === 'birth_date') || ($fieldName === 'deceased_date')) {
+      $form->addDate($name, $title, $required, array('formatType' => 'birth'));
+    }
+    elseif (in_array($fieldName, array(
+      'membership_start_date',
+      'membership_end_date',
+      'join_date',
+      'application_received_date',
+      'decision_date',
+      'grant_money_transfer_date',
+      'grant_due_date',
+    ))) {
+      $form->addDate($name, $title, $required, array('formatType' => 'activityDate'));
+    }
     elseif (CRM_Utils_Array::value('name', $field) == 'membership_type') {
       list($orgInfo, $types) = CRM_Member_BAO_MembershipType::getMembershipTypeInfo();
       $sel = &$form->addElement('hierselect', $name, $title);
