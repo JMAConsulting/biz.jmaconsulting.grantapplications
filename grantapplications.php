@@ -178,14 +178,14 @@ function grantapplications_civicrm_validateForm($formName, &$fields, &$files, &$
     $form->_errors = array(); // hack to prevent file fields from throwing an error in case they are required.
   }
   // Keeping this in validate hook to prevent re-use of same functionality
-  if (($formName == 'CRM_Grant_Form_Grant_Main' ||  $formName == 'CRM_Grant_Form_Grant_Confirm') 
+  if (($formName == 'CRM_Grant_Form_Grant_Main' ||  $formName == 'CRM_Grant_Form_Grant_Confirm')
     && CRM_Utils_Array::value('is_draft', $form->_values) == 1 && (CRM_Utils_Array::value('_qf_Main_save', $fields) == 'Save as Draft' || $form->_params['is_draft'] == 1)) {
     foreach($form->_fields as $name => $values) {
       $form->setElementError($name, NULL);
       $form->_errors = array();
     }
   }
-  if ($formName == "CRM_UF_Form_Field" && CRM_Core_Permission::access('CiviGrant') 
+  if ($formName == "CRM_UF_Form_Field" && CRM_Core_Permission::access('CiviGrant')
     && ($form->getVar('_action') != CRM_Core_Action::DELETE)) {
     $fieldType = $fields['field_name'][0];
     $errorField = FALSE;
@@ -197,9 +197,9 @@ function grantapplications_civicrm_validateForm($formName, &$fields, &$files, &$
       }
     }
     elseif ($fieldType == "Grant") {
-      if ( in_array('Membership', $groupType) || 
-        in_array('Activity', $groupType) || 
-        in_array('Participant', $groupType) || 
+      if ( in_array('Membership', $groupType) ||
+        in_array('Activity', $groupType) ||
+        in_array('Participant', $groupType) ||
         in_array('Contribution', $groupType) ) {
         $errors['field_name'] = ts('A grant field can only be added to a profile that has only contact and grant fields. This profile has fields that are not contact or grant fields');
       }
@@ -213,23 +213,23 @@ function grantapplications_civicrm_buildForm($formName, &$form) {
     if (!$form->elementExists('field_name')) {
       return NULL;
     }
-    
+
     $elements = & $form->getElement('field_name');
-    
+
     if ($elements && !array_key_exists('Grant', $elements->_options[0])) {
       $elements->_options[0]['Grant'] = 'Grant';
       $elements->_options[1]['Grant'] = $form->_mapperFields['Grant'];
-          
+
       $elements->_elements[0]->_options[] = array(
         'text' => 'Grant',
         'attr' => array('value' => 'Grant')
       );
-      
+
       $elements->_js .= 'hs_field_name_Grant = ' . json_encode($form->_mapperFields['Grant']) . ';';
     }
-    
+
     // set default mapper when updating profile fields
-    if ($form->_defaultValues && array_key_exists('field_name', $form->_defaultValues) 
+    if ($form->_defaultValues && array_key_exists('field_name', $form->_defaultValues)
       && $form->_defaultValues['field_name'][0] == 'Grant') {
       $defaults['field_name'] = $form->_defaultValues['field_name'];
       $form->setDefaults($defaults);
@@ -260,14 +260,14 @@ function grantapplications_civicrm_pageRun(&$page) {
     }
     //get all section info.
     $grantAppPageSectionInfo = CRM_Grant_BAO_GrantApplicationPage::getSectionInfo($grantAppPageIds);
-    
+
     while ($grantPage->fetch()) {
       $rows[$grantPage->id] = array();
       CRM_Core_DAO::storeValues($grantPage, $rows[$grantPage->id]);
-      
+
       // form all action links
       $action = array_sum(array_keys(CRM_Grant_BAO_GrantApplicationPage::actionLinks()));
-      
+
       //add configure actions links.
       $action += array_sum(array_keys($configureActionLinks));
 
@@ -275,7 +275,7 @@ function grantapplications_civicrm_pageRun(&$page) {
       if ($grantPage->is_active) {
         $action += array_sum(array_keys(CRM_Grant_BAO_GrantApplicationPage::onlineGrantLinks()));
       }
-      
+
       if ($grantPage->is_active) {
         $action -= CRM_Core_Action::ENABLE;
       }
@@ -297,7 +297,7 @@ function grantapplications_civicrm_pageRun(&$page) {
         'GrantAppPage',
         $grantPage->id
       );
-                  
+
       //build the online grant application links.
       $rows[$grantPage->id]['onlineGrantLinks'] = CRM_Core_Action::formLink(CRM_Grant_BAO_GrantApplicationPage::onlineGrantLinks(),
         $action,
@@ -308,7 +308,7 @@ function grantapplications_civicrm_pageRun(&$page) {
         'GrantAppPage',
         $grantPage->id
       );
-         
+
       //build the normal action links.
       $rows[$grantPage->id]['action'] = CRM_Core_Action::formLink(CRM_Grant_BAO_GrantApplicationPage::actionLinks(),
         $action,
@@ -319,7 +319,7 @@ function grantapplications_civicrm_pageRun(&$page) {
         'GrantAppPage',
         $grantPage->id
       );
-         
+
       $rows[$grantPage->id]['title'] = $grantPage->title;
       $rows[$grantPage->id]['is_active'] = $grantPage->is_active;
       $rows[$grantPage->id]['id'] = $grantPage->id;
@@ -332,7 +332,7 @@ function grantapplications_civicrm_pageRun(&$page) {
   }
 
   if ($page->getVar('_name') == 'CRM_Contact_Page_View_UserDashBoard') {
-    $cid = $page->getVar('_contactId'); 
+    $cid = $page->getVar('_contactId');
     // Check if grant program extension is enabled
     $enabled = CRM_Grantapplications_BAO_GrantApplicationProfile::checkRelatedExtensions('biz.jmaconsulting.grantprograms');
     $smarty = CRM_Core_Smarty::singleton();
@@ -380,7 +380,7 @@ function grantapplications_civicrm_pageRun(&$page) {
           )
         );
       }
-    } 
+    }
     $rows = array();
     if (!empty($rels)) {
       $extraSelect = '';
@@ -388,7 +388,7 @@ function grantapplications_civicrm_pageRun(&$page) {
       $grantType = CRM_Core_PseudoConstant::get('CRM_Grant_DAO_Grant', 'grant_type_id');
       $grantStatus = CRM_Core_PseudoConstant::get('CRM_Grant_DAO_Grant', 'status_id');
       $grantStatusByName = CRM_Core_PseudoConstant::get('CRM_Grant_DAO_Grant', 'status_id', array('labelColumn' => 'name'));
-      
+
       if ($enabled) {
         $extraSelect = ', grant_program_id ';
         $grantProgram = CRM_Grant_BAO_GrantProgram::getGrantPrograms();
@@ -405,7 +405,7 @@ function grantapplications_civicrm_pageRun(&$page) {
           id,
           currency
           {$extraSelect}
-          FROM civicrm_grant 
+          FROM civicrm_grant
           WHERE contact_id = {$values['cid']}
           AND status_id = " . array_search('Draft', $grantStatusByName);
 
@@ -418,12 +418,12 @@ function grantapplications_civicrm_pageRun(&$page) {
           $row['grant_application_received_date'] = $dao->application_received_date;
           $row['grant_amount_total'] = $dao->amount_total;
           $row['grant_status'] = CRM_Utils_Array::value($dao->status_id, $grantStatus);
-          
+
           if ($enabled) {
             $row['program_id'] = $dao->grant_program_id;
             $row['program_name'] =$grantProgram[$row['program_id']];
           }
-          
+
           // FIXME:Calling multiple times
           $ssID = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$dao->id.'%"');
           if ($ssID) {
@@ -441,13 +441,13 @@ function grantapplications_civicrm_pageRun(&$page) {
       }
     }
     $page->assign('grant_rows', array_merge($actionLinks, $rows));
-    $page->assign('enabled', $enabled);    
+    $page->assign('enabled', $enabled);
   }
 }
 
 function grantapplications_addRemoveMenu($enable) {
   $config = CRM_Core_Config::singleton();
-  
+
   $params['enableComponents'] = $config->enableComponents;
   if ($enable) {
     if (array_search('CiviGrant', $config->enableComponents)) {
@@ -461,7 +461,7 @@ function grantapplications_addRemoveMenu($enable) {
       unset($params['enableComponents'][$key]);
     }
   }
-  
+
   CRM_Core_BAO_Setting::setItem($params['enableComponents'],
     CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,'enable_components');
 }
@@ -478,47 +478,47 @@ function grantapplications_civicrm_entityTypes(&$entityTypes) {
 /**
  * function to disable/enable/delete navigation menu
  *
- * @param integer $action 
+ * @param integer $action
  *
  */
 
 function grantapplications_enableDisableNavigationMenu($action) {
   $domainID = CRM_Core_Config::domainID();
-  
+
   $enableDisableDeleteData = NULL;
   if ($action != 1) {
-    $enableDisableDeleteData = CRM_Grantapplications_BAO_GrantApplicationProfile::checkRelatedExtensions();   
+    $enableDisableDeleteData = CRM_Grantapplications_BAO_GrantApplicationProfile::checkRelatedExtensions();
   }
 
 
-  if ($action < 2) { 
-    
+  if ($action < 2) {
+
     if (!$enableDisableDeleteData) {
       CRM_Core_DAO::executeQuery(
-        "UPDATE civicrm_uf_group SET is_active = %1 WHERE group_type LIKE '%Grant%'", 
+        "UPDATE civicrm_uf_group SET is_active = %1 WHERE group_type LIKE '%Grant%'",
         array(
           1 => array($action, 'Integer'),
         )
-      ); 
+      );
     }
-    
+
     CRM_Core_DAO::executeQuery(
-      "UPDATE civicrm_option_value 
+      "UPDATE civicrm_option_value
        INNER JOIN civicrm_option_group ON  civicrm_option_value.option_group_id = civicrm_option_group.id
        INNER JOIN civicrm_msg_template ON civicrm_msg_template.workflow_id = civicrm_option_value.id
          SET civicrm_option_value.is_active = %1,
            civicrm_option_group.is_active = %1,
            civicrm_msg_template.is_active = %1
-       WHERE civicrm_option_group.name LIKE 'msg_tpl_workflow_grant'", 
+       WHERE civicrm_option_group.name LIKE 'msg_tpl_workflow_grant'",
       array(
         1 => array($action, 'Integer')
       )
-    ); 
-    
+    );
+
     $optionGroup = array(
       'activity_type' => 'Grant',
       'grant_status' => 'Draft',
-      'user_dashboard_options' => 'CiviGrant',                         
+      'user_dashboard_options' => 'CiviGrant',
     );
 
     foreach ($optionGroup as $ogName => $ovName) {
@@ -527,7 +527,7 @@ function grantapplications_enableDisableNavigationMenu($action) {
           INNER JOIN civicrm_option_value cv ON cv.value = ca.activity_type_id
           INNER JOIN civicrm_option_group cg ON cg.id = cv.option_group_id
           SET cv.is_active = %1
-          WHERE cg.name = %2 AND cv.name = %3", 
+          WHERE cg.name = %2 AND cv.name = %3",
         array(
           1 => array($action, 'Integer'),
           2 => array($ogName, 'String'),
@@ -535,23 +535,23 @@ function grantapplications_enableDisableNavigationMenu($action) {
         )
       );
     }
-    
+
     CRM_Core_DAO::executeQuery(
-      "UPDATE civicrm_navigation SET is_active = %2 WHERE name = 'New Grant Application Page' AND domain_id = %1", 
+      "UPDATE civicrm_navigation SET is_active = %2 WHERE name = 'New Grant Application Page' AND domain_id = %1",
       array(
         1 => array($domainID, 'Integer'),
         2 => array($action, 'Integer')
       )
-    ); 
+    );
   }
   else {
     CRM_Core_DAO::executeQuery(
-      "DELETE FROM civicrm_navigation  WHERE name = 'New Grant Application Page' AND domain_id = %1", 
+      "DELETE FROM civicrm_navigation  WHERE name = 'New Grant Application Page' AND domain_id = %1",
       array(
         1 => array($domainID, 'Integer')
       )
     );
-    
+
     if ($enableDisableDeleteData === NULL) {
       CRM_Core_DAO::executeQuery(
         "DELETE uj.*, uf.*, g.* FROM civicrm_uf_group g
@@ -562,11 +562,11 @@ function grantapplications_enableDisableNavigationMenu($action) {
     }
     $action = 0;
   }
-  
+
   if ($enableDisableDeleteData) {
     return FALSE;
   }
-  
+
   grantapplications_addRemoveMenu($action);
 }
 
