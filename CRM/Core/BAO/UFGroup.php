@@ -1191,9 +1191,6 @@ class CRM_Core_BAO_UFGroup extends CRM_Core_DAO_UFGroup {
             elseif (in_array($name, array(
               'birth_date',
               'deceased_date',
-              'membership_start_date',
-              'membership_end_date',
-              'join_date',
             ))) {
               // @todo this set should be determined from metadata, not hard-coded.
               $values[$index] = CRM_Utils_Date::customFormat($details->$name);
@@ -1936,20 +1933,6 @@ AND    ( entity_id IS NULL OR entity_id <= 0 )
         }
       }
     }
-    elseif (($fieldName === 'birth_date') || ($fieldName === 'deceased_date')) {
-      $form->addDate($name, $title, $required, array('formatType' => 'birth'));
-    }
-    elseif (in_array($fieldName, array(
-      'membership_start_date',
-      'membership_end_date',
-      'join_date',
-      'application_received_date',
-      'decision_date',
-      'grant_money_transfer_date',
-      'grant_due_date',
-    ))) {
-      $form->addDate($name, $title, $required, array('formatType' => 'activityDate'));
-    }
     elseif (CRM_Utils_Array::value('name', $field) == 'membership_type') {
       list($orgInfo, $types) = CRM_Member_BAO_MembershipType::getMembershipTypeInfo();
       $sel = &$form->addElement('hierselect', $name, $title);
@@ -2124,15 +2107,6 @@ AND    ( entity_id IS NULL OR entity_id <= 0 )
       if ($customFieldID) {
         CRM_Core_BAO_CustomField::addQuickFormElement($form, $name, $customFieldID, $required, $search, $title);
       }
-    }
-    elseif (in_array($fieldName, array(
-      'receive_date',
-      'receipt_date',
-      'thankyou_date',
-      'cancel_date',
-      'decision_date',
-    ))) {
-      $form->addDateTime($name, $title, $required, array('formatType' => 'activityDateTime'));
     }
     elseif ($fieldName == 'send_receipt') {
       $form->addElement('checkbox', $name, $title);
@@ -2457,28 +2431,6 @@ AND    ( entity_id IS NULL OR entity_id <= 0 )
                   $label = CRM_Core_BAO_CustomOption::getOptionLabel($customFieldId, $details[$name]);
                   $defaults[$fldName . '_id'] = $details[$name];
                   $defaults[$fldName] = $label;
-                }
-                break;
-
-              case 'Select Date':
-                // CRM-6681, set defult values according to date and time format (if any).
-                $dateFormat = NULL;
-                if (!empty($customFields[$customFieldId]['date_format'])) {
-                  $dateFormat = $customFields[$customFieldId]['date_format'];
-                }
-
-                if (empty($customFields[$customFieldId]['time_format'])) {
-                  list($defaults[$fldName]) = CRM_Utils_Date::setDateDefaults($details[$name], NULL,
-                    $dateFormat
-                  );
-                }
-                else {
-                  $timeElement = $fldName . '_time';
-                  if (substr($fldName, -1) == ']') {
-                    $timeElement = substr($fldName, 0, -1) . '_time]';
-                  }
-                  list($defaults[$fldName], $defaults[$timeElement]) = CRM_Utils_Date::setDateDefaults($details[$name],
-                    NULL, $dateFormat, $customFields[$customFieldId]['time_format']);
                 }
                 break;
 
@@ -3316,34 +3268,11 @@ AND    ( entity_id IS NULL OR entity_id <= 0 )
       $values += array('event_type_id' => CRM_Core_DAO::getFieldValue('CRM_Event_DAO_Event', $values['event_id'], 'event_type_id'));
     }
 
-    $formattedGroupTree = $notReq = array();
-    $dateTimeFields = array(
-      'participant_register_date',
-      'activity_date_time',
-      'receive_date',
-      'receipt_date',
-      'cancel_date',
-      'thankyou_date',
-      'membership_start_date',
-      'membership_end_date',
-      'join_date',
-    );
-    $dateFields = array('application_received_date', 'decision_date', 'grant_money_transfer_date', 'grant_due_date');
+    $formattedGroupTree = array();
+
     foreach ($fields as $name => $field) {
       $fldName = $isStandalone ? $name : "field[$componentId][$name]";
-      if (in_array($name, $dateTimeFields)) {
-        $timefldName = $isStandalone ? "{$name}_time" : "field[$componentId][{$name}_time]";
-        if (!empty($values[$name])) {
-          list($defaults[$fldName], $defaults[$timefldName]) = CRM_Utils_Date::setDateDefaults($values[$name]);
-        }
-      }      
-      elseif (in_array($name, $dateFields)) {
-        $fldName = $isStandalone ? $name : "field[$componentId][$name]";
-        if (!empty($values[$name])) {
-          list($defaults[$fldName], $notReq) = CRM_Utils_Date::setDateDefaults($values[$name]);
-        }
-      }
-      elseif (array_key_exists($name, $values)) {
+      if (array_key_exists($name, $values)) {
         $defaults[$fldName] = $values[$name];
       }
       elseif ($name == 'participant_note') {
