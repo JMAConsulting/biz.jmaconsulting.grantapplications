@@ -116,24 +116,25 @@ function grantapplications_civicrm_managed(&$entities) {
       'option_group_id' => 'grant_status',
     ),
   );
-  $entities[] = array(
-    'module' => 'biz.jmaconsulting.grantapplications',
-    'name' => 'navigation',
-    'update' => 'never',
-    'entity' => 'Navigation',
-    'params' => array(
-      'label' => "New Grant Application Page",
-      'name' => "grant_application_page",
-      'url' => "civicrm/admin/grant/apply?reset=1&action=add",
-      'parent_id' => "Grants",
-      'permission' => "access CiviGrant,edit Grant Application Pages",
-      'operator' => "AND",
-      'has_separator' => 1,
-      'is_active' => 1,
-      'version' => 3,
-    ),
-  );
   return _grantapplications_civix_civicrm_managed($entities);
+}
+
+/**
+ * Implements hook_civicrm_navigationMenu().
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_navigationMenu
+ *
+ */
+function grantapplications_civicrm_navigationMenu(&$menu) {
+  foreach (array('Grants') as $parentName) {
+    _grantapplications_civix_insert_navigation_menu($menu, $parentName, array(
+      'label' => ts('New Grant Application Page', array('domain' => 'biz.jmaconsulting.grantapplications')),
+      'name' => 'New Grant Application Page',
+      'url' => 'civicrm/admin/grant/apply?reset=1&action=add',
+      'permission' => 'access CiviGrant,edit Grant Application Pages',
+      'operator' => 'AND',
+    ));
+  }
 }
 
 /**
