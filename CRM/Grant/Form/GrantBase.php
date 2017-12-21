@@ -89,13 +89,6 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
   public $_fields;
 
   /**
-   * The billing location id for this grant application page.
-   *
-   * @var int
-   */
-  public $_bltID;
-
-  /**
    * Cache the amount to make things easier
    *
    * @var float
@@ -157,7 +150,6 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
 
     $this->_values = $this->get('values');
     $this->_fields = $this->get('fields');
-    $this->_bltID = $this->get('bltID');
     $this->assign('title', $this->_values['title']);
     CRM_Utils_System::setTitle($this->_values['title']);
 
@@ -176,7 +168,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
         // form is inactive, die a fatal death
         CRM_Core_Error::fatal(ts('The page you requested is currently unavailable.'));
       }
-      
+
       if (!empty($this->_values['custom_pre_id'])) {
         $preProfileType = CRM_Core_BAO_UFField::getProfileType($this->_values['custom_pre_id']);
       }
@@ -188,15 +180,9 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
       $this->set('values', $this->_values);
       $this->set('fields', $this->_fields);
     }
-      
-    $this->assign('is_email_receipt', $this->_values['is_email_receipt']);
-    $this->assign('bltID', $this->_bltID);
 
-    //assign cancelSubscription URL to templates
-    $this->assign('cancelSubscriptionUrl',
-      CRM_Utils_Array::value('cancelSubscriptionUrl', $this->_values)
-    );
-  
+    $this->assign('is_email_receipt', $this->_values['is_email_receipt']);
+
     $this->_defaults = array();
 
     $this->_amount = $this->get('amount');
@@ -236,7 +222,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
     );
 
     $config = CRM_Core_Config::singleton();
- 
+
     if (CRM_Utils_Array::value('default_amount_hidden', $this->_params)) {
       $this->assign('default_amount_hidden', $this->_params['default_amount_hidden']);
     }
@@ -252,7 +238,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
       $this->assign('onBehalfEmail', $this->_params['onbehalf_location']['email'][$locTypeId[0]]['email']);
     }
     $this->assign('email',
-      $this->controller->exportValue('Main', "email-{$this->_bltID}")
+      $this->controller->exportValue('Main', "email")
     );
 
     // also assign the receipt_text
@@ -287,6 +273,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
         'currency' => 1,
         'rationale' => 1,
         'grant_status_id' => 1,
+        'financial_type_id' => 1,
       );
 
       $fields = NULL;
@@ -335,12 +322,12 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
               $cfDefaults = array();
               CRM_Core_DAO::commonRetrieve('CRM_Core_DAO_CustomField', $cfParams, $cfDefaults);
               $columnName = $cfDefaults['column_name'];
-            
+
               //table name of custom data
               $tableName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomGroup',
                 $cfDefaults['custom_group_id'],
                 'table_name', 'id');
-            
+
               //query to fetch id from civicrm_file
               $query = "SELECT {$columnName} FROM {$tableName} where entity_id = {$this->_params['grant_id']}";
               $fileID = CRM_Core_DAO::singleValueQuery($query);
@@ -558,4 +545,3 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
     return $fileName ? $fileName : parent::overrideExtraTemplateFileName();
   }
 }
-

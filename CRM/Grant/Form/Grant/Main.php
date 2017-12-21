@@ -49,10 +49,10 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
    */
   public function preProcess() {
     parent::preProcess();
- 
+
     // Make the grantPageID avilable to the template
     $this->assign('grantPageID', $this->_id);
-   
+
     $this->assign('isConfirmEnabled', 1) ;
 
     // make sure we have right permission to edit this user
@@ -90,7 +90,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       $fields = array();
       $removeCustomFieldTypes = array('Contribution', 'Membership', 'Activity', 'Participant', 'Grant');
       $grantFields = CRM_Grantapplications_BAO_GrantApplicationProfile::getGrantFields(FALSE);
-     
+
       // remove component related fields
       foreach ($this->_fields as $name => $dontCare) {
         if (substr($name, 0, 7) == 'custom_') {
@@ -125,7 +125,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
         }
       }
     }
-   
+
     // to process Custom data that are appended to URL
     $getDefaults = CRM_Core_BAO_CustomGroup::extractGetParams($this, "'Contact', 'Individual', 'Grant'");
     if (!empty($getDefaults)) {
@@ -135,11 +135,11 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     $config = CRM_Core_Config::singleton();
 
     //process drafts
-    if ($gid = CRM_Utils_Request::retrieve('gid', 'Positive')) {
+    $gid = CRM_Utils_Request::retrieve('gid', 'Positive');
+    if ($gid) {
       $ssParams = array();
       $grantStatusID = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_Grant', $gid, 'status_id');
-      $grantStatus = CRM_Core_PseudoConstant::get('CRM_Grant_DAO_Grant', 'status_id', array('labelColumn' => 'name'));
-      if ($grantStatusID != array_search('Draft', $grantStatus)) {
+      if ($grantStatusID != CRM_Core_PseudoConstant::getKey('CRM_Grant_BAO_Grant', 'status_id', 'Draft')) {
         CRM_Core_Error::fatal(ts('This grant application has already been submitted.'));
       }
       $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$gid.'%"');
@@ -189,7 +189,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     else {
       $this->addElement('hidden', "email-{$this->_bltID}", 1);
     }
-    
+
     if (!CRM_Utils_Array::value('amount_requested', $this->_fields)) {
       $defaultAmount = isset($this->_values['default_amount']) ? $this->_values['default_amount'] : '0.00';
       $this->assign('defaultAmount', $defaultAmount);
@@ -214,7 +214,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
         if (in_array($dataType, array('Float', 'Int', 'Money'))) {
           if ($dataType == 'Money') {
             $dataType = 'Float';
-          }          
+          }
           $numericFields[$value['name']] = $dataType;
         }
       }
@@ -267,7 +267,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
         'isDefault' => TRUE,
       );
     }
-    $this->addButtons($buttonArray);  
+    $this->addButtons($buttonArray);
     // set up attachments
     if (CRM_Utils_Request::retrieve('gid', 'Positive')) {
       $gid = CRM_Utils_Request::retrieve('gid', 'Positive');
@@ -296,7 +296,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     }
     $this->addFormRule(array('CRM_Grant_Form_Grant_Main', 'formRule'), $this);
   }
-  
+
   /**
    * Global form rule.
    *
@@ -310,10 +310,10 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
    *   true if no errors, else array of errors
    */
   public static function formRule($fields, $files, $self) {
-    $errors = array();  
+    $errors = array();
     if (array_key_exists('amount_requested', $fields)) {
       if (!is_numeric($fields['amount_requested'])) {
-        $errors['amount_requested'] = ts('Please enter valid amount.');        
+        $errors['amount_requested'] = ts('Please enter valid amount.');
       }
       if ($fields['amount_requested'] < 0) {
         $errors['amount_requested'] = ts('Requested amount has to be greater than zero.');
@@ -348,7 +348,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     // get the submitted form values.
     $params = $this->controller->exportValues($this->_name);
     $this->submit($params);
-   
+
     $buttonName = $this->controller->getButtonName();
     if ($buttonName == $this->getButtonName('save')) {
       $this->set('is_draft', 1);
@@ -356,12 +356,12 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     else {
       $this->set('is_draft', 0);
     }
-    
-    if (CRM_Utils_Array::value('default_amount_hidden', $params) > 0 && !CRM_Utils_Array::value('amount_requested', $params)) {  
+
+    if (CRM_Utils_Array::value('default_amount_hidden', $params) > 0 && !CRM_Utils_Array::value('amount_requested', $params)) {
         $this->set('default_amount', $params['default_amount_hidden']);
-    } elseif (CRM_Utils_Array::value('amount_requested', $params))  {
+    }
+    elseif (CRM_Utils_Array::value('amount_requested', $params))  {
         $this->set('default_amount', $params['amount_requested']);
     }
   }
 }
-

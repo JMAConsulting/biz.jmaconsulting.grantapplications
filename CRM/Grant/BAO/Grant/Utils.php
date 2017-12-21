@@ -60,24 +60,22 @@ class CRM_Grant_BAO_Grant_Utils {
       $form,
       $params,
       $contactID,
-      $grantTypeId,
-      TRUE
+      $grantTypeId
     );
-      
+
     if ($grant) {
       $form->_params['grantID'] = $grant->id;
     }
-    
+
     $form->_params['grantTypeID'] = $grantTypeId;
-    $form->_params['item_name'] = $form->_params['description'];
     $form->_params['application_received_date'] = date('YmdHis');
     $form->set('params', $form->_params);
     // check if grantprograms extension enabled
     $isActive = CRM_Grantapplications_BAO_GrantApplicationProfile::checkRelatedExtensions('biz.jmaconsulting.grantprograms');
     // finally send an email receipt
-    if ($grant && !$isActive) {   
+    if ($grant && !$isActive) {
       $form->_values['grant_id'] = $grant->id;
-      CRM_Grant_BAO_GrantApplicationPage::sendMail($contactID, 
+      CRM_Grant_BAO_GrantApplicationPage::sendMail($contactID,
         $form->_values,
         FALSE,
         $fieldTypes
@@ -105,12 +103,12 @@ class CRM_Grant_BAO_Grant_Utils {
           $value['fileID'],
           'mime_type',
           'id'
-        );  
+        );
         $fileName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File',
           $value['fileID'],
           'uri',
           'id'
-        );  
+        );
         if ($fileType == 'image/jpeg' ||
             $fileType == 'image/pjpeg' ||
             $fileType == 'image/gif' ||
@@ -145,5 +143,3 @@ class CRM_Grant_BAO_Grant_Utils {
   }
 
 }
-
-
