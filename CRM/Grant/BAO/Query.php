@@ -3,7 +3,7 @@
  +--------------------------------------------------------------------+
  | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2017                                |
+ | Copyright CiviCRM LLC (c) 2004-2018                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -28,7 +28,7 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2017
+ * @copyright CiviCRM LLC (c) 2004-2018
  * $Id$
  *
  */
@@ -159,7 +159,7 @@ class CRM_Grant_BAO_Query extends CRM_Core_BAO_Query {
       case 'grant_due_date_high':
         $query->dateQueryBuilder($values, 'civicrm_grant',
           'grant_due_date',
-          'grant_due_date', 'Grant Due Date'
+          'grant_due_date', ts('Grant Due Date')
         );
         return;
 
@@ -173,7 +173,7 @@ class CRM_Grant_BAO_Query extends CRM_Core_BAO_Query {
       case 'grant_decision_date_high':
         $query->dateQueryBuilder($values, 'civicrm_grant',
           'grant_decision_date',
-          'decision_date', 'Grant Decision Date'
+          'decision_date', ts('Grant Decision Date')
         );
         return;
 
@@ -195,11 +195,11 @@ class CRM_Grant_BAO_Query extends CRM_Core_BAO_Query {
 
         if (strstr($name, 'type')) {
           $name = 'grant_type_id';
-          $label = 'Grant Type(s)';
+          $label = ts('Grant Type(s)');
         }
         else {
           $name = 'status_id';
-          $label = 'Grant Status(s)';
+          $label = ts('Grant Status(s)');
         }
 
         $query->_where[$grouping][] = CRM_Contact_BAO_Query::buildClause("civicrm_grant.$name", $op, $value, "Integer");
@@ -336,22 +336,22 @@ class CRM_Grant_BAO_Query extends CRM_Core_BAO_Query {
     $form->addDate('grant_application_received_date_low', ts('App. Received Date - From'), FALSE, array('formatType' => 'searchDate'));
     $form->addDate('grant_application_received_date_high', ts('To'), FALSE, array('formatType' => 'searchDate'));
 
-    $form->addElement('checkbox', 'grant_application_received_notset', '', NULL);
+    $form->addElement('checkbox', 'grant_application_received_notset', ts('Date is not set'), NULL);
 
     $form->addDate('grant_money_transfer_date_low', ts('Money Sent Date - From'), FALSE, array('formatType' => 'searchDate'));
     $form->addDate('grant_money_transfer_date_high', ts('To'), FALSE, array('formatType' => 'searchDate'));
 
-    $form->addElement('checkbox', 'grant_money_transfer_date_notset', '', NULL);
+    $form->addElement('checkbox', 'grant_money_transfer_date_notset', ts('Date is not set'), NULL);
 
     $form->addDate('grant_due_date_low', ts('Report Due Date - From'), FALSE, array('formatType' => 'searchDate'));
     $form->addDate('grant_due_date_high', ts('To'), FALSE, array('formatType' => 'searchDate'));
 
-    $form->addElement('checkbox', 'grant_due_date_notset', '', NULL);
+    $form->addElement('checkbox', 'grant_due_date_notset', ts('Date is not set'), NULL);
 
     $form->addDate('grant_decision_date_low', ts('Grant Decision Date - From'), FALSE, array('formatType' => 'searchDate'));
     $form->addDate('grant_decision_date_high', ts('To'), FALSE, array('formatType' => 'searchDate'));
 
-    $form->addElement('checkbox', 'grant_decision_date_notset', '', NULL);
+    $form->addElement('checkbox', 'grant_decision_date_notset', ts('Date is not set'), NULL);
 
     $form->addYesNo('grant_report_received', ts('Grant report received?'), TRUE);
 
