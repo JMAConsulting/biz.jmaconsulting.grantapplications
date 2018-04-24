@@ -177,13 +177,18 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     }
 
     $this->applyFilter('__ALL__', 'trim');
-    $this->add('text', "email-{$this->_bltID}",
-      ts('Email Address'),
-      array('size' => 30, 'maxlength' => 60, 'class' => 'email'),
-      TRUE
-    );
- 
-    $this->addRule("email-{$this->_bltID}", ts('Email is not valid.'), 'email');
+    if ($this->_emailExists == FALSE) {
+      $this->add('text', "email-Primary",
+        ts('Email Address'),
+        array('size' => 30, 'maxlength' => 60, 'class' => 'email'),
+        TRUE
+      );
+      $this->assign('showMainEmail', TRUE);
+      $this->addRule("email-Primary", ts('Email is not valid.'), 'email');
+    }
+    else {
+      $this->addElement('hidden', "email-{$this->_bltID}", 1);
+    }
     
     if ( !CRM_Utils_Array::value('amount_requested', $this->_fields) && CRM_Utils_Array::value('default_amount', $this->_values) ){
         $this->assign('defaultAmount', $this->_values['default_amount']);

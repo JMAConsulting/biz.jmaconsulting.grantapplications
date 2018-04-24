@@ -3,7 +3,7 @@
  +--------------------------------------------------------------------+
  | CiviCRM version 4.7                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2015                                |
+ | Copyright CiviCRM LLC (c) 2004-2018                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -28,7 +28,7 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2015
+ * @copyright CiviCRM LLC (c) 2004-2018
  */
 
 /**
@@ -112,6 +112,13 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
 
   protected $_userID;
 
+  /**
+   * Flag if email field exists in embedded profile
+   *
+   * @var bool
+   */
+  public $_emailExists = FALSE;
+
   public $_action;
 
   /**
@@ -129,9 +136,10 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
       // lets just bump this to a regular session error and redirect user to main page
       $this->controller->invalidKeyRedirect();
     }
+    $this->_emailExists = $this->get('emailExists');
 
     // this was used prior to the cleverer this_>getContactID - unsure now
-    $this->_userID = CRM_Core_Session::singleton()->get('userID');
+    $this->_userID = CRM_Core_Session::singleton()->getLoggedInContactID();
     $this->_contactID = $this->getContactID();
 
     // we do not want to display recently viewed items, so turn off
@@ -152,6 +160,8 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
     $this->_bltID = $this->get('bltID');
     $this->assign('title', $this->_values['title']);
     CRM_Utils_System::setTitle($this->_values['title']);
+
+    $this->assignHomeType();
     if (!$this->_values) {
       // get all the values from the dao object
       $this->_values = array();
@@ -200,6 +210,17 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
   }
 
   /**
+   * Assign home type id to bltID.
+   *
+   */
+  public function assignHomeType() {
+    $locationTypes = CRM_Core_PseudoConstant::get('CRM_Core_DAO_Address', 'location_type_id', array(), 'validate');
+    $this->_bltID = array_search('Home', $locationTypes);
+    $this->set('bltID', $this->_bltID);
+    $this->assign('bltID', $this->_bltID);
+  }
+
+  /**
    * Set the default values.
    */
   public function setDefaultValues() {
@@ -220,22 +241,10 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
       $this->assign('default_amount_hidden', $this->_params['default_amount_hidden']);
     }
 
-    // assign the address formatted up for display
-    $addressParts = array(
-      "street_address-{$this->_bltID}",
-      "city-{$this->_bltID}",
-      "postal_code-{$this->_bltID}",
-      "state_province-{$this->_bltID}",
-      "country-{$this->_bltID}",
-    );
-
-    $addressFields = array();
-    foreach ($addressParts as $part) {
-      list($n, $id) = explode('-', $part);
-      $addressFields[$n] = CRM_Utils_Array::value('billing_' . $part, $this->_params);
-    }
-
-    $this->assign('address', CRM_Utils_Address::format($addressFields));
+    $this->assign('address', CRM_Utils_Address::getFormattedBillingAddressFieldsFromParameters(
+      $this->_params,
+      $this->_bltID
+    ));
 
     if (!empty($this->_params['onbehalf_profile_id']) && !empty($this->_params['onbehalf'])) {
       $this->assign('onBehalfName', $this->_params['organization_name']);
@@ -293,10 +302,13 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
       }
 
       if ($fields) {
-        // unset any email-* fields since we already collect it, CRM-2888
-        foreach (array_keys($fields) as $fieldName) {
-          if (substr($fieldName, 0, 6) == 'email-' && !in_array($profileContactType, array('onbehalf'))) {
-            unset($fields[$fieldName]);
+        // determine if email exists in profile so we know if we need to manually insert CRM-2888, CRM-15067
+        foreach ($fields as $key => $field) {
+          if (substr($key, 0, 6) == 'email-' &&
+              !in_array($profileContactType, array('honor', 'onbehalf'))
+          ) {
+            $this->_emailExists = TRUE;
+            $this->set('emailExists', TRUE);
           }
         }
 

@@ -681,6 +681,9 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     if (CRM_Utils_Array::value('grant_id', $params)) {
       $grantParams['id'] = $params['grant_id'];
     }
+    if (CRM_Utils_Array::value('grant_note', $params)) {
+      $grantParams['note'] = $params['grant_note'];
+    }
     if (!$online && isset($params['thankyou_date'])) {
       $grantParams['thankyou_date'] = $params['thankyou_date'];
     }
@@ -696,7 +699,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
 
     if ($nonDeductibleAmount || $isDraft) {
       //add grant record
-      $grant = CRM_Grant_BAO_Grant::add($grantParams, $ids);
+      $grant = CRM_Grant_BAO_Grant::create($grantParams, $ids);
     }
     if ($online && $grant) {
         CRM_Core_BAO_CustomValueTable::postProcess($form->_params,
