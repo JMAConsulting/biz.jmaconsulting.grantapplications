@@ -1,28 +1,28 @@
 /**
  * This extension enhances profile creation for Grants.
- * 
- * 
+ *
+ *
  * Copyright (C) 2012 JMA Consulting
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Support: https://github.com/JMAConsulting/biz.jmaconsulting.grantapplications/issues
- * 
+ *
  * Contact: info@jmaconsulting.biz
  *          JMA Consulting
  *          215 Spadina Ave, Ste 400
- *          Toronto, ON  
+ *          Toronto, ON
  *          Canada   M5T 2C7
  */
 --
@@ -48,16 +48,15 @@ CREATE TABLE IF NOT EXISTS `civicrm_grant_app_page` (
   `start_date` datetime DEFAULT NULL COMMENT 'Date and time that this page starts.',
   `end_date` datetime DEFAULT NULL COMMENT 'Date and time that this page ends. May be NULL if no defined end date/time',
   `created_id` int(10) unsigned DEFAULT NULL COMMENT 'FK to civicrm_contact, who created this grant application page',
-  `created_date` datetime DEFAULT NULL COMMENT 'Date and time that grant application page was created.', 
+  `created_date` datetime DEFAULT NULL COMMENT 'Date and time that grant application page was created.',
   `is_for_organization` tinyint(4) DEFAULT '0' COMMENT 'if true, signup is done on behalf of an organization',
   `for_organization` text COLLATE utf8_unicode_ci COMMENT 'This text field is shown when is_for_organization is checked. For example - I am submitting grant application on behalf of an organization.',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_grant_app_page_created_id` (`created_id`)
+  KEY `FK_civicrm_grant_app_page_created_id` (`created_id`),
+  FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-ALTER TABLE `civicrm_grant_app_page`
-  ADD CONSTRAINT `FK_civicrm_grant_app_page_created_id` FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL;
---
+
 -- Dumping data for table `civicrm_navigation`
 
 SELECT @parentId := id FROM `civicrm_navigation` WHERE `name` = 'Grants';
@@ -75,4 +74,3 @@ SELECT @activityTypeId := id FROM `civicrm_option_value` WHERE `name` = 'Grant';
 
 INSERT IGNORE INTO `civicrm_option_value` (`id`, `option_group_id`, {localize field='label'}`label`{/localize}, `value`, `name`, `grouping`, `filter`, `is_default`, `weight`, {localize field='description'}`description`{/localize}, `is_optgroup`, `is_reserved`, `is_active`, `component_id`, `domain_id`, `visibility_id`) VALUES
 (@activityTypeId, @optionGroupId, {localize}'{ts escape="sql"}Grant{/ts}'{/localize}, @maxValue, 'Grant', NULL, 1, NULL, @maxWeight, {localize}'Online Grant Application'{/localize}, 0, 1, 1, 5, NULL, NULL);
-

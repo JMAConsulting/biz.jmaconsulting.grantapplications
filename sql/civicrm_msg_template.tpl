@@ -36,7 +36,7 @@
   $smarty->assign('ovNames',  $ovNames);
 {/php}
 
-INSERT INTO civicrm_option_group
+INSERT IGNORE INTO civicrm_option_group
   (name,                         {localize field='title'}title{/localize},            {localize field='description'}description{/localize},      is_reserved, is_active) VALUES
 {foreach from=$ogNames key=name item=description name=for_groups}
     ('msg_tpl_workflow_{$name}', {localize}'{$description}'{/localize},               {localize}'{$description}'{/localize},                     1,           1) {if $smarty.foreach.for_groups.last};{else},{/if}
@@ -46,7 +46,7 @@ INSERT INTO civicrm_option_group
   SELECT @tpl_ogid_{$name} := MAX(id) FROM civicrm_option_group WHERE name = 'msg_tpl_workflow_{$name}';
 {/foreach}
 
-INSERT INTO civicrm_option_value
+INSERT IGNORE INTO civicrm_option_value
   (option_group_id,        name,       {localize field='label'}label{/localize},   value,                                  weight) VALUES
 {foreach from=$ovNames key=gName item=ovs name=for_groups}
 {foreach from=$ovs key=vName item=label name=for_values}
@@ -59,7 +59,7 @@ INSERT INTO civicrm_option_value
     SELECT @tpl_ovid_{$vName} := MAX(id) FROM civicrm_option_value WHERE option_group_id = @tpl_ogid_{$gName} AND name = '{$vName}';
 {/foreach}
 {/foreach}
-INSERT INTO civicrm_msg_template
+INSERT IGNORE INTO civicrm_msg_template
   (msg_title,      msg_subject,                  msg_text,                  msg_html,                  workflow_id,        is_default, is_reserved) VALUES
 {foreach from=$ovNames key=gName item=ovs name=for_groups}
 {foreach from=$ovs key=vName item=title name=for_values}
