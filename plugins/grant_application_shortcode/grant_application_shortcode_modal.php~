@@ -1,0 +1,122 @@
+<?php
+/**
+ * Define CiviCRM_For_WordPress_Shortcodes Class
+ */
+class CiviCRM_For_WordPress_Shortcodes_Grant extends CiviCRM_For_WordPress_Shortcodes {
+/**
+   * Preprocess CiviCRM-defined shortcodes
+   *
+   * @param array $atts Shortcode attributes array
+   * @return array $args Shortcode arguments array
+   */
+  public function preprocess_atts( $atts ) {
+
+    $shortcode_atts = shortcode_atts( array(
+      'component' => 'contribution',
+      'action' => NULL,
+      'mode' => NULL,
+      'id' => NULL,
+      'cid' => NULL,
+      'gid' => NULL,
+      'cs' => NULL,
+      'force' => NULL,
+      ),
+      $atts,
+      'civicrm'
+    );
+
+    extract( $shortcode_atts );
+
+    $args = array(
+      'reset' => 1,
+      'id'    => $id,
+      'force' => $force,
+    );
+
+    switch ( $component ) {
+
+      case 'contribution':
+
+        if ( $mode == 'preview' || $mode == 'test' ) {
+          $args['action'] = 'preview';
+        }
+        $args['q'] = 'civicrm/contribute/transact';
+        break;
+
+      case 'event':
+
+        switch ( $action ) {
+          case 'register':
+            $args['q'] = 'civicrm/event/register';
+            if ( $mode == 'preview' || $mode == 'test' ) {
+              $args['action'] = 'preview';
+            }
+            break;
+
+          case 'info':
+            $args['q'] = 'civicrm/event/info';
+            $_REQUEST['page'] = $_GET['page'] = 'CiviCRM';
+            break;
+
+          default:
+            echo '<p>' . __( 'Do not know how to handle this shortcode', 'civicrm' ) . '</p>';
+            return;
+        }
+        break;
+
+      case 'user-dashboard':
+
+        $args['q'] = 'civicrm/user';
+        unset( $args['id'] );
+        break;
+
+      case 'profile':
+
+        if ($mode == 'edit') {
+          $args['q'] = 'civicrm/profile/edit';
+        }
+        elseif ($mode == 'view') {
+          $args['q'] = 'civicrm/profile/view';
+        }
+        elseif ($mode == 'search') {
+          $args['q'] = 'civicrm/profile';
+        }
+        else {
+          $args['q'] = 'civicrm/profile/create';
+        }
+        $args['gid'] = $gid;
+        break;
+
+
+      case 'petition':
+
+        $args['q'] = 'civicrm/petition/sign';
+        $args['sid'] = $args['id'];
+        unset($args['id']);
+        break;
+
+      default:
+
+        echo '<p>' . __( 'Do not know how to handle this shortcode', 'civicrm' ) . '</p>';
+        return;
+
+    }
+
+    /**
+     * Filter the CiviCRM shortcode arguments.
+     *
+     * This filter allows plugins or CiviExtensions to modify the attributes
+     * that the 'civicrm' shortcode allows. Injected attributes and their values
+     * will also become available in the $_REQUEST and $_GET arrays.
+     *
+     * @param array $args Existing shortcode arguments
+     * @param array $shortcode_atts Shortcode attributes
+     * @return array $args Modified shortcode arguments
+     */
+    return apply_filters( 'civicrm_shortcode_preprocess_atts', $args, $shortcode_atts );
+
+  }
+
+}
+
+?>

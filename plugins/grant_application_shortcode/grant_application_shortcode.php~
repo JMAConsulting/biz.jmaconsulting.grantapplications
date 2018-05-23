@@ -1,0 +1,57 @@
+<?php
+/*
+Plugin Name: Grant Application Shortcode
+Plugin URI: https://github.com/JMAConsulting/biz.jmaconsulting.grantapplications
+Description: Allow grant application profiles to be used as shortcodes in Wordpress pages and posts
+Version: 1.0
+Author: JMA Consulting
+Author URI: http://jmaconsulting.biz
+License: AGPL3
+*/
+
+
+//require_once 'grant_application_shortcode_modal.php';
+
+//add_action( 'wp', 'grant_callback', 9, 1 );
+add_filter( 'civicrm_shortcode_render', $args, $shortcode_atts);
+
+function civicrm_shortcode_render($args, $shortcode_atts) {
+  print_R($args);
+  print_R($shortcode_atts);
+  echo 'hi';
+  exit;
+}
+
+/**
+   * Return attributes for a given CiviCRM shortcode
+   *
+   * @param $shortcode The shortcode to parse
+   * @return array $shortcode_atts Array of shortcode attributes
+   */
+function get_atts( $shortcode ) {
+
+    // strip all but attributes definitions
+    $text = str_replace( '[civicrm ', '', $shortcode );
+    $text = str_replace( ']', '', $text );
+
+    // extract attributes
+    $shortcode_atts = shortcode_parse_atts( $text );
+
+    return $shortcode_atts;
+
+  }
+
+function grant_callback($wp) {
+
+  $civi = new CiviCRM_For_WordPress_Shortcodes_Grant();
+
+  // the shortcode must be the first item in the shortcodes array
+  $shortcode = $civi->shortcodes[$post->ID][0];
+
+  // check to see if a shortcode component has been repeated?
+  $atts = get_atts( $shortcode );
+  print_R($atts);exit;
+  //$civi->preprocess_atts();
+}
+
+?>
