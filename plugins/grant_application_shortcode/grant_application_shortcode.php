@@ -40,5 +40,3 @@ class CiviCRM_For_WordPress_Shortcodes_Grant {
   }
 
 }
-
-?>
