@@ -596,11 +596,6 @@ class CiviCRM_For_WordPress_Shortcodes {
         $args['q'] = 'civicrm/contribute/transact';
         break;
 
-      case 'grant':
-
-        $args['q'] = 'civicrm/grant/transact';
-        break;
-
       case 'event':
 
         switch ( $action ) {
@@ -728,21 +723,6 @@ class CiviCRM_For_WordPress_Shortcodes {
         $data['text'] = '';
         if ( isset( $civi_entity['intro_text'] ) ) {
           $data['text'] = $civi_entity['intro_text'];
-        }
-
-        break;
-    
-      case 'grant':
-
-        // add grant application page ID
-        $params['id'] = $args['id'];
-
-        // get grant application page
-        $sql = "SELECT title, intro_text FROM civicrm_grant_app_page WHERE id = {$params['id']}";
-        $dao = CRM_Core_DAO::executeQuery($sql);
-        while ($dao->fetch()) {
-          $data['title'] = $dao->title;
-          $data['text'] = $dao->intro_text;
         }
 
         break;
