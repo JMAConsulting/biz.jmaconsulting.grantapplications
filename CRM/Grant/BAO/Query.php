@@ -182,7 +182,7 @@ class CRM_Grant_BAO_Query extends CRM_Core_BAO_Query {
         $query->_qill[$grouping][] = ts("Grant Decision Date is NULL");
         $query->_tables['civicrm_grant'] = $query->_whereTables['civicrm_grant'] = 1;
         return;
-        
+
       case 'grant_id':
         $query->_where[$grouping][] = "civicrm_grant.id = $value";
         $query->_tables['civicrm_grant'] = $query->_whereTables['civicrm_grant'] = 1;
@@ -205,7 +205,7 @@ class CRM_Grant_BAO_Query extends CRM_Core_BAO_Query {
         $query->_where[$grouping][] = CRM_Contact_BAO_Query::buildClause("civicrm_grant.$name", $op, $value, "Integer");
 
         $query->_tables['civicrm_grant'] = $query->_whereTables['civicrm_grant'] = 1;
-        
+
         list($qillop, $qillVal) = CRM_Contact_BAO_Query::buildQillForFieldValue('CRM_Grant_DAO_Grant', $name, $value, $op);
         $query->_qill[$grouping][] = ts("%1 %2 %3", array(1 => $label, 2 => $qillop, 3 => $qillVal));
         $query->_tables['civicrm_grant'] = $query->_whereTables['civicrm_grant'] = 1;

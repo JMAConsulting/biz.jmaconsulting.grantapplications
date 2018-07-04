@@ -833,5 +833,3 @@ class CiviCRM_For_WordPress_Shortcodes {
 
 
 } // class CiviCRM_For_WordPress_Shortcodes ends
-
-

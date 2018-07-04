@@ -37,7 +37,7 @@
   <div id="intro_text" class="crm-public-form-item crm-section intro_text-section">
     {$intro_text}
   </div>
-  {assign var=n value=email-$bltID}
+  {assign var=n value=email}
   <div class="crm-public-form-item crm-section {$form.$n.name}-section">
     <div class="label">{$form.$n.label}</div>
     <div class="content">
@@ -50,14 +50,14 @@
   </div>
 
   <div class="crm-section default_amount-section">
-    {if $defaultAmount}
+    {if isset($defaultAmount) && $defaultAmount neq "0.00"}
       <div class="label">Requested Amount</div>
       <div class="content">
         {$defaultAmount|crmMoney}
-      </div>	
+      </div>
       <div class="clear"></div>
     {/if}
-  </div> 
+  </div>
 
   {include file="CRM/common/CMSUser.tpl"}
 
@@ -81,7 +81,7 @@
     </div>
   {/if}
 </div>
-	
+
 {literal}
 <script type="text/javascript">
   cj(function(){
@@ -94,7 +94,7 @@
       	value = cj(this).val();
 	if (value) {
 	  if (numericFields[elementName] == 'Int') {
-      	    value = value.replace(/[^0-9|,]/g, '');	 
+      	    value = value.replace(/[^0-9|,]/g, '');
           }
           else {
 	    value = value.replace(/[^\d|.|,]/g, '');

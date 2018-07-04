@@ -51,7 +51,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
    */
   public function preProcess() {
     $config = CRM_Core_Config::singleton();
-   
+
     parent::preProcess();
     $this->assign('confirm_text', CRM_Utils_Array::value('confirm_text', $this->_values));
     $this->assign('confirm_footer', CRM_Utils_Array::value('confirm_footer', $this->_values));
@@ -59,7 +59,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     // we use this here to incorporate any changes made by folks in hooks
     $this->_params['currencyID'] = $config->defaultCurrency;
     $this->_params = $this->controller->exportValues('Main');
-    
+
     $this->_params['is_draft'] = $this->get('is_draft');
 
     $this->_params['ip_address'] = $_SERVER['REMOTE_ADDR'];
@@ -68,10 +68,6 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
       $this->_params['ip_address'] = '127.0.0.1';
     }
     $this->_params['amount'] = $this->get('default_amount');
-    
-    if (isset($this->_params['amount'])) {
-      $this->_params['currencyID'] = $config->defaultCurrency;
-    }
 
     // if onbehalf-of-organization
     if (!empty($this->_values['onbehalf_profile_id']) && !empty($this->_params['onbehalf']['organization_name'])) {
@@ -225,7 +221,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     $this->assignToTemplate();
 
     $params = $this->_params;
-       
+
     $this->assign('receiptFromEmail', CRM_Utils_Array::value('receipt_from_email', $this->_values));
 
     $config = CRM_Core_Config::singleton();
@@ -249,7 +245,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     }
     $grantButton = ts('Save Now');
     $this->assign('button', ts('Save Now'));
-    
+
     $this->addButtons(array(
       array(
         'type' => 'next',
@@ -267,8 +263,6 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
 
     $defaults = array();
     $fields = array_fill_keys(array_keys($this->_fields), 1);
-    $fields["billing_state_province-{$this->_bltID}"] = $fields["billing_country-{$this->_bltID}"] = $fields["email-{$this->_bltID}"] = 1;
-
     $contact = $this->_params;
     foreach ($fields as $name => $dontCare) {
       // Recursively set defaults for nested fields
@@ -313,72 +307,9 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
 
     // fix attachment info
     if (CRM_Utils_Array::value('fileFields', $this->_fields)) {
-      foreach ($this->_fields['fileFields'] as $key => $value) {
-        if (CRM_Utils_Array::value('fileID', $value)) {
-          $url = CRM_Utils_System::url('civicrm/file',
-                                       'reset=1&id='.$value['fileID'].'&eid='.$value['entityID'],
-                                       FALSE, NULL, TRUE, TRUE
-                                       );
-          $fileType = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File',
-                                                  $value['fileID'],
-                                                  'mime_type',
-                                                  'id'
-                                                  );  
-          $fileName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_File',
-                                                  $value['fileID'],
-                                                  'uri',
-                                                  'id'
-                                                  );  
-          if ($fileType == 'image/jpeg' ||
-              $fileType == 'image/pjpeg' ||
-              $fileType == 'image/gif' ||
-              $fileType == 'image/x-png' ||
-              $fileType == 'image/png'
-              ) {
-            $files[$key]['displayURL'] = $url;
-          }
-          else {
-            $files[$key]['fileURL'] = $url;
-          }
-          $files[$key]['fileName'] = $fileName;
-          $files[$key]['id'] = $key;
-          $files[$key]['fileID'] = $value['fileID'];
-          if (CRM_Utils_Array::value($key, $this->_params)) {
-            if (in_array($form->_params[$key]['type'], array('image/jpeg', 'image/pjpeg', 'image/gif',  'image/x-png', 'image/png'))) {
-              unset($files[$key]);
-              $files[$key]['displayURLnew'] = $this->_params[$key]['name'];
-              preg_match("/[^\/]+$/", $this->_params[$key]['name'], $matches);
-              $files[$key]['fileName'] = $matches[0];
-            }
-            else {
-              unset($files[$key]);
-              $files[$key]['fileURLnew'] = $this->_params[$key]['name'];
-              preg_match("/[^\/]+$/", $this->_params[$key]['name'], $matches);
-              $files[$key]['fileName'] = $matches[0];
-            }
-          }
-        }
-        else {
-          $files[$key]['noDisplay'] = TRUE;
-          if (CRM_Utils_Array::value($key, $this->_params)) {
-            if (in_array($this->_params[$key]['type'], array('image/jpeg', 'image/pjpeg', 'image/gif',  'image/x-png', 'image/png'))) {
-              unset($files[$key]);
-              $files[$key]['displayURLnew'] = $this->_params[$key]['name'];
-              preg_match("/[^\/]+$/", $this->_params[$key]['name'], $matches);
-              $files[$key]['fileName'] = $matches[0];
-            }
-            else {
-              unset($files[$key]);
-              $files[$key]['fileURLnew'] = $this->_params[$key]['name'];
-              preg_match("/[^\/]+$/", $this->_params[$key]['name'], $matches);
-              $files[$key]['fileName'] = $matches[0];
-            }
-          }
-        }
-      }
-      $this->assign('files', $files);
+      CRM_Grant_BAO_Grant_Utils::processFiles($this);
     }
-    
+
 
     $this->setDefaults($defaults);
 
@@ -598,12 +529,12 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
       );
     }
     $grantTypeId = $this->_values['grant_type_id'];
-    
+
     $fieldTypes = array();
-    
+
     $grantParams = $this->_params;
-    
-    CRM_Grant_BAO_Grant_Utils::processConfirm($this, 
+
+    CRM_Grant_BAO_Grant_Utils::processConfirm($this,
       $grantParams,
       $contactID,
       $grantTypeId,
@@ -621,62 +552,36 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
   static function processApplication(&$form,
     $params,
     $contactID,
-    $grantTypeId,
-    $online = TRUE
+    $grantTypeId
   ) {
     $transaction = new CRM_Core_Transaction();
     $isDraft = FALSE;
     if (CRM_Utils_Array::value('is_draft', $form->_values)) {
       $isDraft = TRUE;
-    } 
-    $className   = get_class($form);
+    }
 
     $params['is_email_receipt'] = CRM_Utils_Array::value('is_email_receipt', $form->_values);
-        
-    $config = CRM_Core_Config::singleton();
-  
-    $nonDeductibleAmount = isset($params['default_amount_hidden']) ? $params['default_amount_hidden'] : $params['amount_requested'];
-   
-    $now = date('YmdHis');
-    $receiptDate = CRM_Utils_Array::value('receipt_date', $params);
-    if (CRM_Utils_Array::value('is_email_receipt', $form->_values)) {
-      $receiptDate = $now;
-    }
 
-    //get the grant page id.
-    $grantPageId = NULL;
-   
-    if ($online) {
-      $grantPageId = $form->_id;
-    }
+    $nonDeductibleAmount = isset($params['default_amount_hidden']) ? $params['default_amount_hidden'] : $params['amount_requested'];
 
     // first create the grant record
-    $grantParams = array(      
+    $params += array(
       'contact_id' => $contactID,
       'grant_type_id' => $grantTypeId,
-      'grant_page_id' => $grantPageId,
-      'application_received_date' => (CRM_Utils_Array::value('receive_date', $params)) ? CRM_Utils_Date::processDate($params['receive_date']) : date('YmdHis'),
-      'amount_level' => CRM_Utils_Array::value('amount_level', $params),
+      'grant_page_id' => $form->_id,
+      'application_received_date' => date('YmdHis'),
       'currency' => $params['currencyID'],
-      'source' =>
-      (!$online || CRM_Utils_Array::value('source', $params)) ?
-      CRM_Utils_Array::value('source', $params) :
-      CRM_Utils_Array::value('description', $params),
-      'thankyou_date' =>
-      isset($params['thankyou_date']) ?
-      CRM_Utils_Date::format($params['thankyou_date']) :
-      NULL,
     );
 
     if (CRM_Utils_Array::value('grant_program_id', $form->_values)) {
-      $grantParams['grant_program_id'] = $form->_values['grant_program_id'];
+      $params['grant_program_id'] = $form->_values['grant_program_id'];
     }
-
+    // FIXME
     if (CRM_Utils_Array::value('is_draft', $params)) {
-      $grantParams['status_id'] = key(CRM_Core_OptionGroup::values('grant_status',  FALSE, FALSE, FALSE, "AND v.name = 'Draft'"));
+      $params['status_id'] = CRM_Core_PseudoConstant::getKey('CRM_Grant_BAO_Grant', 'status_id', 'Draft');
     }
     else {
-      $grantParams['status_id'] = key(CRM_Core_OptionGroup::values('grant_status',  FALSE, FALSE, FALSE, "AND v.name = 'Submitted'"));
+      $grantParams['status_id'] = CRM_Core_PseudoConstant::getKey('CRM_Grant_BAO_Grant', 'status_id', 'Submitted');
     }
     if (CRM_Utils_Array::value('grant_id', $params)) {
       $grantParams['id'] = $params['grant_id'];
@@ -687,40 +592,33 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     if (!$online && isset($params['thankyou_date'])) {
       $grantParams['thankyou_date'] = $params['thankyou_date'];
     }
-
-    $grantParams['grant_status_id'] = CRM_Core_OptionGroup::getValue('grant_status', 'Submitted');
-  
-    $grantParams['is_test'] = 0;
-     
     $ids = array();
+    if (!empty($params['grant_id'])) {
+      $params['id'] = $params['grant_id'];
+      $ids['grant_id'] = $params['grant_id'];
+    }
 
-    $grantParams['amount_requested'] = trim(CRM_Utils_Money::format($nonDeductibleAmount, ' '));
-    $grantParams['amount_total'] = trim(CRM_Utils_Money::format($nonDeductibleAmount, ' '));
+    $params['amount_requested'] = trim(CRM_Utils_Money::format($nonDeductibleAmount, ' '));
+    if (empty($params['amount_total'])) {
+      $params['amount_total'] = trim(CRM_Utils_Money::format($nonDeductibleAmount, ' '));
+    }
 
     if ($nonDeductibleAmount || $isDraft) {
       //add grant record
       $grant = CRM_Grant_BAO_Grant::create($grantParams, $ids);
     }
-    if ($online && $grant) {
+    if ($grant) {
         CRM_Core_BAO_CustomValueTable::postProcess($form->_params,
         'civicrm_grant',
         $grant->id,
         'Grant'
       );
     }
-    elseif ($grant) {
-      //handle custom data.
-      $params['grant_id'] = $grant->id;
-    
-      if (CRM_Utils_Array::value('custom', $params) &&
-        is_array($params['custom']) &&
-        !is_a($grant, 'CRM_Core_Error')
-      ) {
-        CRM_Core_BAO_CustomValueTable::store($params['custom'], 'civicrm_grant', $grant->id);
-      }
-    }
+    $params['grant_id'] = (int)$grant->id;
+
+    // Save form values into saved search table
     if ($grant && $isDraft) {
-      $savedSearch = $formValues = $ssParams = $savedSearch= array();
+      $savedSearch = $formValues = $ssParams = $savedSearch = array();
       $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$grant->id.'%"');
       if (!empty($ssParams['id'])) {
         CRM_Contact_BAO_SavedSearch::retrieve($ssParams, $savedSearch);
@@ -728,24 +626,18 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
       if (CRM_Utils_Array::value('id', $savedSearch)) {
         $formValues['id'] = $savedSearch['id'];
       }
-      $params['grant_id'] = (int)$grant->id;
       $formValues['formValues'] = $params;
       CRM_Contact_BAO_SavedSearch::create($formValues);
-    }
-    $targetContactID = NULL;
-    if (CRM_Utils_Array::value('hidden_onbehalf_profile', $params)) {
-      $targetContactID = $grant->contact_id;
-      $grant->contact_id = $contactID;
     }
 
     // create an activity record
     if ($grant) {
-      CRM_Grant_BAO_GrantApplicationPage::addActivity($grant, $targetContactID);
+      CRM_Grant_BAO_GrantApplicationPage::addActivity($grant);
     }
     // Re-using function defined in Contribution/Utils.php
     CRM_Contribute_BAO_Contribution_Utils::createCMSUser($params,
       $contactID,
-      'email-Primary' 
+      'email-Primary'
     );
 
     return $grant;
@@ -828,7 +720,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
       $cid = array('contact' => $contactID);
       CRM_Contact_BAO_Relationship::legacyCreateMultiple($relParams, $cid);
     }
-    
+
     // if multiple match - send a duplicate alert
     if ($dupeIDs && (count($dupeIDs) > 1)) {
       $values['onbehalf_dupe_alert'] = 1;

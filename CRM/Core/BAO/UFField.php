@@ -943,7 +943,7 @@ SELECT  id
         $fields['Contribution'] = array_merge($contribFields, self::getContribBatchEntryFields());
       }
     }
-    
+
     if (CRM_Core_Permission::access('CiviGrant')) {
       $grantFields = CRM_Grantapplications_BAO_GrantApplicationProfile::getGrantFields();
       if (!empty($grantFields)) {

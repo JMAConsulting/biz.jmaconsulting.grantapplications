@@ -45,7 +45,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
    *
    * @return array $_actionLinks
    *
-   */ 
+   */
   public static function &actionLinks() {
     // check if variable _actionsLinks is populated
     if (!isset(self::$_actionLinks)) {
@@ -95,7 +95,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
           'qs' => $urlParams,
           'uniqueName' => 'settings',
           'class' => 'no-popup',
-        ),    
+        ),
         CRM_Core_Action::FOLLOWUP => array(
           'name' => ts('Save as Draft'),
           'title' => ts('Save as Draft'),
@@ -125,7 +125,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
 
     return self::$_configureActionLinks;
   }
-  
+
   /**
    * Get the online grant links.
    *
@@ -183,7 +183,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
 
     return $formattedConfLinks;
   }
-  
+
   /**
    * Creates a grant application page.
    *
@@ -220,17 +220,17 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
 
   public function deleteGrantApplicationPage($id, $title) {
     $transaction = new CRM_Core_Transaction();
-    
+
     // first delete the join entries associated with this grant application page
     $dao = new CRM_Core_DAO_UFJoin();
-    
+
     $params = array(
       'entity_table' => 'civicrm_grant_app_page',
       'entity_id' => $id,
     );
     $dao->copyValues($params);
     $dao->delete();
-           
+
     // finally delete the grant application page
     $dao = new CRM_Grant_DAO_GrantApplicationPage();
     $dao->id = $id;
@@ -254,7 +254,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
     $params = array('id' => $id);
 
     CRM_Core_DAO::commonRetrieve('CRM_Grant_DAO_GrantApplicationPage', $params, $values);
-    
+
     // get the profile ids
     $ufJoinParams = array(
       'entity_table' => 'civicrm_grant_app_page',
@@ -301,49 +301,36 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
    * @access public
    */
   public static function addActivity(&$grant,
-    $targetContactID = NULL,
     $activityType = 'Grant'
   ) {
-    
+
     $subject = CRM_Utils_Money::format($grant->amount_total, $grant->currency);
     if (!empty($grant->source) && $grant->source != 'null') {
       $subject .= " - {$grant->source}";
     }
     $date = CRM_Utils_Date::isoToMysql($grant->application_received_date);
-    $component = 'Grant';
     $activityParams = array(
-      'source_contact_id' => $grant->contact_id,
       'source_record_id' => $grant->id,
-      'activity_type_id' => CRM_Core_OptionGroup::getValue('activity_type',
-        $activityType,
-        'name'
-      ),
+      'activity_type_id' => $activityType,
       'subject' => $subject,
       'activity_date_time' => $date,
-      'status_id' => CRM_Core_OptionGroup::getValue('activity_status',
-        'Completed',
-        'name'
-      ),
+      'status_id' => 'Completed',
       'skipRecentView' => TRUE,
+      'target_contact_id' => array($grant->contact_id),
     );
-
     // create activity with target contacts
     $session = CRM_Core_Session::singleton();
     $id = $session->get('userID');
     if ($id) {
       $activityParams['source_contact_id'] = $id;
-      $activityParams['target_contact_id'][] = $grant->contact_id;
     }
-    
-    if ($targetContactID) {
-      $activityParams['target_contact_id'][] = $targetContactID;
+    else {
+      $activityParams['source_contact_id'] = $grant->contact_id;
     }
-    if (is_a(CRM_Activity_BAO_Activity::create($activityParams), 'CRM_Core_Error')) {
-      CRM_Core_Error::fatal("Failed creating Activity for $component of id {$activity->id}");
-      return FALSE;
-    }
+
+    civicrm_api3('Activity', 'create', $activityParams);
   }
-  
+
   /**
    * Function to send the emails
    *
@@ -376,7 +363,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
 
       $gIds['custom_post_id'] = $values['custom_post_id'];
     }
-    
+
     if (!$returnMessageText && !empty($gIds)) {
       //send notification email if field values are set (CRM-1941)
       foreach ($gIds as $key => $gId) {
@@ -399,7 +386,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
       $returnMessageText
     ) {
       $template = CRM_Core_Smarty::singleton();
-      
+
       if (!$email) {
         list($displayName, $email) = CRM_Contact_BAO_Contact_Location::getEmailDetails($contactID);
       }
@@ -429,7 +416,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
         }
         self::buildCustomProfile($postID, 'customPost', $userID, $template, $params['custom_post_id'], $onbehalfId);
       }
-      
+
       $title = isset($values['title']) ? $values['title'] : CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantApplicationPage', $values['id'], 'title');
 
       // set email in the template here
@@ -441,7 +428,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
         'grantID' => CRM_Utils_Array::value('grant_id', $values),
         'title' => $title,
       );
-    
+
       if ($grantTypeId = CRM_Utils_Array::value('grant_type_id', $values)) {
         $tplParams['grantTypeId'] = $grantTypeId;
         $tplParams['grantTypeName'] = CRM_Core_OptionGroup::getLabel('grant_type', $grantTypeId);
@@ -498,69 +485,6 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
   }
 
   /**
-   * Get the profile title and fields.
-   *
-   * @param int $gid
-   * @param int $cid
-   * @param array $params
-   * @param array $fieldTypes
-   *
-   * @return array
-   */
-  protected static function getProfileNameAndFields($gid, $cid, &$params, $fieldTypes = array()) {
-    $groupTitle = NULL;
-    $values = array();
-    if ($gid) {
-      if (CRM_Core_BAO_UFGroup::filterUFGroups($gid, $cid)) {
-        $fields = CRM_Core_BAO_UFGroup::getFields($gid, FALSE, CRM_Core_Action::VIEW, NULL, NULL, FALSE, NULL, FALSE, NULL, CRM_Core_Permission::CREATE, NULL);
-        foreach ($fields as $k => $v) {
-          if (!$groupTitle) {
-            $groupTitle = $v["groupTitle"];
-          }
-          // suppress all file fields from display and formatting fields
-          if (
-            CRM_Utils_Array::value('data_type', $v, '') == 'File' ||
-            CRM_Utils_Array::value('name', $v, '') == 'image_URL' ||
-            CRM_Utils_Array::value('field_type', $v) == 'Formatting'
-          ) {
-            unset($fields[$k]);
-          }
-
-          if (!empty($fieldTypes) && (!in_array($v['field_type'], $fieldTypes))) {
-            unset($fields[$k]);
-          }
-        }
-
-        CRM_Core_BAO_UFGroup::getValues($cid, $fields, $values, FALSE, $params);
-      }
-    }
-    return array($groupTitle, $values);
-  }
-  
-  /*
-     * Construct the message to be sent by the send function
-     *
-     */
-  public function composeMessage($tplParams, $contactID, $isTest) {
-    $sendTemplateParams = array(
-      'groupName' => 'msg_tpl_workflow_grant',
-      'valueName' => 'grant_online_receipt',
-      'contactId' => $contactID,
-      'tplParams' => $tplParams,
-      'PDFFilename' => 'receipt.pdf',
-    );
-    if ($returnMessageText) {
-      list($sent, $subject, $message, $html) = CRM_Core_BAO_MessageTemplate::sendTemplate($sendTemplateParams);
-      return array(
-        'subject' => $subject,
-        'body' => $message,
-        'to' => $displayName,
-        'html' => $html,
-      );
-    }
-  }
-
-  /**
    * Function to get info for all sections enable/disable.
    *
    * @return array $info info regarding all sections.
@@ -574,7 +498,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
     if (is_array($grantAppPageIds) && !empty($grantAppPageIds)) {
       $whereClause = 'WHERE civicrm_grant_app_page.id IN ( ' . implode(', ', $grantAppPageIds) . ' )';
     }
- 
+
     $sections = array(
       'settings',
       'draft',
@@ -583,11 +507,11 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
     );
     $query = "SELECT  civicrm_grant_app_page.id as id,
 civicrm_grant_app_page.grant_type_id as settings,
-civicrm_grant_app_page.is_draft as draft,  
+civicrm_grant_app_page.is_draft as draft,
 civicrm_uf_join.id as custom,
 civicrm_grant_app_page.thankyou_title as thankyou
 FROM  civicrm_grant_app_page
-LEFT JOIN  civicrm_uf_join ON ( civicrm_uf_join.entity_id = civicrm_grant_app_page.id 
+LEFT JOIN  civicrm_uf_join ON ( civicrm_uf_join.entity_id = civicrm_grant_app_page.id
 AND civicrm_uf_join.entity_table = 'civicrm_grant_app_page'
 AND module = 'CiviGrant'  AND civicrm_uf_join.is_active = 1 ) $whereClause";
 
@@ -605,7 +529,7 @@ AND module = 'CiviGrant'  AND civicrm_uf_join.is_active = 1 ) $whereClause";
 
     return $info;
   }
-  
+
   /**
    * Function to alter CustomPre/CustomPost mail Params
    *
@@ -626,7 +550,7 @@ AND module = 'CiviGrant'  AND civicrm_uf_join.is_active = 1 ) $whereClause";
       'rationale' => 1,
       'status_id' => 1
     );
-    
+
     if ($gid) {
       if (CRM_Core_BAO_UFGroup::filterUFGroups($gid, $cid)) {
         $values = array();
@@ -665,7 +589,7 @@ AND module = 'CiviGrant'  AND civicrm_uf_join.is_active = 1 ) $whereClause";
             }
           }
         }
-          
+
         CRM_Core_BAO_UFGroup::getValues($cid, $fields, $values, FALSE, $params);
         if ($onBehalfId) {
           CRM_Core_BAO_UFGroup::getValues($onBehalfId, $grantFields, $grantValues, FALSE, $grantParams);
@@ -685,4 +609,3 @@ AND module = 'CiviGrant'  AND civicrm_uf_join.is_active = 1 ) $whereClause";
     }
   }
 }
-
