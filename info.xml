@@ -20,8 +20,8 @@
   <version>1.6.2</version>
   <develStage>stable</develStage>
   <compatibility>
-    <ver>4.7.x</ver>
-    <ver>5.x</ver>
+    <ver>4.7</ver>
+    <ver>5.22.1</ver>
   </compatibility>
   <comments/>
   <civix>
