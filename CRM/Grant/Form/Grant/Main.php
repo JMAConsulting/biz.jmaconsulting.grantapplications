@@ -186,9 +186,6 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       $this->assign('showMainEmail', TRUE);
       $this->addRule("email-Primary", ts('Email is not valid.'), 'email');
     }
-    else {
-      $this->addElement('hidden', "email-{$this->_bltID}", 1);
-    }
 
     if (!CRM_Utils_Array::value('amount_requested', $this->_fields)) {
       $defaultAmount = isset($this->_values['default_amount']) ? $this->_values['default_amount'] : '0.00';
