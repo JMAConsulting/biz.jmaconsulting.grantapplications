@@ -121,6 +121,10 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
    * @access public
    */
   public function preProcess() {
+    CRM_Core_Resources::singleton()->addStyle('#crm-container.crm-public .calc-value, #crm-container.crm-public .content {
+      padding-top: 6px !important;
+      font-size: 15px !important;
+    }');
 
     // current grant application page id
     $this->_id = CRM_Utils_Request::retrieve('id', 'Positive', $this);
