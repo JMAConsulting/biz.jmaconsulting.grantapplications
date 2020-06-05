@@ -97,9 +97,10 @@
       	    value = value.replace(/[^0-9|,]/g, '');
           }
           else {
-	    value = value.replace(/[^\d|.|,]/g, '');
+	        value = value.replace(/[^0-9.]/g, "");
           }
-	  cj(this).val(value);
+          value = parseFloat(value).toFixed(2);
+          cj(this).val(value);
         }
       }
     });
