@@ -1200,6 +1200,9 @@ class CRM_Core_BAO_UFGroup extends CRM_Core_DAO_UFGroup {
               }
               else {
                 $value = $details->$name;
+                if ($name == 'amount_requested') {
+                  $value = CRM_Utils_Money::format($details->$name);
+                }
               }
               $values[$index] = $value;
             }
