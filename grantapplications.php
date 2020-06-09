@@ -253,6 +253,11 @@ function grantapplications_civicrm_buildForm($formName, &$form) {
       $form->setDefaults($defaults);
     }
   }
+  if ($formName == "CRM_Grant_Form_GrantView") {
+    CRM_Core_Resources::singleton()->addStyle('.crm-info-panel td {
+      width: 50% !important;
+    }');
+  }
 }
 
 function grantapplications_civicrm_pageRun(&$page) {
