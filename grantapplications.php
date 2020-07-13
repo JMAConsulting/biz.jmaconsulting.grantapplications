@@ -593,6 +593,17 @@ function grantapplications_enableDisableNavigationMenu($action) {
   grantapplications_addRemoveMenu($action);
 }
 
+function grantapplications_civicrm_alterUFFields(&$fields) {
+  $fields['Grant'] = CRM_Grant_BAO_Grant::exportableFields();
+}
+
+function grantapplications_civicrm_post($entity, $op, $id, $object) {
+  if ($entity === 'UFField' && in_array($op, ['edit', 'create'])) {
+    $fieldsType = CRM_Core_BAO_UFGroup::calculateGroupType($object->uf_group_id, TRUE);
+    CRM_Core_BAO_UFGroup::updateGroupTypes($object->uf_group_id, $fieldsType);
+  }
+}
+
 function grantapplications_dashboardActionLinks() {
   return array(
     CRM_Core_Action::UPDATE => array(
