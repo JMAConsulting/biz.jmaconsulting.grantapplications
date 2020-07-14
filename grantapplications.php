@@ -599,8 +599,8 @@ function grantapplications_civicrm_alterUFFields(&$fields) {
 
 function grantapplications_civicrm_post($entity, $op, $id, $object) {
   if ($entity === 'UFField' && in_array($op, ['edit', 'create'])) {
-    $fieldsType = CRM_Core_BAO_UFGroup::calculateGroupType($object->uf_group_id, TRUE);
-    CRM_Core_BAO_UFGroup::updateGroupTypes($object->uf_group_id, $fieldsType);
+    $fieldsType = CRM_Grantapplications_BAO_GrantApplicationProfile::calculateGroupType($object->uf_group_id, TRUE);
+    CRM_Grantapplications_BAO_GrantApplicationProfile::updateGroupTypes($object->uf_group_id, $fieldsType);
   }
 }
 
