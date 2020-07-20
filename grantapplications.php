@@ -615,3 +615,27 @@ function grantapplications_dashboardActionLinks() {
     ),
   );
 }
+
+if (function_exists('add_filter')) {
+  add_filter('civicrm_shortcode_preprocess_atts', 'grantapplications_amend_args', 10, 2);
+  add_filter('civicrm_shortcode_get_data', 'grantapplications_amend_data', 10, 3);
+}
+
+function grantapplications_amend_args($args, $shortcode_attrs) {
+  extract($shortcode_attrs);
+  if ($component === 'grant') {
+    $args['q'] = 'civicrm/grant/transact';
+  }
+  return $args;
+}
+
+function grantapplications_amend_data(&$data, $atts, $args) {
+  if ($atts['component'] === 'grant') {
+    $dao = CRM_Core_DAO::executeQuery("SELECT title, intro_text FROM civicrm_grant_app_page WHERE id = %1", [1 => [$args['id'], 'Positive']]);
+    while ($dao->fetch()) {
+      $data['title'] = $dao->title;
+      $data['text'] = $dao->intro_text;
+    }
+  }
+  return $data;
+}
