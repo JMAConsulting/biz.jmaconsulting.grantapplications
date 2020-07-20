@@ -24,7 +24,7 @@
  +--------------------------------------------------------------------+
 *}
 <br>
-<div class='crm-container manage-grant-apps' id='crm-container'>
+<div class='crm-container manage-grant-apps' id='crm-container-grant'>
   <h3>{ts}Manage Grant Application Pages{/ts}</h3>
     {include file="CRM/common/enableDisableApi.tpl"}
     {include file="CRM/common/crmeditable.tpl"}
@@ -64,3 +64,4 @@
        {/if}
      </table>
 </div>
+

@@ -253,6 +253,11 @@ function grantapplications_civicrm_buildForm($formName, &$form) {
       $form->setDefaults($defaults);
     }
   }
+  if ($formName == "CRM_Grant_Form_GrantView") {
+    CRM_Core_Resources::singleton()->addStyle('.crm-info-panel td {
+      width: 50% !important;
+    }');
+  }
 }
 
 function grantapplications_civicrm_pageRun(&$page) {
@@ -586,6 +591,17 @@ function grantapplications_enableDisableNavigationMenu($action) {
   }
 
   grantapplications_addRemoveMenu($action);
+}
+
+function grantapplications_civicrm_alterUFFields(&$fields) {
+  $fields['Grant'] = CRM_Grant_BAO_Grant::exportableFields();
+}
+
+function grantapplications_civicrm_post($entity, $op, $id, $object) {
+  if ($entity === 'UFField' && in_array($op, ['edit', 'create'])) {
+    $fieldsType = CRM_Grantapplications_BAO_GrantApplicationProfile::calculateGroupType($object->uf_group_id, TRUE);
+    CRM_Grantapplications_BAO_GrantApplicationProfile::updateGroupTypes($object->uf_group_id, $fieldsType);
+  }
 }
 
 function grantapplications_dashboardActionLinks() {

@@ -211,6 +211,14 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
         }
       }
     }
+    $numericFields = $this->get('numericFields');
+    if (!empty($numericFields)) {
+      foreach ($numericFields as $numericField => $type) {
+        if (!empty($this->_params[$numericField])) {
+          $this->_params[$numericField] = CRM_Utils_Money::format($this->_params[$numericField]);
+        }
+      }
+    }
     $this->set('params', $this->_params);
   }
 

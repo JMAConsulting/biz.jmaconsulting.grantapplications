@@ -131,6 +131,27 @@ class CRM_Grantapplications_Upgrader extends CRM_Grantapplications_Upgrader_Base
     return TRUE;
   }
 
+  /**
+   * Upgrade to add workflow name
+   *
+   * @return TRUE on success
+   * @throws Exception
+   */
+  public function upgrade_4800() {
+    $this->ctx->log->info('Applying update 4800 | Add workflow name to message template');
+    // Get workflow name and id.
+    $sql = "SELECT ov.id, ov.name
+      FROM civicrm_option_value ov
+      INNER JOIN civicrm_option_group og ON og.id = ov.option_group_id
+      WHERE og.name = 'msg_tpl_workflow_grant'";
+    $workflowDetails = CRM_Core_DAO::executeQuery($sql)->fetchAll()[0];
+    $sql = "UPDATE civicrm_msg_template
+      SET workflow_name = %1
+      WHERE workflow_id = %2";
+    CRM_Core_DAO::executeQuery($sql, [1 => [$workflowDetails['name'], 'String'], 2 => [$workflowDetails['id'], 'Integer']]);
+    return TRUE;
+  }
+
 
   /**
    * Example: Run a slow upgrade process by breaking it up into smaller chunk

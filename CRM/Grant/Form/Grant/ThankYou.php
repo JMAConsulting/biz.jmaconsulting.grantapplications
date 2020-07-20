@@ -134,6 +134,11 @@ class CRM_Grant_Form_Grant_ThankYou extends CRM_Grant_Form_GrantBase {
     }
 
     $this->_submitValues = array_merge($this->_submitValues, $defaults);
+    foreach ($defaults as $key => $field) {
+      if (substr($key, 0, strlen('email-')) === 'email-') {
+        $this->assign('email', $defaults[$key]);
+      }
+    }
 
     $this->setDefaults($defaults);
     $this->freeze();

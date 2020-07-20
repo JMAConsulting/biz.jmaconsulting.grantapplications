@@ -186,9 +186,6 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       $this->assign('showMainEmail', TRUE);
       $this->addRule("email-Primary", ts('Email is not valid.'), 'email');
     }
-    else {
-      $this->addElement('hidden', "email-{$this->_bltID}", 1);
-    }
 
     if (!CRM_Utils_Array::value('amount_requested', $this->_fields)) {
       $defaultAmount = isset($this->_values['default_amount']) ? $this->_values['default_amount'] : '0.00';
@@ -207,7 +204,11 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
 
     if ( !empty( $this->_fields ) ) {
       $profileAddressFields = array();
-      $numericFields['amount_total'] = 'Float';
+      $numericFields = [
+        'amount_total' => 'Float',
+        'amount_requested' => 'Float',
+        'amount_granted' => 'Float',
+      ];
       foreach( $this->_fields as $key => $value ) {
         CRM_Core_BAO_UFField::assignAddressField($key, $profileAddressFields, array('uf_group_id' => $this->_values['custom_pre_id']));
         $dataType = CRM_Utils_Array::value('data_type', $value);
@@ -220,6 +221,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       }
       $this->assign('numericFields', json_encode($numericFields));
       $this->set('profileAddressFields', $profileAddressFields);
+      $this->set('numericFields', $numericFields);
     }
 
     //to create an cms user
