@@ -152,6 +152,19 @@ class CRM_Grantapplications_Upgrader extends CRM_Grantapplications_Upgrader_Base
     return TRUE;
   }
 
+  /**
+   * Upgrade to set some necessary defaults on columns
+   */
+  public function upgrade_4900() {
+    $this->ctx->log->info('Applying update 4900 | setting default values on columns');
+    CRM_Core_DAO::executeQuery('UPDATE civicrm_grant_app_page SET is_email_receipt = 0 WHERE is_email_receipt IS NULL');
+    CRM_Core_DAO::executeQuery('ALTER TABLE civicrm_grant_app_page CHANGE is_email_receipt is_email_receipt tinyint DEFAULT 0 COMMENT \'If true, receipt is automatically emailed to contact on success\'');
+    CRM_Core_DAO::executeQuery('UPDATE civicrm_grant_app_page SET is_active = 0 WHERE is_active IS NULL');
+    CRM_Core_DAO::executeQuery('ALTER TABLE civicrm_grant_app_page CHANGE is_active is_active tinyint DEFAULT 0 COMMENT \'Is this grant application page active?\'');
+    CRM_Core_DAO::executeQuery('UPDATE civicrm_grant_app_page SET is_draft = 0 WHERE is_draft IS NULL');
+    CRM_Core_DAO::executeQuery('ALTER TABLE civicrm_grant_app_page CHANGE is_draft is_draft tinyint DEFAULT 0 COMMENT \'Does this page have a Save as Draft button?\'');
+    return TRUE;
+  }
 
   /**
    * Example: Run a slow upgrade process by breaking it up into smaller chunk

@@ -74,9 +74,7 @@ CREATE TABLE `civicrm_grant_app_page` (
      `start_date` datetime   DEFAULT NULL COMMENT 'Date and time that this page starts.',
      `end_date` datetime   DEFAULT NULL COMMENT 'Date and time that this page ends. May be NULL if no defined end date/time',
      `created_id` int unsigned   DEFAULT NULL COMMENT 'FK to civicrm_contact, who created this grant application page',
-     `created_date` datetime   DEFAULT NULL COMMENT 'Date and time that grant application page was created.',
-     `is_for_organization` tinyint   DEFAULT 0 COMMENT 'if true, signup is done on behalf of an organization',
-     `for_organization` text    COMMENT 'This text field is shown when is_for_organization is checked. For example - I am submitting grant application on behalf of an organization.' 
+     `created_date` datetime   DEFAULT NULL COMMENT 'Date and time that grant application page was created.' 
 ,
         PRIMARY KEY (`id`)
  
