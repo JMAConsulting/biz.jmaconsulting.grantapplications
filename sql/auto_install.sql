@@ -79,7 +79,7 @@ CREATE TABLE `civicrm_grant_app_page` (
         PRIMARY KEY (`id`)
  
  
-,          CONSTRAINT FK_civicrm_grant_app_page_created_id FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact`(`id`) ON DELETE CASCADE  
+,          CONSTRAINT FK_civicrm_grant_app_page_created_id FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact`(`id`) ON DELETE SET NULL  
 )    ;
 
  
