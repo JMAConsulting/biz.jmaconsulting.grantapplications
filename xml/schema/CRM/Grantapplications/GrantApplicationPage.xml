@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Grant</base>
+  <class>GrantApplicationPage</class>
+  <name>civicrm_grant_app_page</name>
+  <comment>FIXME</comment>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Grant Application Page ID</comment>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+  <field>
+    <name>title</name>
+    <type>varchar</type>
+    <length>255</length>
+    <html>
+      <type>text</type>
+    </html>
+    <default>NULL</default>
+    <comment>Grant Application Page title. For top of page display.</comment>
+  </field>
+  <field>
+    <name>intro_text</name>
+    <type>text</type>
+    <html>
+      <type>TextArea</type>
+      <rows>4</rows>
+      <cols>60</cols>
+    </html>
+    <add>1.8</add>
+    <comment>Text and html allowed. Displayed below title.</comment>
+  </field>
+  <field>
+    <name>footer_text</name>
+    <type>text</type>
+    <html>
+      <type>TextArea</type>
+      <rows>4</rows>
+      <cols>60</cols>
+    </html>
+    <add>1.8</add>
+    <comment>Text and html allowed. Displayed at the bottom of the first page of the grant application wizard.</comment>
+  </field>
+  <field>
+    <name>grant_type_id</name>
+    <type>int unsigned</type>
+    <title>Grant Type</title>
+    <pseudoconstant>
+      <optionGroupName>grant_type</optionGroupName>
+    </pseudoconstant>
+    <html>
+      <type>Select</type>
+    </html>
+    <export>true</export>
+    <required>true</required>
+    <comment>Grant type assigned to applications submitted via this page.</comment>
+    <add>1.8</add>
+  </field>
+  <field>
+    <name>default_amount</name>
+    <type>decimal</type>
+    <title>Amount</title>
+    <length>20,2</length>
+    <html>
+      <type>Text</type>
+      <size>8</size>
+    </html>
+    <default>NULL</default>
+    <add>1.8</add>
+    <comment>Default amount of grant applied for.</comment>
+  </field>
+  <field>
+    <name>is_draft</name>
+    <default>0</default>
+    <type>boolean</type>
+    <comment>Does this page have a Save as Draft button?</comment>
+  </field>
+  <field>
+   <name>draft_title</name>
+   <type>varchar</type>
+    <length>255</length>
+    <html>
+      <type>text</type>
+    </html>
+    <default>NULL</default>
+    <comment>Title for Save as Draft page (header title tag, and display at the top of the page).</comment>
+  </field>
+  <field>
+    <name>draft_text</name>
+    <type>text</type>
+    <html>
+      <type>TextArea</type>
+      <rows>8</rows>
+      <cols>60</cols>
+    </html>
+    <add>1.8</add>
+    <comment>Text and html allowed. Displayed above application fields on Save as Draft page</comment>
+  </field>
+  <field>
+    <name>draft_footer</name>
+    <type>text</type>
+    <html>
+      <type>TextArea</type>
+      <rows>8</rows>
+      <cols>60</cols>
+    </html>
+    <add>1.8</add>
+    <comment>Text and html allowed. Displayed at the bottom of the Save as Draft page.</comment>
+  </field>
+  <field>
+   <name>thankyou_title</name>
+   <type>varchar</type>
+    <length>255</length>
+    <html>
+      <type>text</type>
+    </html>
+    <default>NULL</default>
+    <comment>Title for Thank-you page (header title tag, and display at the top of the page).</comment>
+  </field>
+  <field>
+    <name>thankyou_text</name>
+    <type>text</type>
+    <html>
+      <type>TextArea</type>
+      <rows>8</rows>
+      <cols>60</cols>
+    </html>
+    <add>1.8</add>
+    <comment>Text and html allowed. Displayed above result on success page</comment>
+  </field>
+  <field>
+    <name>thankyou_footer</name>
+    <type>text</type>
+    <html>
+      <type>TextArea</type>
+      <rows>8</rows>
+      <cols>60</cols>
+    </html>
+    <add>1.8</add>
+    <comment>Text and html allowed. displayed at the bottom of the success page. Common usage is to include link(s) to other pages such as tell-a-friend, etc.</comment>
+  </field>
+  <field>
+    <name>confirm_text</name>
+    <type>text</type>
+    <html>
+      <type>TextArea</type>
+      <rows>8</rows>
+      <cols>60</cols>
+    </html>
+    <add>1.8</add>
+    <comment>Text and html allowed. Displayed above result on confirmation page</comment>
+  </field>
+  <field>
+    <name>confirm_footer</name>
+    <type>text</type>
+    <html>
+      <type>TextArea</type>
+      <rows>8</rows>
+      <cols>60</cols>
+    </html>
+    <add>1.8</add>
+    <comment>Text and html allowed. displayed at the bottom of the confirmation page.</comment>
+  </field>
+  <field>
+    <name>is_email_receipt</name>
+    <type>boolean</type>
+    <default>0</default>
+    <comment>If true, receipt is automatically emailed to contact on success</comment>
+  </field>
+  <field>
+    <name>receipt_from_name</name>
+    <type>varchar</type>
+    <length>255</length>
+    <default>NULL</default>
+    <comment>FROM email name used for receipts generated by applications to this grant application page.</comment>
+  </field>
+  <field>
+    <name>receipt_from_email</name>
+    <type>varchar</type>
+    <length>255</length>
+    <default>NULL</default>
+    <comment>FROM email address used for receipts generated by applications to this grant application page.</comment>
+  </field>
+  <field>
+    <name>cc_receipt</name>
+    <type>varchar</type>
+    <length>255</length>
+    <default>NULL</default>
+    <comment>Comma-separated list of email addresses to cc each time a receipt is sent</comment>
+  </field>
+  <field>
+    <name>bcc_receipt</name>
+    <type>varchar</type>
+    <length>255</length>
+    <default>NULL</default>
+    <comment>Comma-separated list of email addresses to bcc each time a receipt is sent</comment>
+  </field>
+  <field>
+    <name>receipt_text</name>
+    <type>text</type>
+    <html>
+      <type>TextArea</type>
+      <rows>6</rows>
+      <cols>50</cols>
+    </html>
+    <add>1.8</add>
+    <comment>Text to include above standard receipt info on receipt email. emails are text-only, so do not allow html for now</comment>
+  </field>
+  <field>
+    <name>is_active</name>
+    <type>boolean</type>
+    <default>1</default>
+    <add>1.8</add>
+    <comment>Is this grant application page active?</comment>
+  </field>
+  <field>
+    <name>start_date</name>
+    <type>datetime</type>
+    <uniqueName>grant_app_start_date</uniqueName>
+    <title>Grant Application Page Start Date</title>
+    <headerPattern>/^start|(s(tart\s)?date)$/i</headerPattern>
+    <import>true</import>
+    <add>1.7</add>
+    <html>
+      <type>Select Date</type>
+      <formatType>activityDateTime</formatType>
+    </html>
+    <default>NULL</default>
+    <comment>Date and time that this page starts.</comment>
+  </field>
+  <field>
+    <name>end_date</name>
+    <type>datetime</type>
+    <uniqueName>grant_app_end_date</uniqueName>
+    <title>Grant Application Page End Date</title>
+    <headerPattern>/^end|(e(nd\s)?date)$/i</headerPattern>
+    <import>true</import>
+    <add>1.7</add>
+    <html>
+      <type>Select Date</type>
+      <formatType>activityDateTime</formatType>
+    </html>
+    <default>NULL</default>
+    <comment>Date and time that this page ends. May be NULL if no defined end date/time</comment>
+  </field> 
+  <field>
+    <name>created_id</name>
+    <type>int unsigned</type>
+    <comment>FK to civicrm_contact, who created this grant application page</comment>
+    <default>NULL</default>
+  </field>
+  <foreignKey>
+    <name>created_id</name>
+    <table>civicrm_contact</table>
+    <key>id</key>
+    <onDelete>SET NULL</onDelete>
+  </foreignKey>
+  <field>
+    <name>created_date</name>
+    <type>datetime</type>
+    <title>Event Created Date</title>
+    <add>3.0</add>
+    <default>NULL</default>
+    <comment>Date and time that grant application page was created.</comment>
+  </field>
+</table>
