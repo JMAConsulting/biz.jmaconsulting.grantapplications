@@ -146,6 +146,13 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       ]);
       if (!empty($savedSearch['values'][0]['form_values'])) {
         $this->_defaults = array_replace($this->_defaults, $savedSearch['values'][0]['form_values']);
+        $numericFields = [
+          'amount_total',
+          'amount_requested',
+        ];
+        foreach ($numericFields as $field) {
+          $this->_defaults[$field] = CRM_Utils_Money::format($this->_defaults[$field], NULL, '%a');
+        }
       }
     }
     return $this->_defaults;
