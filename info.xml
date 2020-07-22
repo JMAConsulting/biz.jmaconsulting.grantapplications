@@ -17,7 +17,7 @@
     <email>support@jmaconsulting.biz</email>
   </maintainer>
   <releaseDate>2020-07-20</releaseDate>
-  <version>1.7</version>
+  <version>1.7.1</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>5.27</ver>
