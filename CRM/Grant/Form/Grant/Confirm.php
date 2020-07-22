@@ -620,16 +620,17 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
 
     // Save form values into saved search table
     if ($grant && $isDraft) {
-      $savedSearch = $formValues = $ssParams = $savedSearch = array();
-      $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$grant->id.'%"');
-      if (!empty($ssParams['id'])) {
-        CRM_Contact_BAO_SavedSearch::retrieve($ssParams, $savedSearch);
-      }
-      if (CRM_Utils_Array::value('id', $savedSearch)) {
-        $formValues['id'] = $savedSearch['id'];
-      }
-      $formValues['formValues'] = $params;
-      CRM_Contact_BAO_SavedSearch::create($formValues);
+      $savedSearch = civicrm_api3('SavedSearch', 'get', [
+        'search_custom_id' => $grant->id,
+        'api_entity' => 'civicrm_grant',
+      ]);
+
+      civicrm_api3('SavedSearch', 'create', [
+        'form_values' => $params,
+        'id' => CRM_Utils_Array::value('id', $savedSearch, NULL),
+        'search_custom_id' => $grant->id,
+        'api_entity' => 'civicrm_grant',
+      ]);
     }
 
     // create an activity record
