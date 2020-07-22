@@ -67,5 +67,35 @@ class CRM_Grant_Controller_Grant extends CRM_Core_Controller {
       $this->addActions();
     }
   }
-}
 
+  /**
+   * @param $uploadDir
+   * @param $uploadNames
+   */
+  public function addUploadAction($uploadDir, $uploadNames) {
+    if (empty($uploadDir)) {
+      $config = CRM_Core_Config::singleton();
+      $uploadDir = $config->uploadDir;
+    }
+
+    if (empty($uploadNames)) {
+      $uploadNames = $this->get('uploadNames');
+      if (!empty($uploadNames)) {
+        $uploadNames = array_merge($uploadNames,
+          CRM_Core_BAO_File::uploadNames()
+        );
+      }
+      else {
+        $uploadNames = CRM_Core_BAO_File::uploadNames();
+      }
+    }
+
+    $action = new CRM_Core_QuickForm_Action_Upload($this->_stateMachine,
+      $uploadDir,
+      $uploadNames
+    );
+    $this->addAction('upload', $action);
+    $this->addAction('save', $action);
+  }
+
+}
