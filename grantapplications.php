@@ -24,9 +24,12 @@ function grantapplications_civicrm_xmlMenu(&$files) {
 function grantapplications_civicrm_install() {
   _grantapplications_civix_civicrm_install();
 
-  $smarty = CRM_Core_Smarty::singleton();
-  $smarty->assign('currentDirectoryPath', __DIR__);
-  CRM_Utils_File::runSqlQuery(CIVICRM_DSN, $smarty->fetch(__DIR__ . '/sql/civicrm_msg_template.tpl'), NULL, TRUE);
+  $optionValueNameCheck = CRM_Core_DAO::singleValueQuery("SELECT id FROM civicrm_option_value WHERE name = 'grant_online_receipt'");
+  if (empty($optionValueNameCheck)) {
+    $smarty = CRM_Core_Smarty::singleton();
+    $smarty->assign('currentDirectoryPath', __DIR__);
+    CRM_Utils_File::runSqlQuery(CIVICRM_DSN, $smarty->fetch(__DIR__ . '/sql/civicrm_msg_template.tpl'), NULL, TRUE);
+  }
   grantapplications_addRemoveMenu(TRUE);
   return TRUE;
 }
