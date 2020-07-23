@@ -35,6 +35,13 @@ function grantapplications_civicrm_install() {
 }
 
 /**
+ * Implementation of hook_civicrm_postInstall
+ */
+function grantapplications_civicrm_postInstall() {
+  return _grantapplications_civix_civicrm_postInstall();
+}
+
+/**
  * Implementation of hook_civicrm_uninstall
  */
 function grantapplications_civicrm_uninstall() {
@@ -488,8 +495,7 @@ function grantapplications_addRemoveMenu($enable) {
     }
   }
 
-  CRM_Core_BAO_Setting::setItem($params['enableComponents'],
-    CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,'enable_components');
+  Civi::settings()->set('enable_components', $params['enableComponents']);
 }
 
 function grantapplications_civicrm_entityTypes(&$entityTypes) {
