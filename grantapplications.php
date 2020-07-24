@@ -402,9 +402,13 @@ function grantapplications_civicrm_pageRun(&$page) {
         unset($actionLinks[$key]);
         continue;
       }
-      $ssID = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$fields['grant_id'].'%"');
-      if ($ssID) {
-        $formValues = CRM_Contact_BAO_SavedSearch::getFormValues($ssID);
+      $savedSearch = civicrm_api3('SavedSearch', 'get', [
+        'search_custom_id' => $fields['grant_id'],
+        'api_entity' => 'civicrm_grant',
+        'sequential' => 1,
+      ]);
+      if (!empty($savedSearch['values'][0]['form_values'])) {
+        $formValues = $savedSearch['values'][0]['form_values'];
         $actionLinks[$key]['action'] = CRM_Core_Action::formLink(grantapplications_dashboardActionLinks(),
           $mask,
           array(
@@ -458,9 +462,13 @@ function grantapplications_civicrm_pageRun(&$page) {
           }
 
           // FIXME:Calling multiple times
-          $ssID = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$dao->id.'%"');
-          if ($ssID) {
-            $formValues = CRM_Contact_BAO_SavedSearch::getFormValues($ssID);
+          $savedSearch = civicrm_api3('SavedSearch', 'get', [
+            'search_custom_id' => $dao->id,
+            'api_entity' => 'civicrm_grant',
+            'sequential' => 1,
+          ]);
+          if (!empty($savedSearch['values'][0]['form_values'])) {
+            $formValues = $savedSearch['values'][0]['form_values'];
             $row['action'] = CRM_Core_Action::formLink(grantapplications_dashboardActionLinks(),
               $mask,
               array(

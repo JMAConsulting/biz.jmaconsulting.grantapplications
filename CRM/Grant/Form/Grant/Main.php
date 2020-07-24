@@ -132,19 +132,28 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
       $this->_defaults = array_merge($this->_defaults, $getDefaults);
     }
 
-    $config = CRM_Core_Config::singleton();
-
     //process drafts
     $gid = CRM_Utils_Request::retrieve('gid', 'Positive');
     if ($gid) {
-      $ssParams = array();
       $grantStatusID = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_Grant', $gid, 'status_id');
       if ($grantStatusID != CRM_Core_PseudoConstant::getKey('CRM_Grant_BAO_Grant', 'status_id', 'Draft')) {
         CRM_Core_Error::fatal(ts('This grant application has already been submitted.'));
       }
-      $ssParams['id'] = CRM_Core_DAO::singleValueQuery('SELECT id FROM civicrm_saved_search WHERE form_values LIKE "%\"grant_id\";i:'.$gid.'%"');
-      CRM_Contact_BAO_SavedSearch::retrieve($ssParams, $savedSearch);
-      $this->_defaults = array_replace( $this->_defaults, unserialize($savedSearch['form_values']) );
+      $savedSearch = civicrm_api3('SavedSearch', 'get', [
+        'search_custom_id' => $gid,
+        'api_entity' => 'civicrm_grant',
+        'sequential' => 1,
+      ]);
+      if (!empty($savedSearch['values'][0]['form_values'])) {
+        $this->_defaults = array_replace($this->_defaults, $savedSearch['values'][0]['form_values']);
+        $numericFields = [
+          'amount_total',
+          'amount_requested',
+        ];
+        foreach ($numericFields as $field) {
+          $this->_defaults[$field] = CRM_Utils_Money::format($this->_defaults[$field], NULL, '%a');
+        }
+      }
     }
     return $this->_defaults;
   }
