@@ -127,9 +127,10 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
       $this->set('values', $this->_values);
     }
     // Preload libraries required by the "Profiles" tab
-	$schemas = array('IndividualModel', 'OrganizationModel', 'GrantModel');
+    $schemas = array('IndividualModel', 'OrganizationModel', 'GrantModel');
     CRM_UF_Page_ProfileEditor::registerProfileScripts();
     CRM_UF_Page_ProfileEditor::registerSchemas($schemas);
+    CRM_Core_Resources::singleton()->addScriptFile('biz.jmaconsulting.grantapplications', 'js/grantapplications.js');
   }
 
   /**
