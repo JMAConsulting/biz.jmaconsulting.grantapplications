@@ -416,6 +416,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
     $contactID = $this->getContactID();
 
     if (empty($form->_values['onbehalf_profile_id'])) {
+      $form->assign('onBehalfOfFields', []);
       return;
     }
 
