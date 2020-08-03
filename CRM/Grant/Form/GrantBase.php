@@ -280,17 +280,9 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
         'financial_type_id' => 1,
       );
 
-      $fields = NULL;
-      if ($contactID && CRM_Core_BAO_UFGroup::filterUFGroups($id, $contactID)) {
-        $fields = CRM_Core_BAO_UFGroup::getFields($id, FALSE, CRM_Core_Action::ADD, NULL, NULL, FALSE,
-          NULL, FALSE, NULL, CRM_Core_Permission::CREATE, NULL
-        );
-      }
-      else {
-        $fields = self::getFields($id, FALSE, CRM_Core_Action::ADD, NULL, NULL, FALSE,
-          NULL, FALSE, NULL, CRM_Core_Permission::CREATE, NULL
-        );
-      }
+      $fields = self::getFields($id, FALSE, CRM_Core_Action::ADD, NULL, NULL, FALSE,
+        NULL, FALSE, NULL, CRM_Core_Permission::CREATE, NULL
+      );
 
       if ($fields) {
         // determine if email exists in profile so we know if we need to manually insert CRM-2888, CRM-15067
