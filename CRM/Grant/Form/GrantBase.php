@@ -287,7 +287,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
         );
       }
       else {
-        $fields = CRM_Core_BAO_UFGroup::getFields($id, FALSE, CRM_Core_Action::ADD, NULL, NULL, FALSE,
+        $fields = self::getFields($id, FALSE, CRM_Core_Action::ADD, NULL, NULL, FALSE,
           NULL, FALSE, NULL, CRM_Core_Permission::CREATE, NULL
         );
       }
@@ -400,6 +400,382 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
         }
       }
     }
+  }
+
+  /**
+   * Get all the fields that belong to the group with the name title,
+   * and format for use with buildProfile. This is the SQL analog of
+   * formatUFFields().
+   *
+   * @param mix $id
+   *   The id of the UF group or ids of ufgroup.
+   * @param bool|int $register are we interested in registration fields
+   * @param int $action
+   *   What action are we doing.
+   * @param int $visibility
+   *   Visibility of fields we are interested in.
+   * @param $searchable
+   * @param bool $showAll
+   * @param string $restrict
+   *   Should we restrict based on a specified profile type.
+   * @param bool $skipPermission
+   * @param null $ctype
+   * @param int $permissionType
+   * @param string $orderBy
+   * @param null $orderProfiles
+   *
+   * @param bool $eventProfile
+   *
+   * @return array
+   *   The fields that belong to this ufgroup(s)
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public static function getFields(
+    $id,
+    $register = FALSE,
+    $action = NULL,
+    $visibility = NULL,
+    $searchable = NULL,
+    $showAll = FALSE,
+    $restrict = NULL,
+    $skipPermission = FALSE,
+    $ctype = NULL,
+    $permissionType = CRM_Core_Permission::CREATE,
+    $orderBy = 'field_name',
+    $orderProfiles = NULL,
+    $eventProfile = FALSE
+  ) {
+    if (!is_array($id)) {
+      $id = CRM_Utils_Type::escape($id, 'Positive');
+      $profileIds = [$id];
+    }
+    else {
+      $profileIds = $id;
+    }
+
+    $gids = implode(',', $profileIds);
+    $params = [];
+    if ($restrict) {
+      $query = "SELECT g.* from civicrm_uf_group g
+                LEFT JOIN civicrm_uf_join j ON (j.uf_group_id = g.id)
+                WHERE g.id IN ( {$gids} )
+                AND ((j.uf_group_id IN ( {$gids} ) AND j.module = %1) OR g.is_reserved = 1 )
+                ";
+      $params = [1 => [$restrict, 'String']];
+    }
+    else {
+      $query = "SELECT g.* from civicrm_uf_group g WHERE g.id IN ( {$gids} ) ";
+    }
+
+    if (!$showAll) {
+      $query .= " AND g.is_active = 1";
+    }
+
+    $checkPermission = [
+      [
+        'administer CiviCRM',
+        'manage event profiles',
+      ],
+    ];
+    if ($eventProfile && CRM_Core_Permission::check($checkPermission)) {
+      $skipPermission = TRUE;
+    }
+
+    // add permissioning for profiles only if not registration
+    if (!$skipPermission) {
+      $permissionClause = CRM_Core_Permission::ufGroupClause($permissionType, 'g.');
+      $query .= " AND $permissionClause ";
+    }
+
+    if ($orderProfiles and count($profileIds) > 1) {
+      $query .= " ORDER BY FIELD(  g.id, {$gids} )";
+    }
+    $group = CRM_Core_DAO::executeQuery($query, $params);
+    $fields = [];
+    $validGroup = FALSE;
+
+    while ($group->fetch()) {
+      $validGroup = TRUE;
+      $query = self::createUFFieldQuery($group->id, $searchable, $showAll, $visibility, $orderBy);
+      $field = CRM_Core_DAO::executeQuery($query);
+
+      $importableFields = self::getProfileFieldMetadata($showAll);
+      list($customFields, $addressCustomFields) = self::getCustomFields($ctype);
+
+      while ($field->fetch()) {
+        list($name, $formattedField) = self::formatUFField($group, $field, $customFields, $addressCustomFields, $importableFields, $permissionType);
+        if ($formattedField !== NULL) {
+          $fields[$name] = $formattedField;
+        }
+      }
+    }
+
+    if (empty($fields) && !$validGroup) {
+      throw new CRM_Core_Exception(ts('The requested Profile (gid=%1) is disabled OR it is not configured to be used for \'Profile\' listings in its Settings OR there is no Profile with that ID OR you do not have permission to access this profile. Please contact the site administrator if you need assistance.',
+        [1 => implode(',', $profileIds)]
+      ));
+    }
+    else {
+      CRM_Core_BAO_UFGroup::reformatProfileFields($fields);
+    }
+
+    return $fields;
+  }
+
+  /**
+   * @param $ctype
+   *
+   * @return mixed
+   */
+  protected static function getCustomFields($ctype) {
+    $cacheKey = 'uf_grant_group_custom_fields_' . $ctype;
+    if (!Civi::cache('metadata')->has($cacheKey)) {
+      $customFields = CRM_Core_BAO_CustomField::getFieldsForImport($ctype, FALSE, FALSE, FALSE, TRUE, TRUE);
+
+      // hack to add custom data for components
+      $components = ['Contribution', 'Participant', 'Membership', 'Activity', 'Case', 'Grant'];
+      foreach ($components as $value) {
+        $customFields = array_merge($customFields, CRM_Core_BAO_CustomField::getFieldsForImport($value));
+      }
+      $addressCustomFields = CRM_Core_BAO_CustomField::getFieldsForImport('Address');
+      $customFields = array_merge($customFields, $addressCustomFields);
+      Civi::cache('metadata')->set($cacheKey, [$customFields, $addressCustomFields]);
+    }
+    return Civi::cache('metadata')->get($cacheKey);
+  }
+
+  /**
+   * Create a query to find all visible UFFields in a UFGroup.
+   *
+   * This is the SQL-variant of checkUFFieldDisplayable().
+   *
+   * @param int $groupId
+   * @param bool $searchable
+   * @param bool $showAll
+   * @param int $visibility
+   * @param string $orderBy
+   *   Comma-delimited list of SQL columns.
+   *
+   * @return string
+   */
+  protected static function createUFFieldQuery($groupId, $searchable, $showAll, $visibility, $orderBy) {
+    $where = " WHERE uf_group_id = {$groupId}";
+
+    if ($searchable) {
+      $where .= " AND is_searchable = 1";
+    }
+
+    if (!$showAll) {
+      $where .= " AND is_active = 1";
+    }
+
+    if ($visibility) {
+      $clause = [];
+      if ($visibility & self::PUBLIC_VISIBILITY) {
+        $clause[] = 'visibility = "Public Pages"';
+      }
+      if ($visibility & self::ADMIN_VISIBILITY) {
+        $clause[] = 'visibility = "User and User Admin Only"';
+      }
+      if ($visibility & self::LISTINGS_VISIBILITY) {
+        $clause[] = 'visibility = "Public Pages and Listings"';
+      }
+      if (!empty($clause)) {
+        $where .= ' AND ( ' . implode(' OR ', $clause) . ' ) ';
+      }
+    }
+
+    $query = "SELECT * FROM civicrm_uf_field $where ORDER BY weight";
+    if ($orderBy) {
+      $query .= ", " . $orderBy;
+      return $query;
+    }
+    return $query;
+  }
+
+  /**
+   * Get the metadata for all potential profile fields.
+   *
+   * @param bool $isIncludeInactive
+   *   Should disabled fields be included.
+   *
+   * @return array
+   *   Field metadata for all fields that might potentially be in a profile.
+   */
+  protected static function getProfileFieldMetadata($isIncludeInactive) {
+    return self::getImportableFields($isIncludeInactive, NULL, NULL, NULL, TRUE);
+  }
+
+
+  /**
+   * Get a list of filtered field metadata.
+   *
+   * @param $showAll
+   * @param $profileType
+   * @param $contactActivityProfile
+   * @param bool $filterMode
+   *   Filter mode means you are using importable fields for filtering rather than just getting metadata.
+   *   With filter mode = FALSE BOTH activity fields and component fields are returned.
+   *   I can't see why you would ever want to use this function in filter mode as the component fields are
+   *   still unfiltered. However, I feel scared enough to leave it as it is. I have marked this function as
+   *   deprecated and am recommending the wrapper 'getProfileFieldMetadata' in order to try to
+   *   send this confusion to history.
+   *
+   * @return array
+   * @deprecated use getProfileFieldMetadata
+   *
+   */
+  protected static function getImportableFields($showAll, $profileType, $contactActivityProfile, $filterMode = TRUE) {
+    if (!$showAll) {
+      $importableFields = CRM_Contact_BAO_Contact::importableFields('All', FALSE, FALSE, FALSE, TRUE, TRUE);
+    }
+    else {
+      $importableFields = CRM_Contact_BAO_Contact::importableFields('All', FALSE, TRUE, FALSE, TRUE, TRUE);
+    }
+
+    $activityFields = CRM_Activity_BAO_Activity::getProfileFields();
+    $componentFields = CRM_Core_Component::getQueryFields();
+    if ($filterMode == TRUE) {
+      if ($profileType == 'Activity' || $contactActivityProfile) {
+        $importableFields = array_merge($importableFields, $activityFields);
+      }
+      else {
+        $importableFields = array_merge($importableFields, $componentFields);
+      }
+    }
+    else {
+      $importableFields = array_merge($importableFields, $activityFields, $componentFields);
+    }
+
+    $importableFields['group']['title'] = ts('Group(s)');
+    $importableFields['group']['where'] = NULL;
+    $importableFields['tag']['title'] = ts('Tag(s)');
+    $importableFields['tag']['where'] = NULL;
+    return $importableFields;
+  }
+
+  /**
+   * Prepare a field for rendering with CRM_Core_BAO_UFGroup::buildProfile.
+   *
+   * @param CRM_Core_DAO_UFGroup|CRM_Core_DAO $group
+   * @param CRM_Core_DAO_UFField|CRM_Core_DAO $field
+   * @param array $customFields
+   * @param array $addressCustomFields
+   * @param array $importableFields
+   * @param int $permissionType
+   *   Eg CRM_Core_Permission::CREATE.
+   *
+   * @return array
+   */
+  protected static function formatUFField(
+    $group,
+    $field,
+    $customFields,
+    $addressCustomFields,
+    $importableFields,
+    $permissionType = CRM_Core_Permission::CREATE
+  ) {
+    $name = $field->field_name;
+    $title = $field->label;
+
+    $addressCustom = FALSE;
+    if (in_array($permissionType, [CRM_Core_Permission::CREATE, CRM_Core_Permission::EDIT]) &&
+      in_array($field->field_name, array_keys($addressCustomFields))
+    ) {
+      $addressCustom = TRUE;
+      $name = "address_{$name}";
+    }
+    if ($field->field_name == 'url') {
+      $name .= "-{$field->website_type_id}";
+    }
+    elseif (!empty($field->location_type_id)) {
+      $name .= "-{$field->location_type_id}";
+    }
+    else {
+      $locationFields = CRM_Core_BAO_UFGroup::getLocationFields();
+      if (in_array($field->field_name, $locationFields) || $addressCustom) {
+        $name .= '-Primary';
+      }
+    }
+
+    if (isset($field->phone_type_id)) {
+      $name .= "-{$field->phone_type_id}";
+    }
+    $fieldMetaData = CRM_Utils_Array::value($name, $importableFields, ($importableFields[$field->field_name] ?? []));
+
+    // No lie: this is bizarre; why do we need to mix so many UFGroup properties into UFFields?
+    // I guess to make field self sufficient with all the required data and avoid additional calls
+    $formattedField = [
+      'name' => $name,
+      'groupTitle' => $group->title,
+      'groupName' => $group->name,
+      'groupDisplayTitle' => (!empty($group->frontend_title)) ? $group->frontend_title : $group->title,
+      'groupHelpPre' => empty($group->help_pre) ? '' : $group->help_pre,
+      'groupHelpPost' => empty($group->help_post) ? '' : $group->help_post,
+      'title' => $title,
+      'where' => CRM_Utils_Array::value('where', CRM_Utils_Array::value($field->field_name, $importableFields)),
+      'attributes' => CRM_Core_DAO::makeAttribute(CRM_Utils_Array::value($field->field_name, $importableFields)),
+      'is_required' => $field->is_required,
+      'is_view' => $field->is_view,
+      'help_pre' => $field->help_pre,
+      'help_post' => $field->help_post,
+      'visibility' => $field->visibility,
+      'in_selector' => $field->in_selector,
+      'rule' => CRM_Utils_Array::value('rule', CRM_Utils_Array::value($field->field_name, $importableFields)),
+      'location_type_id' => $field->location_type_id ?? NULL,
+      'website_type_id' => $field->website_type_id ?? NULL,
+      'phone_type_id' => $field->phone_type_id ?? NULL,
+      'group_id' => $group->id,
+      'add_to_group_id' => $group->add_to_group_id ?? NULL,
+      'add_captcha' => $group->add_captcha ?? NULL,
+      'field_type' => $field->field_type,
+      'field_id' => $field->id,
+      'pseudoconstant' => CRM_Utils_Array::value(
+        'pseudoconstant',
+        CRM_Utils_Array::value($field->field_name, $importableFields)
+      ),
+      // obsolete this when we remove the name / dbName discrepancy with gender/suffix/prefix
+      'dbName' => CRM_Utils_Array::value(
+        'dbName',
+        CRM_Utils_Array::value($field->field_name, $importableFields)
+      ),
+      'skipDisplay' => 0,
+      'data_type' => CRM_Utils_Type::getDataTypeFromFieldMetadata($fieldMetaData),
+      'bao' => $fieldMetaData['bao'] ?? NULL,
+    ];
+
+    $formattedField = CRM_Utils_Date::addDateMetadataToField($fieldMetaData, $formattedField);
+
+    //adding custom field property
+    if (substr($field->field_name, 0, 6) == 'custom' ||
+      substr($field->field_name, 0, 14) === 'address_custom'
+    ) {
+      // if field is not present in customFields, that means the user
+      // DOES NOT HAVE permission to access that field
+      if (array_key_exists($field->field_name, $customFields)) {
+        $formattedField['serialize'] = !empty($customFields[$field->field_name]['serialize']);
+        $formattedField['is_search_range'] = $customFields[$field->field_name]['is_search_range'];
+        // fix for CRM-1994
+        $formattedField['options_per_line'] = $customFields[$field->field_name]['options_per_line'];
+        $formattedField['html_type'] = $customFields[$field->field_name]['html_type'];
+
+        if (CRM_Utils_Array::value('html_type', $formattedField) == 'Select Date') {
+          $formattedField['date_format'] = $customFields[$field->field_name]['date_format'];
+          $formattedField['time_format'] = $customFields[$field->field_name]['time_format'];
+          $formattedField['is_datetime_field'] = TRUE;
+          $formattedField['smarty_view_format'] = CRM_Utils_Date::getDateFieldViewFormat($formattedField['date_format']);
+        }
+
+        $formattedField['is_multi_summary'] = $field->is_multi_summary;
+        return [$name, $formattedField];
+      }
+      else {
+        $formattedField = NULL;
+        return [$name, $formattedField];
+      }
+    }
+    return [$name, $formattedField];
   }
 
   /**
