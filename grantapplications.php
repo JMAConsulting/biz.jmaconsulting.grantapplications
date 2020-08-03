@@ -611,7 +611,7 @@ function grantapplications_enableDisableNavigationMenu($action) {
 }
 
 function grantapplications_civicrm_alterUFFields(&$fields) {
-  $fields['Grant'] = CRM_Grant_BAO_Grant::exportableFields();
+  $fields['Grant'] = CRM_Grantapplications_BAO_GrantApplicationProfile::exportableFields();
 }
 
 function grantapplications_civicrm_post($entity, $op, $id, $object) {
