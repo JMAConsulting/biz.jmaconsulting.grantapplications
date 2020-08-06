@@ -94,7 +94,7 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
         TRUE
       );
     }
- 
+
     $this->add('wysiwyg', 'intro_text', ts('Introductory Message'), $attributes['intro_text']);
 
     $this->add('wysiwyg', 'footer_text', ts('Footer Message'), $attributes['footer_text']);
@@ -104,7 +104,7 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
 
     // is on behalf of an organization ?
     $this->addElement('checkbox', 'is_organization', ts('Allow individuals to apply for grants on behalf of an organization?'), NULL, array('onclick' => "showHideByValue('is_organization',true,'for_org_text','table-row','radio',false);showHideByValue('is_organization',true,'for_org_option','table-row','radio',false);"));
-    
+
     $coreTypes = array('Contact', 'Organization');
 
     $entities[] = array(
@@ -117,12 +117,12 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
 
     // is this page active ?
     $this->addElement('checkbox', 'is_active', ts('Is this Grant Aplication Page Active?'));
-    
+
     $allowCoreTypes = array_merge($coreTypes, CRM_Contact_BAO_ContactType::subTypes('Organization'));
     $allowSubTypes = array();
 
     $this->addProfileSelector('onbehalf_profile_id', ts('Organization Profile'), $allowCoreTypes, $allowSubTypes, $entities);
-    
+
     $options   = array();
     $options[] = $this->createElement('radio', NULL, NULL, ts('Optional'), 1);
     $options[] = $this->createElement('radio', NULL, NULL, ts('Required'), 2);
@@ -157,7 +157,7 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
       $grantType = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantProgram', $values['grant_program_id'], 'grant_type_id');
       if ($grantType != $values['grant_type_id']) {
         $errors['grant_program_id'] = ts("Please select a Grant Program which uses the same grant type.");
-      } 
+      }
     }
 
     //CRM-4286
@@ -185,23 +185,15 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
     return $errors;
   }
 
-  /**
-   * Process the form.
-   */
-  public function postProcess() {
-    // get the submitted form values.
-    $params = $this->controller->exportValues($this->_name);
-
+  public function submit($params, $isTest = FALSE) {
     // we do this in case the user has hit the forward/back button
-    if ($this->_id) {
+    if (!empty($this->_id)) {
       $params['id'] = $this->_id;
     }
     else {
-      $session = CRM_Core_Session::singleton();
-      $params['created_id'] = $session->get('userID');
+      $params['created_id'] = CRM_Core_Session::singleton()->get('userID');
       $params['created_date'] = date('YmdHis');
-      $config = CRM_Core_Config::singleton();
-      $params['currency'] = $config->defaultCurrency;
+      $params['currency'] = CRM_Core_Config::singleton()->defaultCurrency;
     }
 
     $params['is_active'] = CRM_Utils_Array::value('is_active', $params, FALSE);
@@ -246,6 +238,10 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
       }
     }
 
+    if ($isTest) {
+      return $dao->id;
+    }
+
     $this->set('id', $dao->id);
     if ($this->_action & CRM_Core_Action::ADD) {
       $url = 'civicrm/admin/grant/draft';
@@ -261,6 +257,17 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
 
       CRM_Utils_System::redirect(CRM_Utils_System::url($url, $urlParams));
     }
+  }
+
+  /**
+   * Process the form.
+   */
+  public function postProcess() {
+    // get the submitted form values.
+    $params = $this->controller->exportValues($this->_name);
+
+    $this->submit($params);
+
     parent::endPostProcess();
   }
 

@@ -110,16 +110,7 @@ class CRM_Grant_Form_GrantPage_ThankYou extends CRM_Grant_Form_GrantPage {
     return $errors;
   }
 
-  /**
-   * Process the form
-   *
-   * @return void
-   * @access public
-   */
-  public function postProcess() {
-    // get the submitted form values.
-    $params = $this->controller->exportValues($this->_name);
-
+  public function submit($params) {
     $params['id'] = $this->_id;
     $params['is_email_receipt'] = CRM_Utils_Array::value('is_email_receipt', $params, FALSE);
     if (!$params['is_email_receipt']) {
@@ -130,7 +121,20 @@ class CRM_Grant_Form_GrantPage_ThankYou extends CRM_Grant_Form_GrantPage {
       $params['bcc_receipt'] = NULL;
     }
 
-    $dao = CRM_Grant_BAO_GrantApplicationPage::create($params);
+    CRM_Grant_BAO_GrantApplicationPage::create($params);
+  }
+
+  /**
+   * Process the form
+   *
+   * @return void
+   * @access public
+   */
+  public function postProcess() {
+    // get the submitted form values.
+    $params = $this->controller->exportValues($this->_name);
+    $this->submit($params);
+
     parent::endPostProcess();
   }
 
@@ -144,4 +148,3 @@ class CRM_Grant_Form_GrantPage_ThankYou extends CRM_Grant_Form_GrantPage {
     return ts('Thanks and Receipt');
   }
 }
-

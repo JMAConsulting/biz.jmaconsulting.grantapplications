@@ -96,16 +96,7 @@ class CRM_Grant_Form_GrantPage_Custom extends CRM_Grant_Form_GrantPage {
     return $defaults;
   }
 
-  /**
-   * Process the form
-   *
-   * @return void
-   * @access public
-   */
-  public function postProcess() {
-    // get the submitted form values.
-    $params = $this->controller->exportValues($this->_name);
-
+  public function submit($params) {
     if ($this->_action & CRM_Core_Action::UPDATE) {
       $params['id'] = $this->_id;
     }
@@ -138,6 +129,19 @@ class CRM_Grant_Form_GrantPage_Custom extends CRM_Grant_Form_GrantPage {
     }
 
     $transaction->commit();
+  }
+
+  /**
+   * Process the form
+   *
+   * @return void
+   * @access public
+   */
+  public function postProcess() {
+    // get the submitted form values.
+    $params = $this->controller->exportValues($this->_name);
+    $this->submit($params);
+
     parent::endPostProcess();
   }
 
@@ -167,4 +171,3 @@ class CRM_Grant_Form_GrantPage_Custom extends CRM_Grant_Form_GrantPage {
     return empty($errors) ? TRUE : $errors;
   }
 }
-

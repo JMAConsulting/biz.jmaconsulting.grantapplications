@@ -67,7 +67,7 @@ class CRM_Grant_Form_GrantPage_Draft extends CRM_Grant_Form_GrantPage {
     $this->addFormRule(array('CRM_Grant_Form_GrantPage_Draft', 'formRule'));
 
     parent::buildQuickForm();
-  } 
+  }
 
   /**
    * global validation rules for the form
@@ -87,6 +87,17 @@ class CRM_Grant_Form_GrantPage_Draft extends CRM_Grant_Form_GrantPage {
     return $errors;
   }
 
+  public function submit($params) {
+    $params['id'] = $this->_id;
+    $params['is_draft'] = CRM_Utils_Array::value('is_draft', $params, FALSE);
+    if (!$params['is_draft']) {
+      $params['draft_title'] = NULL;
+      $params['draft_text'] = NULL;
+      $params['draft_footer'] = NULL;
+    }
+
+    CRM_Grant_BAO_GrantApplicationPage::create($params);
+  }
   /**
    * Process the form
    *
@@ -96,16 +107,8 @@ class CRM_Grant_Form_GrantPage_Draft extends CRM_Grant_Form_GrantPage {
   public function postProcess() {
     // get the submitted form values.
     $params = $this->controller->exportValues($this->_name);
+    $this->submit($params);
 
-    $params['id'] = $this->_id;
-    $params['is_draft'] = CRM_Utils_Array::value('is_draft', $params, FALSE);
-    if (!$params['is_draft']) {
-      $params['draft_title'] = NULL;
-      $params['draft_text'] = NULL;
-      $params['draft_footer'] = NULL;
-    }
-
-    $dao = CRM_Grant_BAO_GrantApplicationPage::create($params);
     parent::endPostProcess();
   }
 
@@ -119,4 +122,3 @@ class CRM_Grant_Form_GrantPage_Draft extends CRM_Grant_Form_GrantPage {
     return ts('Save as Draft');
   }
 }
-
