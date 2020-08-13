@@ -136,11 +136,12 @@ class CRM_Grant_Form_GrantPageTest extends \PHPUnit\Framework\TestCase implement
     /**
      * Create dummy contact.
      */
-    public function createDummyContact() {
-      $results = $this->callAPISuccess('Contact', 'create', array(
+    public function createDummyContact($params = []) {
+      $results = $this->callAPISuccess('Contact', 'create', array_merge([
         'contact_type' => 'Individual',
         'first_name' => 'Adam' . substr(sha1(rand()), 0, 7),
         'last_name' => 'Cooper' . substr(sha1(rand()), 0, 7),
+      ], $params
       ));
 
       return $results['id'];
@@ -181,24 +182,28 @@ class CRM_Grant_Form_GrantPageTest extends \PHPUnit\Framework\TestCase implement
       $id = $form->submit($params, TRUE);
       $this->assertTrue(!empty($id));
 
+      $this->_getGrantOnBehalfProfile($id, $onBehalfProfileID);
+
+      return $id;
+    }
+
+    public function _getGrantOnBehalfProfile($grantPageID) {
       $dao = new CRM_Core_DAO_UFJoin();
       $dao->entity_table = 'civicrm_grant_app_page';
       $dao->module = 'on_behalf';
-      $dao->entity_id = $id;
+      $dao->entity_id = $grantPageID;
       $dao->find(TRUE);
       $this->assertEquals($dao->N, 1);
       $expectedSettings = [
         'module' => 'on_behalf',
         'entity_table' => 'civicrm_grant_app_page',
-        'entity_id' => $id,
-        'uf_group_id' => $onBehalfProfileID,
+        'entity_id' => $grantPageID,
+        'uf_group_id' => $onBehalfProfileID ?: $dao->uf_group_id,
         'module_data' => '{"on_behalf":{"is_for_organization":false,"default":{"for_organization":""}}}',
       ];
       foreach ($expectedSettings as $attr => $value) {
         $this->assertEquals($dao->$attr, $value);
       }
-
-      return $id;
     }
 
     /**
@@ -242,21 +247,28 @@ class CRM_Grant_Form_GrantPageTest extends \PHPUnit\Framework\TestCase implement
 
       // TODO : we cannot use UFJoin.get api yet as its not supporting civicrm_grant_app_page entity_table in core and there is ni hook to enxtend
       // the valid list of entity_tables. For more details check CRM_Core_BAO_UFJoin::entityTables()
+      $this->_getGrantProfileID($id, $profileID);
+    }
+
+    public function _getGrantProfileID($grantPageID, $profileID = NULL) {
       $dao = new CRM_Core_DAO_UFJoin();
       $dao->entity_table = 'civicrm_grant_app_page';
       $dao->module = 'CiviGrant';
-      $dao->entity_id = $id;
+      $dao->entity_id = $grantPageID;
       $dao->find(TRUE);
       $this->assertEquals($dao->N, 1);
+
       $expectedSettings = [
         'module' => 'CiviGrant',
         'entity_table' => 'civicrm_grant_app_page',
         'entity_id' => $id,
-        'uf_group_id' => $profileID,
+        'uf_group_id' => $profileID ?: $dao->uf_group_id,
       ];
       foreach ($expectedSettings as $attr => $value) {
         $this->assertEquals($dao->$attr, $value);
       }
+
+      return $dao->uf_group_id;
     }
 
     /**
@@ -295,6 +307,7 @@ class CRM_Grant_Form_GrantPageTest extends \PHPUnit\Framework\TestCase implement
       $this->_grantPageDraft($grantPageID);
       $this->_grantPageProfile($grantPageID);
       $this->_grantPageThankYou($grantPageID);
+      return $grantPageID;
     }
 
 }
