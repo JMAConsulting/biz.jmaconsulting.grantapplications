@@ -58,7 +58,7 @@ class CRM_Grant_Form_GrantPage_Delete extends CRM_Grant_Form_GrantPage {
 
     //check for delete
     if (!CRM_Core_Permission::checkActionPermission('CiviGrant', $this->_action)) {
-      CRM_Core_Error::fatal(ts('You do not have permission to access this page'));
+      throw new CRM_Core_Exception(ts('You do not have permission to access this page'));
     }
   }
 
@@ -72,7 +72,7 @@ class CRM_Grant_Form_GrantPage_Delete extends CRM_Grant_Form_GrantPage {
     $id = CRM_Utils_Request::retrieve('id', 'Positive',
       $this, FALSE, 0
     );
-  
+
     $this->_title = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantApplicationPage', $id, 'title');
     $this->assign('title', $this->_title);
 
@@ -109,7 +109,7 @@ class CRM_Grant_Form_GrantPage_Delete extends CRM_Grant_Form_GrantPage {
     );
     $dao->copyValues($params);
     $dao->delete();
-           
+
     // finally delete the grant application page
     $dao = new CRM_Grant_DAO_GrantApplicationPage();
     $dao->id = $this->_id;

@@ -7,9 +7,9 @@
  * extension.
  */
 class CRM_Grantapplications_ExtensionUtil {
-  const SHORT_NAME = "grantapplications";
-  const LONG_NAME = "biz.jmaconsulting.grantapplications";
-  const CLASS_PREFIX = "CRM_Grantapplications";
+  const SHORT_NAME = 'grantapplications';
+  const LONG_NAME = 'biz.jmaconsulting.grantapplications';
+  const CLASS_PREFIX = 'CRM_Grantapplications';
 
   /**
    * Translate a string using the extension's domain.

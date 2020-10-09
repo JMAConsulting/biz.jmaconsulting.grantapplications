@@ -170,7 +170,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
       // check if form is active
       if (!CRM_Utils_Array::value('is_active', $this->_values)) {
         // form is inactive, die a fatal death
-        CRM_Core_Error::fatal(ts('The page you requested is currently unavailable.'));
+        throw new CRM_Core_Exception(ts('The page you requested is currently unavailable.'));
       }
 
       if (!empty($this->_values['custom_pre_id'])) {
@@ -789,7 +789,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
     }
 
     if (!CRM_Core_DAO::getFieldValue('CRM_Core_DAO_UFGroup', $form->_values['onbehalf_profile_id'], 'is_active')) {
-      CRM_Core_Error::fatal(ts('This grant application page has been configured for application of grant on behalf of an organization and the selected onbehalf profile is either disabled or not found.'));
+      throw new CRM_Core_Exception(ts('This grant application page has been configured for application of grant on behalf of an organization and the selected onbehalf profile is either disabled or not found.'));
     }
 
     if ($contactID) {
