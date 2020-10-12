@@ -137,7 +137,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
     if ($gid) {
       $grantStatusID = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_Grant', $gid, 'status_id');
       if ($grantStatusID != CRM_Core_PseudoConstant::getKey('CRM_Grant_BAO_Grant', 'status_id', 'Draft')) {
-        CRM_Core_Error::fatal(ts('This grant application has already been submitted.'));
+        throw new CRM_Core_Exception(ts('This grant application has already been submitted.'));
       }
       $savedSearch = civicrm_api3('SavedSearch', 'get', [
         'search_custom_id' => $gid,

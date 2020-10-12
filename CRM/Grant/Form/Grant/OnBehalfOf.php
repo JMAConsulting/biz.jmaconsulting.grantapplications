@@ -57,13 +57,13 @@ class CRM_Grant_Form_Grant_OnBehalfOf {
     if (!$form->_profileId ||
       !CRM_Core_DAO::getFieldValue('CRM_Core_DAO_UFGroup', $form->_profileId, 'is_active')
     ) {
-      CRM_Core_Error::fatal(ts('This grant application page has been configured for applying for grants on behalf of an organization and the selected onbehalf profile is either disabled or not found.'));
+      throw new CRM_Core_Exception(ts('This grant application page has been configured for applying for grants on behalf of an organization and the selected onbehalf profile is either disabled or not found.'));
     }
 
     $requiredProfileFields = array('organization_name', 'email');
     $validProfile = CRM_Core_BAO_UFGroup::checkValidProfile($form->_profileId, $requiredProfileFields);
     if (!$validProfile) {
-      CRM_Core_Error::fatal(ts('This grant application page has been configured for applying for grants on behalf of an organization and the required fields of the selected onbehalf profile are disabled.'));
+      throw new CRM_Core_Exception(ts('This grant application page has been configured for applying for grants on behalf of an organization and the required fields of the selected onbehalf profile are disabled.'));
     }
 
     $form->assign('profileId', $form->_profileId);
