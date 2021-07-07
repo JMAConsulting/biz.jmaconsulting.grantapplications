@@ -74,9 +74,14 @@ class CRM_Grant_BAO_Grant_Utils {
     $isActive = CRM_Grantapplications_BAO_GrantApplicationProfile::checkRelatedExtensions('biz.jmaconsulting.grantprograms');
     // finally send an email receipt
     if ($grant && !$isActive) {
-      $form->_values['grant_id'] = $grant->id;
+      $formValues = array_merge($form->_values, [
+        'grant_id' => $grant->id,
+        'application_received_date' => $form->_params['application_received_date'],
+        'amount_requested' => $grant->amount_requested,
+        'currency' => $grant->currency,
+      ]);
       CRM_Grant_BAO_GrantApplicationPage::sendMail($contactID,
-        $form->_values,
+        $formValues,
         FALSE,
         $fieldTypes
       );

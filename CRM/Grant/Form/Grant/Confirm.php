@@ -215,7 +215,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     if (!empty($numericFields)) {
       foreach ($numericFields as $numericField => $type) {
         if (!empty($this->_params[$numericField])) {
-          $this->_params[$numericField] = CRM_Utils_Money::format($this->_params[$numericField]);
+          $this->_params[$numericField] = CRM_Utils_Rule::cleanMoney($this->_params[$numericField]);
         }
       }
     }
@@ -600,9 +600,9 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
       unset($params['grant_id']);
     }
 
-    $params['amount_requested'] = trim(CRM_Utils_Money::format($nonDeductibleAmount, ' '));
+    $params['amount_requested'] = CRM_Utils_Rule::cleanMoney($nonDeductibleAmount) ?? 0;
     if (empty($params['amount_total'])) {
-      $params['amount_total'] = trim(CRM_Utils_Money::format($nonDeductibleAmount, ' '));
+      $params['amount_total'] = CRM_Utils_Rule::cleanMoney($nonDeductibleAmount) ?? 0;
     }
 
     if ($nonDeductibleAmount || $isDraft) {
