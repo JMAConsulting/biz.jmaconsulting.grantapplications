@@ -403,7 +403,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
             $userID = CRM_Utils_Array::value('related_contact', $values);
           }
         }
-        self::buildCustomProfile($preID, 'customPre', $userID, $template, $params['custom_pre_id'], $onbehalfId);
+        self::buildCustomProfile($preID, 'customPre', $userID, $template, $params, $onbehalfId);
       }
       $userID = $contactID;
       if ($postID = CRM_Utils_Array::value('custom_post_id', $values)) {
@@ -414,7 +414,7 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
             $userID = CRM_Utils_Array::value('related_contact', $values);
           }
         }
-        self::buildCustomProfile($postID, 'customPost', $userID, $template, $params['custom_post_id'], $onbehalfId);
+        self::buildCustomProfile($postID, 'customPost', $userID, $template, $params, $onbehalfId);
       }
 
       $title = isset($values['title']) ? $values['title'] : CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantApplicationPage', $values['id'], 'title');
@@ -425,8 +425,11 @@ class CRM_Grant_BAO_GrantApplicationPage extends CRM_Grant_DAO_GrantApplicationP
         'receiptFromEmail' => CRM_Utils_Array::value('receipt_from_email', $values),
         'contactID' => $contactID,
         'displayName' => $displayName,
-        'grantID' => CRM_Utils_Array::value('grant_id', $values),
+        'grantID' => $values['grant_id'],
         'title' => $title,
+        'currency' => $values['currency'],
+        'application_received_date' => $values['application_received_date'] ?? date('YmdHis'),
+        'default_amount_hidden' => $values['amount_requested'] ?? 0,
       );
 
       if ($grantTypeId = CRM_Utils_Array::value('grant_type_id', $values)) {
@@ -540,6 +543,7 @@ AND module = 'CiviGrant'  AND civicrm_uf_join.is_active = 1 ) $whereClause";
     //Ignore fields for mails
     $fieldsToIgnore = array(
       'amount_granted' => 1,
+      'amount_requested' => 1,
       'application_received_date' => 1,
       'decision_date' => 1,
       'grant_money_transfer_date' => 1,
