@@ -351,6 +351,10 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
             }
           }
 
+          // in order to add required rule after maxfilesize rule we are setting the required parameter false for 
+          // bypassing the is_required parameter ONLY for file type fields, and later added again below
+          $required = $field['is_required'];
+          $field['is_required'] = ($field['html_type'] == 'File') ? FALSE : $field['is_required'];
           if ($profileContactType) {
             if (!empty($fieldTypes) && in_array($field['field_type'], $fieldTypes)) {
               CRM_Core_BAO_UFGroup::buildProfile(
@@ -376,6 +380,18 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
               TRUE
             );
             $this->_fields[$key] = $field;
+          }
+          if ($field['html_type'] == 'File') {
+            $uploadFileSize = CRM_Utils_Number::formatUnitSize(ini_get('upload_max_filesize'), TRUE);
+            $uploadSize = round(($uploadFileSize / (1024 * 1024)), 2);
+            $this->addRule($field['name'], ts('%1 size exeeds %2 MB', [
+              1 => $field['title'],
+              2 => $uploadSize,
+            ]), 'maxfilesize', $uploadFileSize);
+            if ($required) {
+              // restore the required rule
+              $this->addRule($field['name'], ts('%1 is required', [1 => $field['title']]), 'required');
+            }
           }
           // CRM-11316 Is ReCAPTCHA enabled for this profile AND is this an anonymous visitor
           if ($field['add_captcha'] && !$this->_userID) {
