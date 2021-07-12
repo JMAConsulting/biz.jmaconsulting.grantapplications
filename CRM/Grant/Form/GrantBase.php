@@ -390,7 +390,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
             ]), 'maxfilesize', $uploadFileSize);
             if ($required) {
               // restore the required rule
-              $this->addRule($field['name'], ts('%1 is required', [1 => $field['title']]), 'required');
+              $this->addRule($field['name'], ts('%1 is required', [1 => $field['title']]), 'uploadedfile');
             }
           }
           // CRM-11316 Is ReCAPTCHA enabled for this profile AND is this an anonymous visitor
