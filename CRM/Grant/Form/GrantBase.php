@@ -31,6 +31,8 @@
  * @copyright CiviCRM LLC (c) 2004-2018
  */
 
+use CRM_Grantapplications_ExtensionUtil as E;
+
 /**
  * This class generates form components for processing a grant application.
  */
@@ -384,13 +386,13 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
           if ($field['html_type'] == 'File') {
             $uploadFileSize = CRM_Utils_Number::formatUnitSize(ini_get('upload_max_filesize'), TRUE);
             $uploadSize = round(($uploadFileSize / (1024 * 1024)), 2);
-            $this->addRule($field['name'], ts('%1 size exeeds %2 MB', [
+            $this->addRule($field['name'], E::ts('%1 size exeeds %2 MB', [
               1 => $field['title'],
               2 => $uploadSize,
             ]), 'maxfilesize', $uploadFileSize);
             if ($required) {
               // restore the required rule
-              $this->addRule($field['name'], ts('%1 is required', [1 => $field['title']]), 'uploadedfile');
+              $this->addRule($field['name'], E::ts('%1 is required', [1 => $field['title']]), 'uploadedfile');
             }
           }
           // CRM-11316 Is ReCAPTCHA enabled for this profile AND is this an anonymous visitor
