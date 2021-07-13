@@ -31,6 +31,8 @@
  * @copyright CiviCRM LLC (c) 2004-2018
  */
 
+use CRM_Grantapplications_ExtensionUtil as E;
+
 /**
  * This class generates form components for processing a grant application.
  */
@@ -351,6 +353,10 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
             }
           }
 
+          // in order to add required rule after maxfilesize rule we are setting the required parameter false for 
+          // bypassing the is_required parameter ONLY for file type fields, and later added again below
+          $required = $field['is_required'];
+          $field['is_required'] = ($field['html_type'] == 'File') ? FALSE : $field['is_required'];
           if ($profileContactType) {
             if (!empty($fieldTypes) && in_array($field['field_type'], $fieldTypes)) {
               CRM_Core_BAO_UFGroup::buildProfile(
@@ -376,6 +382,17 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
               TRUE
             );
             $this->_fields[$key] = $field;
+          }
+          if ($field['html_type'] == 'File') {
+            $uploadFileSize = CRM_Utils_Number::formatUnitSize(ini_get('upload_max_filesize'), TRUE);
+            $uploadSize = round(($uploadFileSize / (1024 * 1024)), 2);
+            $this->addRule($field['name'], $field['title'] . ': ' . E::ts('File size should be less than %1 MByte(s)', [
+              1 => $uploadSize,
+            ]), 'maxfilesize', $uploadFileSize);
+            if ($required) {
+              // restore the required rule
+              $this->addRule($field['name'], E::ts('%1 is a required field.', [1 => $field['title']]), 'uploadedfile');
+            }
           }
           // CRM-11316 Is ReCAPTCHA enabled for this profile AND is this an anonymous visitor
           if ($field['add_captcha'] && !$this->_userID) {
