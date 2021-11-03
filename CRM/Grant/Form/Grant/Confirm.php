@@ -527,7 +527,7 @@ class CRM_Grant_Form_Grant_Confirm extends CRM_Grant_Form_GrantBase {
     }
     // If onbehalf-of-organization grant application add organization
     // and it's location.
-    if (isset($this->_values['onbehalf_profile_id']) && isset($behalfOrganization['organization_name'])) {
+    if (!empty($this->_values['onbehalf_profile_id']) && !empty($behalfOrganization['organization_name'])) {
       $ufFields = array();
       foreach ($this->_fields['onbehalf'] as $name => $value) {
         $ufFields[$name] = 1;
