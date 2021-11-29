@@ -556,10 +556,15 @@ AND module = 'CiviGrant'  AND civicrm_uf_join.is_active = 1 ) $whereClause";
     );
 
     if ($gid) {
-      if (CRM_Core_BAO_UFGroup::filterUFGroups($gid, $cid)) {
+      $profileType = CRM_Core_BAO_UFField::getProfileType($gid);
+      // Match if profile type is 'Grant' (or built-in contact types)
+      if (($profileType == 'Grant') || CRM_Core_BAO_UFGroup::filterUFGroups($gid, $cid)) {
         $values = array();
         $groupTitle = NULL;
-        $fields = CRM_Core_BAO_UFGroup::getFields($gid, FALSE, CRM_Core_Action::VIEW, NULL, NULL, FALSE, NULL, FALSE, NULL, CRM_Core_Permission::CREATE, NULL);
+        // Need to expressly include 'Grant' in entity types for custom field retrieval
+        // Use default list of entity types specified in CRM_Core_BAO_CustomField::getFields() with 'Grant'
+        $ctype = ['Contact', 'Individual', 'Organization', 'Household', 'Grant'];
+        $fields = CRM_Core_BAO_UFGroup::getFields($gid, FALSE, CRM_Core_Action::VIEW, NULL, NULL, FALSE, NULL, FALSE, $ctype, CRM_Core_Permission::CREATE, NULL);
         $fields = array_diff_key($fields, $fieldsToIgnore);
         foreach ($fields as $k => $v) {
           if (!$groupTitle) {
