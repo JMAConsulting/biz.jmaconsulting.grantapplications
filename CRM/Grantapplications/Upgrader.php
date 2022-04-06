@@ -73,7 +73,8 @@ class CRM_Grantapplications_Upgrader extends CRM_Grantapplications_Upgrader_Base
     $this->ctx->log->info('Applying update 4700');
     $this->addTask(ts('Migrate \'on behalf of\' information to module_data'), 'migrateOnBehalfOfInfo');
     // this path is relative to the extension base dir
-    $this->executeSqlFile('sql/upgrade_4700.sql');
+    CRM_Core_BAO_SchemaHandler::dropColumn('civicrm_grant_app_page', 'for_organization', FALSE, TRUE);
+    CRM_Core_BAO_SchemaHandler::dropColumn('civicrm_grant_app_page', 'is_for_organization', FALSE, TRUE);
     return TRUE;
   }
 
