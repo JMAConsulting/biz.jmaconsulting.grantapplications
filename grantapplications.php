@@ -372,15 +372,13 @@ function grantapplications_civicrm_pageRun(&$page) {
     $rels = CRM_Contact_BAO_Relationship::getRelationship($cid, 3, 0, 0, 0, NULL, NULL, TRUE);
 
     $dashboardElements = $smarty->get_template_vars('dashboardElements');
-    $components = CRM_Core_Component::getEnabledComponents();
-    $userDashboard = $components['CiviGrant']->getUserDashboardObject();
     $dashboardElements[] = array(
-      'class' => 'crm-dashboard-' . strtolower($components['CiviGrant']->name),
+      'name' => ts('Grant'),
       'sectionTitle' => ts('Your Grant(s)'),
-      'templatePath' => $userDashboard->getTemplateFileName(),
+      'templatePath' => 'CRM/Grant/Page/GrantApplicationDashboard.tpl',
+      'perm' => array('submit online grant application'),
       'weight' => 50,
     );
-    $userDashboard->run();
     usort($dashboardElements, array('CRM_Utils_Sort', 'cmpFunc'));
     $page->assign('dashboardElements', $dashboardElements);
 

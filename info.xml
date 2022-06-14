@@ -22,6 +22,9 @@
   <compatibility>
     <ver>5.27</ver>
   </compatibility>
+  <requires>
+    <ext>civigrant</ext>
+  </requires>
   <comments/>
   <civix>
     <namespace>CRM/Grantapplications</namespace>
