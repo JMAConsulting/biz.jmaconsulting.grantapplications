@@ -239,7 +239,7 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
 
       // fix the display of the monetary value, CRM-4038
       if (isset($defaults['default_amount'])) {
-        $defaults['default_amount'] = CRM_Utils_Money::format($defaults['default_amount'], NULL, '%a');
+        $defaults['default_amount'] = CRM_Utils_Money::formatLocaleNumericRoundedForDefaultCurrency($defaults['default_amount']);
       }
 
       if (!empty($defaults['end_date'])) {

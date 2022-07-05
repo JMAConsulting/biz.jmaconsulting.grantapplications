@@ -356,7 +356,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
           // in order to add required rule after maxfilesize rule we are setting the required parameter false for 
           // bypassing the is_required parameter ONLY for file type fields, and later added again below
           $required = $field['is_required'];
-          $field['is_required'] = (CRM_Utils_Array::value('html_type', $field) == 'File') ? FALSE : $field['is_required'];
+          $field['is_required'] = (($field['html_type'] ?? '') == 'File') ? FALSE : $field['is_required'];
           if ($profileContactType) {
             if (!empty($fieldTypes) && in_array($field['field_type'], $fieldTypes)) {
               CRM_Core_BAO_UFGroup::buildProfile(
@@ -383,7 +383,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
             );
             $this->_fields[$key] = $field;
           }
-          if (CRM_Utils_Array::value('html_type', $field) == 'File') {
+          if (($field['html_type'] ?? '') == 'File') {
             $uploadFileSize = CRM_Utils_Number::formatUnitSize(ini_get('upload_max_filesize'), TRUE);
             $uploadSize = round(($uploadFileSize / (1024 * 1024)), 2);
             $this->addRule($field['name'], $field['title'] . ': ' . E::ts('File size should be less than %1 MByte(s)', [

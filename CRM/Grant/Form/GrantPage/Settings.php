@@ -113,7 +113,7 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
     );
     // collect default amount
     $this->add('text', 'default_amount', ts('Default Amount'), array('size' => 8, 'maxlength' => 12));
-    $this->addRule('default_amount', ts('Please enter a valid money value (e.g. %1).', array(1 => CRM_Utils_Money::format('99.99', ' '))), 'money');
+    $this->addRule('default_amount', ts('Please enter a valid money value (e.g. %1).', [1 => CRM_Utils_Money::formatLocaleNumericRoundedForDefaultCurrency('99.99')]), 'money');
 
     // is this page active ?
     $this->addElement('checkbox', 'is_active', ts('Is this Grant Aplication Page Active?'));
