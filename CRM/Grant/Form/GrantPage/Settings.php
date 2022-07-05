@@ -47,7 +47,7 @@ class CRM_Grant_Form_GrantPage_Settings extends CRM_Grant_Form_GrantPage {
 
     if ($this->_id) {
       $title = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantApplicationPage', $this->_id, 'title');
-      CRM_Utils_System::setTitle(ts('Title and Settings') . " ($title)");
+      $this->setTitle(ts('Title and Settings') . " ($title)");
 
       $module = 'on_behalf';
       $ufJoinDAO = new CRM_Core_DAO_UFJoin();

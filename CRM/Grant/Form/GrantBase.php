@@ -156,9 +156,7 @@ class CRM_Grant_Form_GrantBase extends CRM_Core_Form {
 
     $this->_values = $this->get('values');
     $this->_fields = $this->get('fields');
-    $this->assign('title', CRM_Utils_Array::value('title', $this->_values));
-    CRM_Utils_System::setTitle(CRM_Utils_Array::value('title', $this->_values));
-
+    $this->setTitle($this->_values['title'] ?? '');
     $this->assignHomeType();
     if (!$this->_values) {
       // get all the values from the dao object

@@ -79,7 +79,7 @@ class CRM_Grant_Form_GrantPage_Custom extends CRM_Grant_Form_GrantPage {
 
     if ($this->_id) {
       $title = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantApplicationPage', $this->_id, 'title');
-      CRM_Utils_System::setTitle(ts('Include Profiles (%1)', array(1 => $title)));
+      $this->setTitle(ts('Include Profiles (%1)', array(1 => $title)));
     }
 
 
