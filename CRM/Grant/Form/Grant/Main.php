@@ -151,7 +151,7 @@ class CRM_Grant_Form_Grant_Main extends CRM_Grant_Form_GrantBase {
           'amount_requested',
         ];
         foreach ($numericFields as $field) {
-          $this->_defaults[$field] = CRM_Utils_Money::format($this->_defaults[$field], NULL, '%a');
+          $this->_defaults[$field] = CRM_Utils_Money::formatLocaleNumericRoundedForDefaultCurrency($this->_defaults[$field]);
         }
       }
     }

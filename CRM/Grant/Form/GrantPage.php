@@ -106,13 +106,13 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
     CRM_Grant_Form_GrantPage_TabHeader::build($this);
 
     if ($this->_action == CRM_Core_Action::UPDATE) {
-      CRM_Utils_System::setTitle(ts('Configure Page - %1', array(1 => $title)));
+      $this->setTitle(ts('Configure Page - %1', array(1 => $title)));
     }
     elseif ($this->_action == CRM_Core_Action::VIEW) {
-      CRM_Utils_System::setTitle(ts('Preview Page - %1', array(1 => $title)));
+      $this->setTitle(ts('Preview Page - %1', array(1 => $title)));
     }
     elseif ($this->_action == CRM_Core_Action::DELETE) {
-      CRM_Utils_System::setTitle(ts('Delete Page - %1', array(1 => $title)));
+      $this->setTitle(ts('Delete Page - %1', array(1 => $title)));
     }
 
     //cache values.
@@ -239,7 +239,7 @@ class CRM_Grant_Form_GrantPage extends CRM_Core_Form {
 
       // fix the display of the monetary value, CRM-4038
       if (isset($defaults['default_amount'])) {
-        $defaults['default_amount'] = CRM_Utils_Money::format($defaults['default_amount'], NULL, '%a');
+        $defaults['default_amount'] = CRM_Utils_Money::formatLocaleNumericRoundedForDefaultCurrency($defaults['default_amount']);
       }
 
       if (!empty($defaults['end_date'])) {

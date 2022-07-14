@@ -48,7 +48,7 @@ class CRM_Grant_Form_GrantPage_ThankYou extends CRM_Grant_Form_GrantPage {
    */
   function setDefaultValues() {
     $title = CRM_Core_DAO::getFieldValue('CRM_Grant_DAO_GrantApplicationPage', $this->_id, 'title');
-    CRM_Utils_System::setTitle(ts('Thank-you and Receipting (%1)', array(1 => $title)));
+    $this->setTitle(ts('Thank-you and Receipting (%1)', array(1 => $title)));
     return parent::setDefaultValues();
   }
 

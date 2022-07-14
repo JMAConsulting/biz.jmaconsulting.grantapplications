@@ -47,13 +47,13 @@ class CRM_Grant_Form_Grant_ThankYou extends CRM_Grant_Form_GrantBase {
       $this->assign('thankyou_text', CRM_Utils_Array::value('draft_text', $this->_values));
       $this->assign('thankyou_footer', CRM_Utils_Array::value('draft_footer', $this->_values));
       $this->assign('isDraft', 1);
-      CRM_Utils_System::setTitle(CRM_Utils_Array::value('draft_title', $this->_values));
+      $this->setTitle($this->_values['draft_title'] ?? '');
     }
     else {
       $this->assign('thankyou_title', CRM_Utils_Array::value('thankyou_title', $this->_values));
       $this->assign('thankyou_text', CRM_Utils_Array::value('thankyou_text', $this->_values));
       $this->assign('thankyou_footer', CRM_Utils_Array::value('thankyou_footer', $this->_values));
-      CRM_Utils_System::setTitle(CRM_Utils_Array::value('thankyou_title', $this->_values));
+      $this->setTitle($this->_values['thankyou_title'] ?? '');
     }
     // Make the grantPageID avilable to the template
     $this->assign('grantPageID', $this->_id);

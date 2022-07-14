@@ -303,7 +303,7 @@ class CRM_UF_Page_Group extends CRM_Core_Page {
     CRM_Utils_Hook::aclGroup(CRM_Core_Permission::ADMIN, NULL, 'civicrm_uf_group', $ufGroups, $allUFGroups);
 
     foreach ($allUFGroups as $id => $value) {
-      $ufGroup[$id] = [];
+      $ufGroup[$id] = ['class' => ''];
       $ufGroup[$id]['id'] = $id;
       $ufGroup[$id]['title'] = $value['title'];
       $ufGroup[$id]['frontend_title'] = $value['frontend_title'];
@@ -475,7 +475,7 @@ class CRM_UF_Page_Group extends CRM_Core_Page {
 
         foreach ($valueParts as $val) {
           if (CRM_Utils_Rule::integer($val)) {
-            $groupTypeValues[$val] = CRM_Utils_Array::value($val, $valueLabels);
+            $groupTypeValues[$val] = $valueLabels[$val] ?? NULL;
           }
         }
 
